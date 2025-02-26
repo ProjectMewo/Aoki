@@ -1,6 +1,6 @@
 import Event from '../struct/handlers/Event.js';
 import { ActivityType } from 'discord.js';
-import { logOnReady } from '../assets/util/junk.js';
+import { logOnReady } from '../assets/junk.js';
 
 class ReadyEvent extends Event {
   constructor() {
@@ -11,9 +11,20 @@ class ReadyEvent extends Event {
    * @param {Object} client Client object
    */
   async execute(client) {
+    const activities = [
+      "/my info",
+      `I'm in ${client.util.commatize(client.guilds.cache.size)} servers!`,
+      `I'm with ${client.util.commatize(client.guilds.cache.reduce((a, b) => a + b.memberCount, 0))} users!`
+    ];
+
     if (!client.dev) {
       client.user.setPresence({ status: "online" });
-      client.user.setActivity("/my info", { type: ActivityType.Custom });
+      const updateStatus = () => {
+        const pickedStatus = client.util.random(activities);
+        client.user.setActivity(pickedStatus, { type: ActivityType.Custom });
+      };
+      updateStatus();
+      setInterval(updateStatus, 300000);
     } else {
       client.user.setPresence({ status: "idle" });
       client.user.setActivity("I'm in development mode!", { type: ActivityType.Custom });
