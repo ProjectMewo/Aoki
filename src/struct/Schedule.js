@@ -1,4 +1,4 @@
-import { Schedule } from "../assets/const/graphql.js";
+import { Schedule } from "../assets/graphql.js";
 import { EmbedBuilder } from "discord.js";
 
 export default class AniSchedule {
@@ -22,15 +22,15 @@ export default class AniSchedule {
     let schedules;
     try {
       // for mongoose, this would be await this.client.settings.schedules.find({}).lean().exec();
-      schedules = await this.client.db.collection("schedules").find({}).toArray().catch(() => []);
+      schedules = await this.client.db`SELECT * FROM schedules;`
     } catch {
       schedules = [];
     }
     if (!schedules?.length) return;
 
     // Gather unique IDs and episodes from schedules
-    const watched = [...new Set(schedules.map(s => s.anilistId))];
-    const episode = [...new Set(schedules.map(s => s.nextEp))];
+    const watched = [...new Set(schedules.map(s => s.anilistid))];
+    const episode = [...new Set(schedules.map(s => s.nextep))];
     const page = 0;
 
     const { data } = await this.fetch(this.schedule, { page, watched, episode });
@@ -43,7 +43,7 @@ export default class AniSchedule {
     for (const schedule of schedules) {
       const entry = data.Page?.airingSchedules.find(
         ({ episode, media }) =>
-          episode === schedule.nextEp && media.id === schedule.anilistId
+          episode === schedule.nextep && media.id === schedule.anilistid
       );
       if (!entry) continue;
 
@@ -52,7 +52,7 @@ export default class AniSchedule {
       try {
         const user = await this.client.users.fetch(schedule.id);
         await user.send({ embeds: [embed] });
-        await user.setSchedule({ nextEp: schedule.nextEp + 1 });
+        await user.setSchedule({ nextep: schedule.nextep + 1 });
       } catch (error) {
         this.client.util.warn(
           `Failed to notify user ${schedule.id}: ${error.message}`,

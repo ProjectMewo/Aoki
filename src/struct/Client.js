@@ -1,14 +1,10 @@
 import { Client, GatewayIntentBits, Partials, Options, Collection, REST, Routes } from 'discord.js';
-// In order to use mongoose library, work with the logics from this branch and the v4.2 release code.
-// The Settings.js file also in this directory can be straight up replaced with the v4.2 release code, and it will work.
-// Make sure to check Schedule.js, one line uses bare mongodb method.
-import { MongoClient, ServerApiVersion } from "mongodb";
 import Settings from './Settings.js';
 import Utilities from './Utilities.js';
 import Schedule from './Schedule.js';
 import AokiWebAPI from '../web/WebAPI.js';
 import DBL from "./DBL.js";
-import schema from '../assets/const/schema.js';
+import schema from '../assets/schema.js';
 
 class AokiClient extends Client {
   constructor(dev) {
@@ -62,13 +58,11 @@ class AokiClient extends Client {
     this.dev = dev;
     this.lastStats = null;
     this.db = null;
-    this.dbClient = null;
     this.settings = {
-      users: new Settings(this, "users", schema.users),
-      members: new Settings(this, "members", schema.members),
-      guilds: new Settings(this, "guilds", schema.guilds),
-      schedules: new Settings(this, "schedules", schema.schedules),
-      verifications: new Settings(this, "verifications", schema.verifications)
+      users: new Settings(this, "users"),
+      guilds: new Settings(this, "guilds"),
+      schedules: new Settings(this, "schedules"),
+      verifications: new Settings(this, "verifications")
     };
     this.once("ready", this.onReady.bind(this));
     this.util.warn("Logging in...", "[Warn]");
@@ -138,18 +132,19 @@ class AokiClient extends Client {
    * @returns {Promise<void>}
    */
   async loadDatabase() {
-    const url = process.env.MONGO_KEY;
-    this.dbClient = await MongoClient.connect(url, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      }
+    const key = process.env.PG_PASS;
+    const user = process.env.PG_USER;
+    const url = process.env.PG_STRING;
+    const database = new Bun.SQL(`postgresql://${user}:${key}@${url}/aoki-dev?sslmode=require`, {
+      max: 20, // max connections in pool
+      idleTimeout: 30, // close idle connections after 30s
+      maxLifetime: 0, // connection lifetime, 0 = inf
+      connectionTimeout: 30, // connect timeout
     });
+    this.db = await database.connect();
     this.util.success("Loaded database", "[Loader]");
-    this.db = this.dbClient.db();
-  }
-
+    await schema(this.db);
+  };
   /**
    * Listen to internal exception throws
    * @param {Array} events Exception names
@@ -184,7 +179,7 @@ class AokiClient extends Client {
     await Promise.all(Object.values(this.settings).map(setting => setting.init()));
     // init web server
     new AokiWebAPI(this).serve();
-    
+
     this.util.success("Loaded settings and web server", "[Loader]");
   };
   /**

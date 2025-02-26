@@ -1,4 +1,4 @@
-// @ravener wrote the logics, check out his miyako discord app on github for this
+import { Collection } from "discord.js";
 /**
  * Manages settings for a specific table.
  * To make sure the cache is in sync methods from here must be used.
@@ -10,11 +10,11 @@
  * this.client.settings[prop].update({ ... });
  */
 export default class Settings {
-  constructor(client, collection, defaults = {}) {
+  constructor(client, table) {
     this.client = client;
-    this.cache = new Map();
-    this.collection = collection;
-    this.defaults = defaults;
+    // we try to utilize discordjs's collection for performance
+    this.cache = new Collection();
+    this.table = table;
   };
   /**
    * Get an entry by ID from cache.
@@ -36,89 +36,61 @@ export default class Settings {
    */
   async update(id, obj) {
     if (typeof obj !== "object") throw new Error("Expected an object.");
-    const value = await this.client.db.collection(this.collection).findOneAndUpdate({ id }, { $set: obj }, {
-      upsert: true,
-      // https://mongodb.github.io/node-mongodb-native/6.8/interfaces/FindOneAndUpdateOptions.html#returnDocument
-      // the importance of reading documentations
-      returnDocument: 'after',
-      projection: { _id: 0 }
-    });
-    this.cache.set(id, this.mergeDefault(this.defaults, value));
-    return value;
-  };
-  /**
-   * Syncs the cache with the database.
-   * Use this in case the cache becomes outdated.
-   * @param {String} id - ID of the document to sync.
-   * @returns {Object} The newly fetched data from the database.
-   */
-  async sync(id) {
-    const doc = await this.client.db.collection(this.collection).findOne({ id }, { projection: { _id: 0 } });
-    if (!doc) return;
-    this.cache.set(id, this.mergeDefault(this.defaults, doc));
+    const keys = Object.keys(obj);
+    const values = Object.values(obj);
+    const query = `INSERT INTO ${this.table} (id, ${
+      keys.map((key) => `${key}`).join(", ")}) VALUES ($1, ${
+      keys.map((_, i) => `$${i + 2}`).join(", ")}) ON CONFLICT (id) DO UPDATE SET ${
+      keys.map((key, i) => `${key} = $${i + 2}`).join(", ")} RETURNING *;`;
+    const rows = await this.client.db(query, id, ...values);
+    const doc = rows[0];
+    this.cache.set(doc.id, doc);
     return doc;
-  };
-  /**
-   * Deletes a document with the given ID.
-   * @param {String} id - ID of the document to delete.
-   */
-  async delete(id) {
-    await this.client.db.collection(this.collection).deleteOne({ id });
-    this.cache.delete(id);
-  };
-  /**
-   * Alias to db.collection(col).find(...)
-   */
-  find(...args) {
-    return this.client.db.collection(this.collection).find(...args);
-  };
-  /**
-   * Alias to db.collection(col).findOne(...)
-   */
-  findOne(...args) {
-    return this.client.db.collection(this.collection).findOne(...args);
-  };
-  /**
-  * Return cache if available, else return the default values.
-  */
-  getDefaults(id) {
-    return this.cache.get(id) || this.defaults;
   }
   /**
-   * Initializes this settings by loading the cache.
-   * Call this before the client is logged in.
+   * A simple helper to fetch one row by column name and value
+   * @param {string} column
+   * @param {any} value
+   * @returns {Promise<object|undefined>}
+   */
+  async findOne(column, value) {
+    // First try the cache
+    const found = this.cache.find(doc => doc[column] == value);
+    if (found) return found;
+    
+    // If not in cache, query the database
+    const query = `SELECT * FROM ${this.table} WHERE ${column} = $1;`;
+    const rows = await this.client.db(query, value);
+    const doc = rows[0];
+    if (doc) this.cache.set(doc.id, doc);
+    return doc;
+  }
+  /**
+   * Initializes this settings by loading the cache
    */
   async init() {
-    const docs = await this.client.db
-      .collection(this.collection)
-      .find({}, { projection: { _id: 0 } })
-      .toArray();
+    // simulate TTL by cleaning up expired records
+    if (this.table === "verifications") {
+      // we create an index on createdat for performance
+      await this.client.db.unsafe(
+        `CREATE INDEX IF NOT EXISTS "verifications_createdat_idx" ON "${this.table}" (createdat)`
+      );
 
-    // set verification collection ttl to 1h
-    if (this.collection == "verifications") await this.client.db
-      .collection(this.collection)
-      .createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 });
-
-    for (const doc of docs) this.cache.set(doc.id, this.mergeDefault(this.defaults, doc));
-  };
-  // discord late v14 removed this bit of utility
-  // bringing back for local use because this method is pretty good for our use case
-  /**
-   * Sets default properties on an object that aren't already specified.
-   * @param {Object} def Default properties
-   * @param {Object} given Object to assign defaults to
-   * @returns {Object}
-   */
-  mergeDefault(def, given) {
-    if (!given) return def;
-    for (const key in def) {
-      if (!Object.hasOwn(given, key) || given[key] === undefined) {
-        given[key] = def[key];
-      } else if (given[key] === Object(given[key])) {
-        given[key] = this.mergeDefault(def[key], given[key]);
-      }
+      // then delete rows older than 1 hour
+      await this.client.db`
+        DELETE FROM ${this.client.db(this.table)}
+        WHERE TO_TIMESTAMP(createdat::BIGINT) < NOW() - INTERVAL '1 hour'
+      `;
+    }
+    // retrieve all rows from the table, then populate the cache
+    const docs = await this.client.db`
+      SELECT * FROM ${this.client.db(this.table)}
+    `;
+    for (const doc of docs) {
+      this.cache.set(doc.id, doc);
     }
 
-    return given;
-  };
+    // reinitialize this function every 1 hour
+    setTimeout(() => this.init(), 1000 * 60 * 60);
+  }
 };

@@ -48,19 +48,57 @@ class Command {
     this.cooldowns.set(userId, Date.now());
   }
   /**
-   * Execute the command
+   * Execute the command.
+   * 
+   * Generally our commands have the same parameter, which we will name it `query`,
+   * and it is passed as our second argument for the command. Other parameters should
+   * be handled separately in the command function itself.
+   * 
+   * The third parameter passed is the utility object, which is used for common functions.
+   * There is no need to import the file, or call the client object for it.
+   * @example
+   * async command_name(i, query, util) {
+   *   // command code here
+   * };
    * @param {Object} i Interaction object
    */
   async execute(i) {
-    throw new Error('Execute method not implemented');
-  }
+    this.i = i;
+    const sub = i.options.getSubcommand();
+    const query = i.options.getString("query");
+    const util = i.client.util;
+
+    if (!["ping", "toggle", "customize"].includes(sub)) await i.deferReply();
+    
+    try {
+      return await this[sub](i, query, util);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log(err);
+        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
+        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
+      }
+    };
+  };
+  async autocomplete(i) {
+    this.i = i;
+    const sub = i.options.getSubcommand();
+    const focusedValue = await i.options.getFocused();
+    const util = i.client.util;
+
+    try {
+      return this[`${sub}_autocomplete`](i, focusedValue, util);
+    } catch (err) {
+      if (err instanceof Error) return console.log(err);
+    };
+  };
   /**
    * Throw an error message to the user
    * @param {String} content The content to send
    * @returns `Promise` The rejected promise
    */
   async throw(i, content) {
-    await i.editReply({ content, ephemeral: true });
+    await i.editReply({ content, flags: 64 });
     return Promise.reject();
   };
   // Preset embed
