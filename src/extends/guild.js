@@ -20,7 +20,16 @@ export default class AokiGuild extends Extender {
    * @type {Object}
    */
   settings() {
-    return this.client.settings.guilds.getDefaults(this.id);
+    return this.client.settings.guilds.get(this.id) || {
+      timestampchannel: null,
+      verificationroleid: null,
+      verificationchannelid: null,
+      verificationmessageid: null,
+      verificationtitle: null,
+      verificationdescription: null,
+      verificationthumbnail: null,
+      verificationcolor: null
+    };
   };
   /**
    * Updates the guild settings associated with this guild.

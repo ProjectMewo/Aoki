@@ -24,7 +24,17 @@ export default class AokiUser extends Extender {
    * @type {Object}
    */
   settings() {
-    return this.client.settings.users.getDefaults(this.id);
+    return this.client.settings.users.get(this.id) || {
+      ingamename: null,
+      defaultmode: 0,
+      background: null,
+      pattern: null,
+      color: null,
+      description: "wow so magical",
+      ticket: 0,
+      inventory: [],
+      processmessagepermission: true
+    };
   };
   /**
    * Updates the guild settings associated with this user.
@@ -64,15 +74,15 @@ export default class AokiUser extends Extender {
    * Retrieves the user's schedule.
    * @returns {Object} The user's schedule.
    */
-  getSchedule() {
-    return this.client.settings.schedules.findOne({ id: this.id });
+  async getSchedule() {
+    return await this.client.settings.schedules.findOne("id", this.id);
   };
   /**
    * Updates the user's schedule.
    * @param {Object} data - The new schedule data to be applied.
    * @returns {Promise<Object>|Object} The updated schedule or a promise resolving to it.
    */
-  setSchedule(obj) {
-    return this.client.settings.schedules.update(this.id, obj);
+  async setSchedule(obj) {
+    return await this.client.settings.schedules.update(this.id, obj);
   }; 
 }
