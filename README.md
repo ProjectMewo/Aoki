@@ -73,8 +73,6 @@ aoki
 ├── src            # project source code
 │   ├── ...
 │   ├── assets     # static JS files
-│   │   ├── const       # files rarely update
-│   │   └── util        # heavy utilities
 │   ├── struct     # code structure files
 │   │   └── handlers    # handlers
 │   ├── events     # Discord.js events
