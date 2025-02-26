@@ -82,7 +82,7 @@ export default class VerificationHandler {
       }
     }
 
-    const guildSettings = await this.client.settings.guilds.findOne(id, guildId);
+    const guildSettings = await this.client.settings.guilds.findOne("id", guildId);
 
     if (!guildSettings?.verificationstatus) {
       return new Response("Verification is not enabled for this server.", { status: 400 });

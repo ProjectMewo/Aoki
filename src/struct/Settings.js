@@ -36,16 +36,21 @@ export default class Settings {
    */
   async update(id, obj) {
     if (typeof obj !== "object") throw new Error("Expected an object.");
-    const keys = Object.keys(obj);
-    const values = Object.values(obj);
-    const query = `INSERT INTO ${this.table} (id, ${
-      keys.map((key) => `${key}`).join(", ")}) VALUES ($1, ${
-      keys.map((_, i) => `$${i + 2}`).join(", ")}) ON CONFLICT (id) DO UPDATE SET ${
-      keys.map((key, i) => `${key} = $${i + 2}`).join(", ")} RETURNING *;`;
-    const rows = await this.client.db(query, id, ...values);
-    const doc = rows[0];
-    this.cache.set(doc.id, doc);
-    return doc;
+    // combine the id with the update object
+    const data = { id, ...obj };
+    const updateKeys = Object.keys(obj);
+    // for each key, generate key = EXCLUDED.key
+    const updateClause = updateKeys
+      .map((key) => `${key} = EXCLUDED.${key}`)
+      .join(", ");
+    // the table names are static so we can safely interpolate them with `Bun.sql#unsafe`
+    const [row] = await this.client.db`
+      INSERT INTO ${this.client.db(this.table)} ${this.client.db(data)}
+      ON CONFLICT (id) DO UPDATE SET ${this.client.db.unsafe(updateClause)}
+      RETURNING *
+    `;
+    this.cache.set(id, row);
+    return row;
   }
   /**
    * A simple helper to fetch one row by column name and value
@@ -57,13 +62,12 @@ export default class Settings {
     // First try the cache
     const found = this.cache.find(doc => doc[column] == value);
     if (found) return found;
-    
-    // If not in cache, query the database
-    const query = `SELECT * FROM ${this.table} WHERE ${column} = $1;`;
-    const rows = await this.client.db(query, value);
-    const doc = rows[0];
-    if (doc) this.cache.set(doc.id, doc);
-    return doc;
+    // else try the database then cache it
+    const [row] = await this.client.db`
+      SELECT * FROM ${this.client.db(this.table)} WHERE ${this.client.db(column)} = ${value}
+    `;
+    if (row) this.cache.set(row.id, row);
+    return row;
   }
   /**
    * Initializes this settings by loading the cache
@@ -72,9 +76,9 @@ export default class Settings {
     // simulate TTL by cleaning up expired records
     if (this.table === "verifications") {
       // we create an index on createdat for performance
-      await this.client.db.unsafe(
-        `CREATE INDEX IF NOT EXISTS "verifications_createdat_idx" ON "${this.table}" (createdat)`
-      );
+      await this.client.db`
+        CREATE INDEX IF NOT EXISTS "verifications_createdat_idx" ON ${this.client.db(this.table)} (createdat)
+      `;
 
       // then delete rows older than 1 hour
       await this.client.db`

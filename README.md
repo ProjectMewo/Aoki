@@ -31,8 +31,11 @@ Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but 
 
 In the future, to better support new infrastructure, Aoki will use **PostgreSQL** instead, using the new built-in `Bun#sql` module. This v4.3 branch has **very, very experimental** support for it, as such please use with caution.
 
+> [!WARNING]
+> Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.3**. For your own database safety, it is recommended that you update using `bun upgrade`.
+
 ### Runtime
-Aoki officially supports Bun v1.2+. It is recommended to use Bun for the time being, because:
+Aoki officially supports Bun v1.2.3+. It is recommended to use Bun for the time being, because:
 - It has native `.env` loading support, so loading it won't be an issue.
 - It has built-in `serve()` for web stuff, which is very fast.
 - It has built-in support for PostgreSQL, which is also very fast.
@@ -46,7 +49,7 @@ Aoki **heavily relies** on APIs and external projects, and most redundant librar
 Check the [roadmap](https://github.com/AokiOfficial/Aoki/issues/6) for future planned implementations.
 
 ## Local development setup
-Make sure you have Bun v1.2+ on your local machine. [Install it here](https://bun.sh).
+Make sure you have Bun v1.2.3+ on your local machine. [Install it here](https://bun.sh).
 
 Place all the necessary keys required by first renaming the `.env.example` file to `.env`, and then fill it. **It is recommended that you use only the DEV variant of the keys.**
 
