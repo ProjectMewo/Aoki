@@ -3,7 +3,6 @@
 export default class VerificationHandler {
   constructor(client) {
     this.client = client;
-    this.settings = client.settings.verifications;
     this.OSU_CLIENT_ID = client.dev ? process.env.OSU_DEV_ID : process.env.OSU_ID;
     this.OSU_SECRET = client.dev ? process.env.OSU_DEV_SECRET : process.env.OSU_SECRET;
     this.REDIRECT_URI = client.dev ? "http://localhost:8080/callback" : "https://aoki.hackers.moe/callback";
@@ -25,11 +24,11 @@ export default class VerificationHandler {
 
   async handleLogin(url) {
     const id = url.searchParams.get("id");
-    const guildId = url.searchParams.get("guildId");
+    const guildid = url.searchParams.get("guildId");
     // structure the state
     // to retrieve, use state.split("_");
-    const state = `${id}_${guildId}_${Date.now()}`;
-    await this.settings.update(id, { state, createdAt: Date.now(), guildId });
+    const state = `${id}_${guildid}_${Date.now()}`;
+    await this.client.settings.verifications.update(id, { state, createdat: Date.now(), guildid });
 
     const authUrl = `${this.AUTH_URL}?response_type=code&client_id=${this.OSU_CLIENT_ID}&redirect_uri=${this.REDIRECT_URI}&scope=identify&state=${state}`;
     return new Response(null, {
@@ -54,14 +53,14 @@ export default class VerificationHandler {
 
       const tokenData = await this.exchangeCodeForToken(code);
       const user = await this.fetchOsuUserData(tokenData.access_token);
-      const verificationData = await this.settings.findOne({ state });
+      const verificationData = await this.client.settings.verifications.findOne("state", state);
 
       if (!verificationData) {
         throw new Error("Invalid or expired state");
       }
 
       await this.saveUserData(verificationData.id, user);
-      await this.grantRoles(verificationData.id, verificationData.guildId, user);
+      await this.grantRoles(verificationData.id, verificationData.guildid, user);
 
       return new Response("Verification successful. You can now return to Discord.", { status: 200 });
     } catch (err) {
@@ -83,9 +82,9 @@ export default class VerificationHandler {
       }
     }
 
-    const guildSettings = await this.client.settings.guilds.findOne({ id: guildId });
+    const guildSettings = await this.client.settings.guilds.findOne(id, guildId);
 
-    if (!guildSettings?.verification?.status) {
+    if (!guildSettings?.verificationstatus) {
       return new Response("Verification is not enabled for this server.", { status: 400 });
     }
 
@@ -93,7 +92,7 @@ export default class VerificationHandler {
       throw new Error("Member not found in guild. Either the cache is broken or something is wrong.", { status: 400 });
     }
 
-    const role = await guild.roles.cache.get(guildSettings.verification.roleId);
+    const role = await guild.roles.cache.get(guildSettings.verificationroleid);
     if (!role) {
       return new Response("Verification role not found. Please contact the server administrator.", { status: 500 });
     }
@@ -149,10 +148,10 @@ export default class VerificationHandler {
    * @param {Object} user The osu! user data.
    */
   async saveUserData(id, user) {
-    const defaultMode = this.client.util.osuNumberModeFormat(user.playmode);
+    const defaultmode = this.client.util.osuNumberModeFormat(user.playmode);
     await this.client.settings.users.update(id, {
-      inGameName: user.username,
-      defaultMode,
+      ingamename: user.username,
+      defaultmode,
     });
   }
 

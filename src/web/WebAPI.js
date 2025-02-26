@@ -7,14 +7,15 @@ export default class AokiWebAPI {
     this.port = Number(process.env.PORT) || 3000;
     this.verificationHandler = new VerificationHandler(client);
     this.osuGameHandler = new OsuGameHandler(client);
+
     this.URI = client.dev ? "http://localhost:8080" : "https://aoki.hackers.moe";
 
     this.routes = [
-      { path: '/login', handler: this.verificationHandler.handleLogin },
-      { path: '/callback', handler: this.verificationHandler.handleCallback },
-      { path: '/osuedit', handler: this.osuGameHandler.handleOsuRedirect },
-      { path: '/osudirect', handler: this.osuGameHandler.handleOsuDirect },
-      { path: '/verify', handler: this.verificationHandler.verify },
+      { path: '/login', handler: (url) => this.verificationHandler.handleLogin(url) },
+      { path: '/callback', handler: (url) => this.verificationHandler.handleCallback(url) },
+      { path: '/osuedit', handler: (url) => this.osuGameHandler.handleOsuRedirect(url) },
+      { path: '/osudirect', handler: (url) => this.osuGameHandler.handleOsuDirect(url) },
+      { path: '/verify', handler: (url) => this.verificationHandler.verify(url) },
       { path: '/', handler: async () => "Why would you be here? I'll work on this later!" }
     ];
   }
