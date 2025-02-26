@@ -26,7 +26,6 @@
   "homepage": "https://github.com/AokiOfficial/Aoki#readme",
   "devDependencies": {
     "discord.js": "^14.18.0",
-    "esbuild": "^0.25.0",
-    "mongodb": "^6.13.1"
+    "esbuild": "^0.25.0"
   }
 }

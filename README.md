@@ -27,17 +27,20 @@ Aoki is written in **JavaScript**. There are no plans to rewrite it into another
 CommonJS is not supported. This project uses ESM.
 
 ### Database
-Aoki uses **MongoDB**. She uses the `mongodb` library, but release v4.2 has support for `mongoose`. Both logics are interchargable, please check the [Client.js](/src/struct/Client.js) file for more info.
+Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but release v4.2 has support for `mongoose`. Both logics are interchargable, please check the [Client.js](/src/struct/Client.js) file for more info.
+
+In the future, to better support new infrastructure, Aoki will use **PostgreSQL** instead, using the new built-in `Bun#sql` module. This v4.3 branch has **very, very experimental** support for it, as such please use with caution.
 
 ### Runtime
-Aoki officially supports Bun v1.2+. It is recommended to use Bun for the time being, because loading `.env` file won't be an issue and Bun has a built-in `serve()`, which is really fast, for web stuff.
+Aoki officially supports Bun v1.2+. It is recommended to use Bun for the time being, because:
+- It has native `.env` loading support, so loading it won't be an issue.
+- It has built-in `serve()` for web stuff, which is very fast.
+- It has built-in support for PostgreSQL, which is also very fast.
 
-Aoki *technically* supports Node.js v22+ if you rewrite the [WebAPI.js](/src/web/WebAPI.js) file to use a different web library (such as `fastify`).
-
-If for some reason you cannot use Node.js v22+ and Bun but a lower version of Node.js, do the above and install `dotenv` to load your `.env` file before doing anything.
+Aoki *technically* supports Node.js v18+ if you rewrite the [WebAPI.js](/src/web/WebAPI.js) file to use a different web library (such as `fastify`), install `postgres` then import it into [Client.js](/src/struct/Client.js), and install `dotenv` to load `.env` file.
 
 ### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.js](/src/struct/Utilities.js). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than 2MB.
+Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.js](/src/struct/Utilities.js). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than a single megabyte.
 
 ### Future-proof
 Check the [roadmap](https://github.com/AokiOfficial/Aoki/issues/6) for future planned implementations.
