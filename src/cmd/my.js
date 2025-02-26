@@ -2,7 +2,7 @@ import Command from '../struct/handlers/Command.js';
 import os from "os";
 import * as pkg from "../../package.json" with { type: 'json' };
 import { version as DiscordVersion } from 'discord.js';
-import { my } from '../assets/const/import.js';
+import { my } from '../assets/import.js';
 
 export default new class My extends Command {
   constructor() {
@@ -11,24 +11,6 @@ export default new class My extends Command {
       permissions: [],
       cooldown: 0
     });
-  };
-  async execute(i) {
-    this.i = i;
-    const sub = i.options.getSubcommand();
-    const query = i.options.getString("query");
-    const util = i.client.util;
-
-    if (sub != "ping") await i.deferReply();
-
-    try {
-      return await this[sub](i, query, util);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err);
-        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
-        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
-      }
-    };
   };
   // ping command
   async ping(i, _, util) {
@@ -44,7 +26,7 @@ export default new class My extends Command {
   };
   // permission command
   async rights(i) {
-    const query = i.options.getString("to");
+    const query = i.options.getString("to").toLowerCase();
     const value = i.options.getBoolean("should_be");
     if (i.user.settings[query] == value) return this.throw(i, `Baka, that's your current settings.`);
     const res = await i.user.update({ [query]: value });

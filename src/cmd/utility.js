@@ -1,6 +1,6 @@
 import Command from '../struct/handlers/Command.js';
 import { EmbedBuilder } from "@discordjs/builders";
-import { util } from "../assets/const/import.js";
+import { util } from "../assets/import.js";
 import { AttachmentBuilder } from 'discord.js';
 
 export default new class Utility extends Command {
@@ -13,24 +13,6 @@ export default new class Utility extends Command {
     this.imgur = "https://i.imgur.com/";
     this.headers = {
       'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.3"
-    };
-  };
-  async execute(i) {
-    this.i = i;
-    const sub = i.options.getSubcommand();
-    const query = i.options.getString("query");
-    const util = i.client.util;
-
-    await i.deferReply();
-
-    try {
-      return await this[sub](i, query, util);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err);
-        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
-        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
-      }
     };
   };
   // avatar command

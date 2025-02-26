@@ -1,5 +1,5 @@
 import Command from '../struct/handlers/Command.js';
-import { fun } from '../assets/const/import.js';
+import { fun } from '../assets/import.js';
 import { EmbedBuilder } from 'discord.js';
 
 export default new class Fun extends Command {
@@ -9,24 +9,6 @@ export default new class Fun extends Command {
       permissions: [],
       cooldown: 0
     });
-  };
-  async execute(i) {
-    this.i = i;
-    const sub = i.options.getSubcommand();
-    const query = i.options.getString("query");
-    const util = i.client.util;
-
-    await i.deferReply();
-    
-    try {
-      return await this[sub](i, query, util);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err);
-        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
-        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
-      }
-    };
   };
   // 8ball command
   async "8ball"(i, query, util) {

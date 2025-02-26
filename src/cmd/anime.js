@@ -1,9 +1,8 @@
 import Command from '../struct/handlers/Command.js';
 import Pagination from '../struct/Paginator.js';
 import { EmbedBuilder } from 'discord.js';
-import { convert as toMarkdown } from "../assets/util/html2md.js";
-import { Watching, User, Seiyuu, Character } from "../assets/const/graphql.js";
-import { anime } from "../assets/const/import.js";
+import { Watching, User } from "../assets/graphql.js";
+import { anime } from "../assets/import.js";
 
 export default new class Anime extends Command {
   constructor() {
@@ -18,25 +17,6 @@ export default new class Anime extends Command {
       500: "The service is probably dead. Wait a little bit, then try again.",
       400: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`.",
       default: "Wow, this kind of error has never been documented. Wait for about 5-10 minutes, if nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`."
-    };
-  };
-  // main block
-  async execute(i) {
-    this.i = i;
-    const sub = i.options.getSubcommand();
-    const query = i.options.getString("query");
-    const util = i.client.util;
-
-    await i.deferReply();
-    
-    try {
-      return await this[sub](i, query, util);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err);
-        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
-        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
-      }
     };
   };
   // action command
@@ -59,28 +39,28 @@ export default new class Anime extends Command {
     if (!res) return this.throw(i, this.ErrorMessages.default);
     const stats = {
       "Main Genre": res.genres?.[0]?.name || "No data",
-      ...(type === "anime") ? 
-      {
-        "Source": res.source || "No data",
-        "Episodes": res.episodes || "No data",
-        "Status": res.status || "No data",
-        "Schedule": res.broadcast?.day ? `${res.broadcast.day}s` : "No data",
-        "Duration": res.duration?.replace(/ per /g, "/") || "No data"
-      } : {
-        "Chapters": res.chapters || "No data",
-        "Volumes": res.volumes || "No data"
-      }
+      ...(type === "anime") ?
+        {
+          "Source": res.source || "No data",
+          "Episodes": res.episodes || "No data",
+          "Status": res.status || "No data",
+          "Schedule": res.broadcast?.day ? `${res.broadcast.day}s` : "No data",
+          "Duration": res.duration?.replace(/ per /g, "/") || "No data"
+        } : {
+          "Chapters": res.chapters || "No data",
+          "Volumes": res.volumes || "No data"
+        }
     };
     const scores = {
       "Mean Rank": res.rank || "No data",
       "Popularity": res.popularity || "No data",
       "Favorites": res.favorites || "No data",
       "Subscribed": res.members || "No data",
-      ...(type === "anime") ? 
-      {
-        "Average Score": res.score || "No data",
-        "Scored By": res.scored_by || "No data",
-      } : {}
+      ...(type === "anime") ?
+        {
+          "Average Score": res.score || "No data",
+          "Scored By": res.scored_by || "No data",
+        } : {}
     };
     const description = [
       util.textTruncate((res.synopsis || '').replace(/(<([^>]+)>)/ig, ''), 350, `...`),
@@ -134,7 +114,7 @@ export default new class Anime extends Command {
        * @param {Array} arr Array of query info to work with
        * @returns `String`
        */
-      const spreadMap = function(arr) {
+      const spreadMap = function (arr) {
         const res = util.joinArrayAndLimit(arr.map((entry) => {
           return `[${entry[entry.title ? "title" : "name"]}](${entry.url.split('/').splice(0, 5).join('/')})`;
         }), 1000, ' • ');
@@ -161,9 +141,9 @@ export default new class Anime extends Command {
         .addFields([
           { name: 'Anime Stats', value: util.keyValueField(res.statistics.anime), inline: true },
           { name: 'Manga Stats', value: util.keyValueField(res.statistics.manga), inline: true },
-          { name: 'Favourite Anime', value: fav.anime }, 
-          { name: 'Favorite Manga', value: fav.manga }, 
-          { name: 'Favorite Characters', value: fav.chars }, 
+          { name: 'Favourite Anime', value: fav.anime },
+          { name: 'Favorite Manga', value: fav.manga },
+          { name: 'Favorite Characters', value: fav.chars },
           { name: 'Favorite Staffs', value: fav.people }
         ]);
       return await i.editReply({ embeds: [embed] });
@@ -209,7 +189,7 @@ export default new class Anime extends Command {
     for (const data of res.data) {
       // helpers
       const description = [
-       `${data.score ? `**Score**: ${data.score}\n` : ''}`,
+        `${data.score ? `**Score**: ${data.score}\n` : ''}`,
         `${data.genres.map(x => `[${x.name}](${x.url})`).join(' • ')}\n\n`,
         `${data.synopsis ? util.textTruncate(data.synopsis, 300, `... *(read more [here](${data.url}))*`) : "*No synopsis available*"}`
       ].join("");
@@ -261,133 +241,180 @@ export default new class Anime extends Command {
 
     collector.on('end', async () => await msg.reactions.removeAll());
   };
+  // search autocomplete
+  async search_autocomplete(i, focusedValue) {
+    const type = i.options.getString("type");
+    // we try to use jikan api to try make sense what the user is possibly typing
+    const res = await this.fetch(`${this.jikan_v4}/${type}?q=${focusedValue}`);
+    const data = res.data; // this is the array we need to work with
+    // now we filter this array by taking the title
+    // be sure to leave nsfw content out if we're not in such a channel
+    const nsfw = i.channel.nsfw;
+    const names = data.filter(
+      (name) => {
+        let reqName;
+        if (type == "anime" || type == "manga") reqName = name.title;
+        else if (type == "characters" || type == "people") reqName = name.name;
+        return reqName.toLowerCase().includes(focusedValue.toLowerCase()) && (nsfw || !name.rating || !["R-17"].includes(name.rating));
+      }
+    );
+    // we then limit this list down to 25 results
+    const namesLimited = names.slice(0, 25);
+    // finally, we respond to the autocomplete interaction
+    await i.respond(
+      namesLimited.map((names) => ({
+        name: names.name ? names.name : names.title,
+        value: names.mal_id.toString(),
+      })),
+    );
+  };
   // search command
   async search(i, query, util) {
     // processing user query
     const type = i.options.getString("type");
-    if (await util.isProfane(query)) return this.throw(i, "Stop sneaking in bad content please, you baka.");
-    const kitsuURL = function(type) {
-      return `https://kitsu.io/api/edge/${type}?filter[text]=${query}&page[offset]=0&page[limit]=1`;
+    // try to use jikan api to fetch the query
+    // we assume all queries must have been handled by autocomplete, and the value has to be an id
+    const jikanURL = (type) => {
+      // for characters, we need the full query to have their appearances and their voice actors
+      return `${this.jikan_v4}/${type}/${query}${['characters', 'people'].includes(type) ? "/full" : ""}`;
     };
     const fetchData = {
-      anime: async () => await this.fetch(kitsuURL("anime")),
-      manga: async () => await this.fetch(kitsuURL("manga")),
-      character: async () => (await util.anilist(Character, { search: query })).data.Character,
-      seiyuu: async () => (await util.anilist(Seiyuu, { search: query })).data
+      anime: async () => await this.fetch(jikanURL("anime")),
+      manga: async () => await this.fetch(jikanURL("manga")),
+      characters: async () => await this.fetch(jikanURL("characters")),
+      people: async () => await this.fetch(jikanURL("people"))
     };
     const res = await fetchData[type]();
     // error handling
     if (
       !res || /* universal */
-      ((type == "anime" || type == "manga") && !res.data?.[0]) /* kitsu.io response */
+      ((type == "anime" || type == "manga") && !res.data) /* jikan response */
     ) {
       return this.throw(i, this.ErrorMessages[400]);
     };
     // processing api response
-    const processData = {
-      anime: res.data?.[0]?.attributes,
-      manga: res.data?.[0]?.attributes,
-      character: res.Character,
-      seiyuu: res
-    };
-    const data = processData[type];
+    const data = res.data;
     if (
-      (type == "anime" || type == "manga") && /* kitsu.io response */
-      data.ageRatingGuide && /* ageRatingGuide exists */
-      (data.ageRatingGuide.includes("Nudity") && data.ageRatingGuide.includes("Mature")) && /* ageRatingGuide has NSFW */
+      (type == "anime" || type == "manga") && /* jikan response */
+      data.rating && /* age rating exists */
+      (["R-17"].includes(data.rating)) && /* the age rating points to violence or nudity */
       !i.channel.nsfw /* channel is not NSFW */
     ) {
-      return this.throw(i, "The content given to me by Kitsu.io has something to do with NSFW, and I can't show that in this channel, sorry. Get in a NSFW channel, please.");
+      return this.throw(i, "The content given to me by MyAnimeList has something to do with R-17 content, and I can't show that in this channel, sorry. Get in a NSFW channel, please.");
     };
     // handling by type
     if (type == "anime" || type == "manga") {
       // processing api response
       const presetEmbed = this.embed
-        .setTitle(`${data.titles.en_jp}`)
-        .setURL(`https://kitsu.io/${type}/${res.data[0].id}`)
-        .setThumbnail(data.posterImage.original)
+        .setTitle(`${data.title}`) /* default title */
+        .setURL(`${data.url}`) /* default url */
+        .setThumbnail(data.images.jpg.small_image_url) /* default thumbnail */
         .setDescription(
-          `*The cover of this ${type} can be found [here](https://media.kitsu.io/${type}/poster_images/${res.data[0].id}/large.jpg)*\n\n` +
-          `**Description:** ${util.textTruncate(`${data.synopsis}`, 250, `... *(read more [here](https://kitsu.io/${type}/${res.data[0].id}))*`)}`
+          `*The cover of this ${type} can be found [here](${data.images.jpg.large_image_url})*\n\n` +
+          `**Description:** ${util.textTruncate(`${data.synopsis}`, 250, `... *(read more [here](${data.url}))*`)}`
         )
+      // we generally can tell if a series is NSFW by checking if it has explicit genres
+      // and if the age rating guide is R-17
+      const nsfw = Boolean(data.rating && ["R-17"].includes(data.rating) && data.explicit_genres.length);
       const fields = [
-        { name: "Type", value: `${util.toProperCase(data[type == "anime" ? "showType" : "subtype"])}`, inline: true },
+        { name: "Type", value: `${util.toProperCase(data.type)}`, inline: true },
         { name: "Status", value: util.toProperCase(`${data.status}`), inline: true },
-        { name: "Air Date", value: `${data.startDate}`, inline: true },
-        { name: "Avg. Rating", value: `${data.averageRating?.toLocaleString() || "Unknown"}`, inline: true },
-        { name: "Age Rating", value: `${data.ageRatingGuide?.replace(")", "") || "Unknown"}`, inline: true },
-        { name: "Rating Rank", value: `#${data.ratingRank?.toLocaleString() || "Unknown"}`, inline: true },
-        { name: "Popularity", value: `#${data.popularityRank?.toLocaleString() || "Unknown"}`, inline: true },
+        { name: "Air Date", value: `${data[type == "anime" ? "aired" : "published"].string}`, inline: true },
+        { name: "Avg. Rating", value: `${data.score?.toLocaleString() || "Unknown"}`, inline: true },
+        { name: "Age Rating", value: `${data.rating?.replace(")", "") || "Unknown"}`, inline: true },
+        { name: "Rating Rank", value: `#${data.rank?.toLocaleString() || "Unknown"}`, inline: true },
+        { name: "Popularity", value: `#${data.popularity?.toLocaleString() || "Unknown"}`, inline: true },
         ...(type == "anime") ?
-        [
-          { name: "NSFW?", value: util.toProperCase(`${data.nsfw}`), inline: true },
-          { name: "Ep. Count", value: `${data.episodeCount}`, inline: true },
-        ] : [
-          { name: "Volume Count", value: `${data.volumeCount || "None recorded"}`, inline: true },
-          { name: "Chapter Count", value: `${data.chapterCount || "None recorded"}`, inline: true },
-        ]
+          [
+            { name: "NSFW?", value: util.toProperCase(`${nsfw}`), inline: true },
+            { name: "Ep. Count", value: `${data.episodes}`, inline: true },
+          ] : [
+            { name: "Volume Count", value: `${data.volumes || "Unfinished"}`, inline: true },
+            { name: "Chapter Count", value: `${data.chapters || "Unfinished"}`, inline: true },
+          ]
       ];
       const embed = presetEmbed.addFields(fields);
       await i.editReply({ embeds: [embed] });
-    } else if (type == "seiyuu") {
+    }
+    // character
+    else if (type == "characters") {
       // processing api response
-      /**
-       * format AniList array information
-       * 
-       * Method scoped in here is exclusive for seiyuu
-       * @param {Array} arr Array of query info to work with
-       * @returns `String`
-       */
-      const spreadMap = function(arr) {
-        const res = util.joinArrayAndLimit(arr.map((entry) => {
-          return `[${entry[entry.title ? "title" : "name"][entry.title ? "romaji" : "full"]}](${entry.siteUrl.split('/').slice(0, 5).join('/')})`;
+      const spreadMap = function (arr, type) {
+        // if the array is empty we return none listed
+        if (!arr?.length) return 'None Listed.';
+        // take only first 5 entries to avoid too long outputs
+        const limitedArr = arr.slice(0, 5);
+        const res = util.joinArrayAndLimit(limitedArr.map((entry) => {
+          return `[${entry[type][entry[type]?.title ? "title" : "name"]}](${entry[type].url})`;
         }), 350, ' • ');
-        return res.text + (!!res.excess ? ` and ${res.excess} more!` : '') || 'None Listed.'
+        // show total count if there are more
+        const remaining = arr.length - limitedArr.length;
+        return res.text + (remaining > 0 ? ` and ${remaining} more!` : '') || 'None Listed.';
       };
-      const staffName = [res.Staff.name.full, res.Staff.name.native].filter(Boolean).join(" | ");
-      const description = [
-        util.langflags.find(f => f.lang.toLowerCase() == res.Staff.language?.toLowerCase())?.flag,
-        util.textTruncate(toMarkdown(util.heDecode(res.Staff.description || '\u200b')), 1000, `... *(read more [here](${res.Staff.siteUrl}))*`)
-      ].join('\n');
       // extending preset embed
-      const embed = this.embed
-        .setThumbnail(res.Staff.image.large)
-        .setAuthor({ name: staffName, url: res.Staff.siteUrl })
-        .setDescription(description)
-        .addFields([
-          { name: `${staffName} voiced...`, value: spreadMap(res.Staff.characters.nodes) },
-          { name: `${staffName} is part of...`, value: spreadMap(res.Staff.staffMedia.nodes) }
-        ]);
+      const presetEmbed = this.embed
+        .setTitle(`${data.name} // ${data.name_kanji || data.name}`) /* default title */
+        .setURL(`${data.url}`) /* default url */
+        .setThumbnail(data.images.jpg.image_url) /* default thumbnail */
+        .setDescription(
+          `*The portrait of this character can be found [here](${data.images.jpg.image_url})*\n\n` +
+          `**About this character:** \n${util.textTruncate(`${data.about || "*They might be a support character, so there's no description about them yet. Maybe you could write one if you like them?*"}`, 500, `... *(read more [here](${data.url}))*`)}`
+        )
+      const fields = [
+        { name: `${data.name} appears in these anime...`, value: spreadMap(data.anime, "anime") },
+        { name: `They also appear in these manga...`, value: spreadMap(data.manga, "manga") },
+        { name: `They're voiced by...`, value: spreadMap(data.voices, "person") }
+      ];
+      const embed = presetEmbed.addFields(fields);
       await i.editReply({ embeds: [embed] });
-    } else {
+    }
+    // people
+    else if (type == "people") {
       // processing api response
-      const description = (res.description?.replace(/~!|!~/g, "||") || 'No description.') + `\n\n*More inutil.formatDateion can be found [here](${res.siteUrl}).*`;
-      const embedField = util.joinArrayAndLimit(res.media.nodes.map((entry) => {
-        return `[${entry.title.romaji}](${entry.siteUrl?.split('/').slice(0, 5).join('/') || "https://anilist.co/"})`;
-      }), 350, ' • ');
+      const spreadMap = function (arr, type) {
+        // if the array is empty we return none listed
+        if (!arr?.length) return 'None Listed.';
+        // take only first 5 entries to avoid too long outputs
+        const limitedArr = arr.slice(0, 5);
+        const res = util.joinArrayAndLimit(limitedArr.map((entry) => {
+          return `[${entry[type][entry[type].title ? "title" : "name"]}](${entry[type].url})`;
+        }), 350, ' • ');
+        // show total count if there are more
+        const remaining = arr.length - limitedArr.length;
+        return res.text + (remaining > 0 ? ` and ${remaining} more!` : '') || 'None Listed.';
+      };
       // extending preset embed
-      const embed = this.embed
-        .setTitle(`${res.name.full}`)
-        .setURL(res.siteUrl)
-        .setDescription(description)
-        .setThumbnail(res.image.large)
-        .addFields({
-          name: "Appears in...",
-          value: embedField.text + (!!embedField.excess ? ` and ${embedField.excess} more!` : '') || 'None Listed.'
-        });
+      const presetEmbed = this.embed
+        .setTitle(`${data.name}`) /* default name */
+        .setURL(`${data.url}`) /* default url */
+        .setThumbnail(data.images.jpg.image_url) /* default thumbnail */
+        .setDescription(
+          `*The portrait of ${data.name} can be found [here](${data.images.jpg.image_url})*\n\n` +
+          `**About them:** \n${util.textTruncate(`${data.about || "*They might be someone who hasn't been very notable on MyAnimeList yet. Maybe you could write one if you like them?*"}`, 500, `... *(read more [here](${data.url}))*`)}`
+        )
+      const fields = [
+        // birthdate
+        { name: "Birthdate", value: `${new Date(data.birthday).toLocaleDateString("en-GB") || "Unknown"}`, inline: false },
+        { name: "Given Name", value: `${data.given_name || "Unknown"}`, inline: true },
+        { name: "Family Name", value: `${data.family_name || "Unknown"}`, inline: true },
+        { name: `${data.name} appears in these anime...`, value: spreadMap(data.anime, "anime") },
+        { name: `They also appear in these manga...`, value: spreadMap(data.manga, "manga") },
+        { name: `They voice these characters...`, value: spreadMap(data.voices, "character") }
+      ];
+      const embed = presetEmbed.addFields(fields);
       await i.editReply({ embeds: [embed] });
     };
   };
   // schedule current command
   async current(i, _, util) {
-    // get user sschedules
+    // get user schedules
     const schedule = await i.user.getSchedule();
     // handle exceptions
     if (!schedule) return this.throw(i, "Baka, you have no anime subscription.");
     // get watching data
-    const res = (await util.anilist(Watching, { 
-      watched: [schedule.anilistId], 
-      page: 0 
+    const res = (await util.anilist(Watching, {
+      watched: [schedule.anilistid],
+      page: 0
     })).data.Page.media[0];
     // handle errors
     if (!res) return this.throw(i, this.ErrorMessages[400]);
@@ -401,22 +428,42 @@ export default new class Anime extends Command {
     };
     // handle api response
     const title = `[${res.title.romaji}](${res.siteUrl})`;
-    const nextEpisode = res.nextAiringEpisode.episode;
+    const nextepisode = res.nextAiringEpisode.episode;
     const timeUntilAiring = Math.round(res.nextAiringEpisode.timeUntilAiring / 3600, 0);
     // send response
-    return await i.editReply({ content: `You are currently watching **${title}**. Its next episode is **${nextEpisode}**, airing in about **${timeUntilAiring} hours**.` });
+    return await i.editReply({ content: `You are currently watching **${title}**. Its next episode is **${nextepisode}**, airing in about **${timeUntilAiring} hours**.` });
+  };
+  // schedule add autocomplete
+  // having the user type in the id themselves is not intuitive, so we implement this for ease of use
+  async add_autocomplete(i, focusedValue) {
+    // we try to use jikan api to try make sense what the user is possibly typing
+    const res = await this.fetch(`${this.jikan_v4}/anime?q=${focusedValue}`);
+    const data = res.data; // this is the array we need to work with
+    // now we filter this array by taking the title
+    const names = data.filter(
+      (name) => name.title.toLowerCase().includes(focusedValue.toLowerCase())
+    );
+    // we then limit this list down to 25 results
+    const namesLimited = names.slice(0, 25);
+    // finally, we respond to the autocomplete interaction
+    await i.respond(
+      namesLimited.map((names) => ({
+        name: names.title,
+        value: names.mal_id.toString(),
+      })),
+    );
   };
   // schedule add command
   async add(i, query, util) {
     // get user schedule
     const schedule = await i.user.getSchedule();
     // handle exceptions
-    if (schedule?.anilistId) return this.throw(i, "Baka, you can only have **one schedule** running at a time.");
+    if (schedule?.anilistid) return this.throw(i, "Baka, you can only have **one schedule** running at a time.");
     // handle user query
-    const anilistId = await util.getMediaId(query);
-    if (!anilistId) return this.throw(i, this.ErrorMessages[400]);
-    const media = (await util.anilist(Watching, { 
-      watched: [anilistId],
+    const anilistid = await util.getMediaId(query);
+    if (!anilistid) return this.throw(i, this.ErrorMessages[400]);
+    const media = (await util.anilist(Watching, {
+      watched: [anilistid],
       page: 0
     })).data.Page.media[0];
     // handle errors
@@ -431,7 +478,7 @@ export default new class Anime extends Command {
     };
     if (!["NOT_YET_RELEASED", "RELEASING"].includes(media.status)) return this.throw(i, "Baka, that's not airing. It's not an upcoming one, too. Maybe even finished.");
     // update database
-    await i.user.setSchedule({ anilistId: media.id, nextEp: media.nextAiringEpisode.episode });
+    await i.user.setSchedule({ anilistid: media.id, nextep: media.nextAiringEpisode.episode });
     // send result
     const title = media.title.romaji;
     const timeUntilAiring = Math.round(media.nextAiringEpisode.timeUntilAiring / 3600, 0);
@@ -442,10 +489,10 @@ export default new class Anime extends Command {
     // get user schedule
     const schedule = await i.user.getSchedule();
     // handle exceptions
-    if (!schedule?.anilistId) return this.throw(i, "Baka, you have no anime subscription.");
+    if (!schedule?.anilistid) return this.throw(i, "Baka, you have no anime subscription.");
     // handle user query
-    const res = (await util.anilist(Watching, { 
-      watched: [schedule.anilistId],
+    const res = (await util.anilist(Watching, {
+      watched: [schedule.anilistid],
       page: 0
     })).data.Page.media[0];
     // handle errors
@@ -459,7 +506,7 @@ export default new class Anime extends Command {
       } else return this.throw(i, this.ErrorMessages.default);
     };
     // update database
-    await i.user.setSchedule({ anilistId: 0, nextEp: 0 });
+    await i.user.setSchedule({ anilistid: 0, nextep: 0 });
     // send message
     return await i.editReply({ content: `Stopped tracking airing episodes for **${res.title.romaji}**.` });
   };

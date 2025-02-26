@@ -10,7 +10,7 @@ import {
   ButtonStyle,
   PermissionsBitField
 } from 'discord.js';
-import { osugame } from "../assets/const/import.js";
+import { osugame } from "../assets/import.js";
 import Pagination from '../struct/Paginator.js';
 
 export default new class OsuGame extends Command {
@@ -28,31 +28,13 @@ export default new class OsuGame extends Command {
     this.api_asset = "https://assets.ppy.sh";
     this.osuV2Token = null;
   };
-  async execute(i) {
-    this.i = i;
-    const sub = i.options.getSubcommand();
-    const query = i.options.getString("query");
-    const util = i.client.util;
-
-    await i.deferReply();
-
-    try {
-      return await this[sub](i, query, util);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log(err);
-        const error = `\`\`\`fix\nCommand "${sub}" returned "${err}"\n\`\`\``; /* discord code block formatting */
-        return this.throw(i, `Oh no, something happened internally. Please report this using \`/my fault\`, including the following:\n\n${error}`);
-      }
-    };
-  };
   // set command
   async set(i, _, util) {
     const user = i.options.getString("username");
     const mode = i.options.getString("mode");
     // handle exceptions
     const settings = i.user.settings;
-    if (!settings) await i.user.update({ inGameName: "", defaultMode: "osu" });
+    if (!settings) await i.user.update({ ingamename: "", defaultmode: "osu" });
     if (!this.usernameRegex.test(user)) return this.throw(i, "Baka, the username is invalid.");
     const profile = await this.findUserByUsername(user, mode);
     if (!profile?.username) return this.throw(i, "Baka, that user doesn't exist.");
@@ -61,21 +43,21 @@ export default new class OsuGame extends Command {
     const reply = `${util.random(replies)} Your current username is \`${profile.username}\`, and your current mode is \`${mode}\`.`;
     // database check
     if (
-      settings?.defaultMode && /* entry exists in db */
-      settings?.inGameName == profile.username && /* ign is the same */
-      settings?.defaultMode == mode /* mode is the same */
+      settings?.defaultmode && /* entry exists in db */
+      settings?.ingamename == profile.username && /* ign is the same */
+      settings?.defaultmode == mode /* mode is the same */
     ) {
       return this.throw(i, `${reply}\n\nThat's the same thing you did before, though.`);
     };
     // save to database
-    await i.user.update({ inGameName: profile.username, defaultMode: mode });
+    await i.user.update({ ingamename: profile.username, defaultmode: mode });
     return await i.editReply({ content: reply });
   };
   // profile command
   async profile(i, _, util) {
     const settings = i.user.settings;
-    const user = i.options.getString("username") || settings?.inGameName;
-    const mode = i.options.getString("mode") || settings?.defaultMode;
+    const user = i.options.getString("username") || settings?.ingamename;
+    const mode = i.options.getString("mode") || settings?.defaultmode;
 
     // handle exceptions
     if (!user || !mode) return this.throw(i, "You didn't configure your in-game info, baka. I don't know you.\n\nConfigure them with `/osu set` so I can store it.");
@@ -163,7 +145,7 @@ export default new class OsuGame extends Command {
     // check if we have permissions to send messages in there
     if (!channel.permissionsFor(i.guild.members.me).has(PermissionsBitField.Flags.SendMessages)) return this.throw(i, "Baka, I can't send messages in there. Enable **Send Messages** in permissions view, please.");
     // save the channel
-    await i.guild.update({ timestampChannel: channel.id });
+    await i.guild.update({ timestampchannel: channel.id });
     return i.editReply({ content: `Updated the timestamp channel to <#${channel.id}>.` });
   };
   // country-leaderboard
