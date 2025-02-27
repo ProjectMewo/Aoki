@@ -1,21 +1,24 @@
-import VerificationHandler from "./VerificationHandler.js";
-import OsuGameHandler from "./OsuGameHandler.js";
+import verification from "./handlers/verify.js";
+import osugame from "./handlers/osugame.js";
+import redirects from "./handlers/redirects.js";
 
 export default class AokiWebAPI {
   constructor(client) {
     this.client = client;
     this.port = Number(process.env.PORT) || 3000;
-    this.verificationHandler = new VerificationHandler(client);
-    this.osuGameHandler = new OsuGameHandler(client);
+    this.verification = new verification(client);
+    this.osugame = new osugame(client);
+    this.redirects = new redirects(client);
 
     this.URI = client.dev ? "http://localhost:8080" : "https://aoki.hackers.moe";
 
     this.routes = [
-      { path: '/login', handler: (url) => this.verificationHandler.handleLogin(url) },
-      { path: '/callback', handler: (url) => this.verificationHandler.handleCallback(url) },
-      { path: '/osuedit', handler: (url) => this.osuGameHandler.handleOsuRedirect(url) },
-      { path: '/osudirect', handler: (url) => this.osuGameHandler.handleOsuDirect(url) },
-      { path: '/verify', handler: (url) => this.verificationHandler.verify(url) },
+      { path: '/login', handler: (url) => this.verification.handleLogin(url) },
+      { path: '/callback', handler: (url) => this.verification.handleCallback(url) },
+      { path: '/osuedit', handler: (url) => this.osugame.handleOsuEdit(url) },
+      { path: '/osudirect', handler: (url) => this.osugame.handleOsuDirect(url) },
+      { path: '/verify', handler: (url) => this.verification.verify(url) },
+      { path: '/privacy', handler: () => this.redirects.handlePPRedirect() },
       { path: '/', handler: async () => "Why would you be here? I'll work on this later!" }
     ];
   }

@@ -1,10 +1,9 @@
-export default class OsuGameHandler {
+export default class osugame {
   constructor(client) {
     this.client = client;
-    this.settings = client.settings.verifications;
   }
 
-  handleOsuRedirect(url) {
+  handleOsuEdit(url) {
     const params = url.searchParams;
     // only redirect to edit route
     let osuUrl = "osu://";
