@@ -32,10 +32,11 @@ Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but 
 In the future, to better support new infrastructure, Aoki will use **PostgreSQL** instead, using the new built-in `Bun#sql` module. This v4.3 branch has **very, very experimental** support for it, as such please use with caution.
 
 > [!WARNING]
-> Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.3**. For your own database safety, it is recommended that you update using `bun upgrade`.
+> Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.4**. For your own database safety, it is recommended that you update using `bun upgrade`.
+> Technical information about this is in the [Settings.js file](/src/struct/Settings.js).
 
 ### Runtime
-Aoki officially supports Bun v1.2.3+. It is recommended to use Bun for the time being, because:
+Aoki officially supports Bun v1.2.4+. It is recommended to use Bun for the time being, because:
 - It has native `.env` loading support, so loading it won't be an issue.
 - It has built-in `serve()` for web stuff, which is very fast.
 - It has built-in support for PostgreSQL, which is also very fast.

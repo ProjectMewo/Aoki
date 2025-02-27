@@ -8,7 +8,7 @@ import {
   StringSelectMenuBuilder,
   ButtonBuilder,
   ButtonStyle,
-  PermissionsBitField
+  PermissionFlagsBits
 } from 'discord.js';
 import { osugame } from "../assets/import.js";
 import Pagination from '../struct/Paginator.js';
@@ -139,11 +139,11 @@ export default new class OsuGame extends Command {
     if (channel.type != 0) return this.throw(i, "Baka, this feature can only be toggled in text channels.");
     // TODO: make shorthand function for permissions
     // check if the member who executed this was an admin // mod
-    if (!channel.permissionsFor(i.guild.members.cache.get(i.user.id)).has(PermissionsBitField.Flags.ManageChannels)) return this.throw(i, "Baka, you don't have the **Manage Channels** permission. You can't edit this settings.");
+    if (!channel.permissionsFor(i.guild.members.cache.get(i.user.id)).has(PermissionFlagsBits.ManageChannels)) return this.throw(i, "Baka, you don't have the **Manage Channels** permission. You can't edit this settings.");
     // check if we have permission to see the channel
-    if (!channel.permissionsFor(i.guild.members.me).has(PermissionsBitField.Flags.ViewChannel)) return this.throw(i, "Baka, I can't see that channel. Enable **View Channel** in permissions view, please.");
+    if (!channel.permissionsFor(i.guild.members.me).has(PermissionFlagsBits.ViewChannel)) return this.throw(i, "Baka, I can't see that channel. Enable **View Channel** in permissions view, please.");
     // check if we have permissions to send messages in there
-    if (!channel.permissionsFor(i.guild.members.me).has(PermissionsBitField.Flags.SendMessages)) return this.throw(i, "Baka, I can't send messages in there. Enable **Send Messages** in permissions view, please.");
+    if (!channel.permissionsFor(i.guild.members.me).has(PermissionFlagsBits.SendMessages)) return this.throw(i, "Baka, I can't send messages in there. Enable **Send Messages** in permissions view, please.");
     // save the channel
     await i.guild.update({ timestampchannel: channel.id });
     return i.editReply({ content: `Updated the timestamp channel to <#${channel.id}>.` });

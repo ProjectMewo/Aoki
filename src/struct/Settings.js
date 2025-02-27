@@ -34,6 +34,11 @@ export default class Settings {
    * @param {Object} obj - An object with key-value changes to apply.
    * @returns {Object} The updated object from the database.
    */
+  // read the bun v1.2.4 release notes for why we have to go from that particular version.
+  // from bun v1.2.3 backwards, tagged template literals were not enforced on your queries,
+  // therefore you can do things like this.client.db(query, ...params) and accidentally
+  // expose your database to SQL injection attacks.
+  // from bun v1.2.4 onwards, this is patched along with async requests to update a table.
   async update(id, obj) {
     if (typeof obj !== "object") throw new Error("Expected an object.");
     // combine the id with the update object
@@ -43,7 +48,7 @@ export default class Settings {
     const updateClause = updateKeys
       .map((key) => `${key} = EXCLUDED.${key}`)
       .join(", ");
-    // the table names are static so we can safely interpolate them with `Bun.sql#unsafe`
+    // the column names are static so we can safely interpolate them with `Bun.sql#unsafe`
     const [row] = await this.client.db`
       INSERT INTO ${this.client.db(this.table)} ${this.client.db(data)}
       ON CONFLICT (id) DO UPDATE SET ${this.client.db.unsafe(updateClause)}

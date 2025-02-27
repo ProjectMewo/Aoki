@@ -30,8 +30,11 @@ export default new class My extends Command {
     const value = i.options.getBoolean("should_be");
     if (i.user.settings[query] == value) return this.throw(i, `Baka, that's your current settings.`);
     const res = await i.user.update({ [query]: value });
+    const properQuery = {
+      processmessagepermission: "read & process your messages",
+    };
     if (res[query] == value) {
-      await i.editReply({ content: `Updated your **${query}** settings to **${value}**.` });
+      await i.editReply({ content: `Alright, I ${value ? "will" : "won't"} **${properQuery[query]}**.` });
     } else {
       return this.throw(i, "The database might be having problems. Try executing this again.");
     };
