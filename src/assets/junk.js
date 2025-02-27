@@ -14,7 +14,7 @@ const followUpWithProperTimestamp = async (msg, timestamps, timestampRegex) => {
     const res = timestampRegex.exec(timestamp);
     timestampRegex.lastIndex = 0;
     if (!res) continue;
-    message += `- [${timestamp}](https://aoki.hackers.moe/osu/edit?time=${res[1]}:${res[2]}:${res[3]}`;
+    message += `- [${timestamp}](https://aoki.hackers.moe/osuedit?time=${res[1]}:${res[2]}:${res[3]}`;
     if (res[4]) message += `-${res[4]}`;
     message += ")\n";
   };

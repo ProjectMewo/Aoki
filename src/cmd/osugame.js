@@ -164,10 +164,7 @@ export default new class OsuGame extends Command {
       accuracy: 4,
     };
     const sorting = sortingMap[sort_mode] ?? 0;
-
-    if (!beatmapId) return this.throw(i, 'Please provide a valid beatmap ID.');
-    if (!countryCode || countryCode.length !== 2) return this.throw(i, 'Please provide a valid 2-letter country code.');
-
+    if (countryCode.length !== 2) return this.throw(i, 'Baka, provide a valid 2-letter country code.');
     try {
       // concurrently fetch the first 2 pages of country leaderboard
       const [page1, page2] = await Promise.all([
@@ -367,7 +364,7 @@ export default new class OsuGame extends Command {
 
         const directButton = new ButtonBuilder()
           .setLabel('osu!direct')
-          .setURL(`https://aoki.hackers.moe/osu/direct?id=${selectedBeatmap.id}`)
+          .setURL(`https://aoki.hackers.moe/osudirect?id=${selectedBeatmap.id}`)
           .setStyle(ButtonStyle.Link);
 
         const nerinyanButton = new ButtonBuilder()
