@@ -1,27 +1,18 @@
 // save build means no token or secret is included in the distribution file
 // after a safe build, the built file in dist folder must be paired with a .env file to use
 // to disable safe build aka build so that you don't have to include a .env file (NOT RECOMMENDED),
-// define all of your keys like this
-/**
- * build({
- *  ...,
- *  define: {
- *    'process.env.KEY_NAME': JSON.stringify(process.env.KEY_NAME),  
- *  }
- * });
- */
-// unsafe build is recommended to be used as a different file not in the dist folder for security purposes
-import { build } from 'esbuild';
-
-build({
-  entryPoints: ['src/main.js'],
+// add `env: 'inline'` to the Bun.build options.
+// https://bun.sh/docs/bundler#env
+Bun.build({
+  entrypoints: ['src/main.js'],
   bundle: true,
   minify: true,
-  sourcemap: false,
+  sourcemap: 'none',
   keepNames: true,
-  format: "esm",
+  format: 'esm',
   platform: 'node',
-  target: 'node18',
+  target: 'bun',
   outfile: 'dist/main.js',
   external: ['bun'],
+  drop: ['debugger'],
 }).catch(() => process.exit(1));

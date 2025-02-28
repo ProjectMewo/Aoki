@@ -41,7 +41,7 @@ Aoki officially supports Bun v1.2.4+. It is recommended to use Bun for the time 
 - It has built-in `serve()` for web stuff, which is very fast.
 - It has built-in support for PostgreSQL, which is also very fast.
 
-Aoki *technically* supports Node.js v18+ if you rewrite the [WebAPI.js](/src/web/WebAPI.js) file to use a different web library (such as `fastify`), install `postgres` then import it into [Client.js](/src/struct/Client.js), and install `dotenv` to load `.env` file.
+Aoki *technically* supports Node.js v18+ if you rewrite the [WebAPI.js](/src/web/WebAPI.js) file to use a different web library (such as `fastify`), install `postgres` then import it into [Client.js](/src/struct/Client.js), and install `dotenv` to load `.env` file. After that, to build the project, install `esbuild` and edit [safe-build.js](/src/safe-build.js).
 
 ### Project size
 Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.js](/src/struct/Utilities.js). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than a single megabyte.
@@ -50,7 +50,7 @@ Aoki **heavily relies** on APIs and external projects, and most redundant librar
 Check the [roadmap](https://github.com/AokiOfficial/Aoki/issues/6) for future planned implementations.
 
 ## Local development setup
-Make sure you have Bun v1.2.3+ on your local machine. [Install it here](https://bun.sh).
+Make sure you have Bun v1.2.4+ on your local machine. [Install it here](https://bun.sh).
 
 Place all the necessary keys required by first renaming the `.env.example` file to `.env`, and then fill it. **It is recommended that you use only the DEV variant of the keys.**
 
