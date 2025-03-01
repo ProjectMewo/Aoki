@@ -2,7 +2,7 @@
 <p align="center">a multi-purpose Discord application to spice up your experiences.<br>focus mainly on anime, fun and utility.</br></p>
 <p align="center">
   <a href="https://www.typescriptlang.org/">
-    <img src="https://i.ibb.co/fVSG9yr7/powered-by-typescript.png" alt="Powered by TypeScript" height="36"/>
+    <img src="https://i.imgur.com/t12LZSY.png" alt="Powered by TypeScript" height="36"/>
   </a>
   <a href="https://www.digitalocean.com/pricing/droplets/">
     <img src="https://i.imgur.com/9rZ8bLb.png" alt="Runs on... wherever you want it to be" height="36"/>
