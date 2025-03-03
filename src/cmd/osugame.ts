@@ -12,9 +12,11 @@ import {
   ChatInputCommandInteraction,
   TextChannel,
   User as DiscordUser,
-  StringSelectMenuInteraction
+  StringSelectMenuInteraction,
+  MessageReaction
 } from "discord.js";
 import { osugame } from "../assets/import";
+import { Beatmapset } from '../types/beatmapset';
 import Pagination from '../struct/Paginator';
 import Utilities from '../struct/Utilities';
 import AokiClient from '../struct/Client';
@@ -152,7 +154,7 @@ export default new class OsuGame extends Command {
   };
   // set_timestamp_channel command
   async set_timestamp_channel(i: ChatInputCommandInteraction) {
-    const channel = i.options.getChannel("channel");
+    const channel = i.options.getChannel("channel")!;
     // cast channel to TextChannel
     const textChannel = channel as TextChannel;
     // check if channel is of text type
@@ -171,7 +173,7 @@ export default new class OsuGame extends Command {
   // country-leaderboard
   // this command is complex, some parts might be hard to debug
   async country_leaderboard(i: ChatInputCommandInteraction, _: string, util: Utilities) {
-    const beatmapId = i.options.getInteger('beatmap_id');
+    const beatmapId = i.options.getInteger('beatmap_id')!;
     const countryCode = i.options.getString('country_code')!.toUpperCase();
     const mode = i.options.getString('mode')!;
     const sort_mode = i.options.getString("sort") || "lazer_score";
@@ -252,7 +254,7 @@ export default new class OsuGame extends Command {
             `**${pageIndex * scoresPerPage + idx + 1}) ${user.username}**`,
             `▸ ${rankEmote} ▸ **${Number(score.pp).toFixed(2)}pp** ▸ ${(score.accuracy * 100).toFixed(2)}%`,
             `▸ ${displayedScore.toLocaleString()} ▸ x${score.max_combo}/${beatmapDetails.max_combo} ▸ [${statsString}]`,
-            `▸ \`+${score.mods.map((mod: any) => mod.acronym).join("") || 'NM'}\` ▸ Score set ||${util.formatDistance(new Date(score.ended_at), new Date())}||`
+            `▸ \`+${score.mods.map((mod: { acronym: string }) => mod.acronym).join("") || 'NM'}\` ▸ Score set ||${util.formatDistance(new Date(score.ended_at), new Date())}||`
           ].join('\n');
         }));
 
@@ -277,7 +279,7 @@ export default new class OsuGame extends Command {
 
       // Reaction-based pagination using a collector with navigator emojis
       const navigators = ['◀', '▶', '❌'];
-      const filter = (_: any, user: DiscordUser) => user.id === i.member?.user.id;
+      const filter = (_: MessageReaction, user: DiscordUser) => user.id === i.member?.user.id;
       const collector = msg.createReactionCollector({ filter, time: 90000 });
       for (const nav of navigators) await msg.react(nav);
 
@@ -304,7 +306,7 @@ export default new class OsuGame extends Command {
     const sort = i.options.getString("sort") || "relevance";
     const genre = i.options.getString("genre") || "any";
     const language = i.options.getString("language") || "any";
-    const storyboard = i.options.getBoolean("storyboard");
+    const storyboard = i.options.getBoolean("storyboard") ? '1' : '0';
 
     try {
       const searchParams = {
@@ -314,22 +316,19 @@ export default new class OsuGame extends Command {
         genre: genre,
         language: language,
         sort: sort,
+        storyboard: storyboard
       };
 
-      if (storyboard !== null) {
-        (searchParams as any).storyboard = storyboard ? '1' : '0';
-      }
-
-      const { beatmapsets } = await this.searchBeatmap({
+      const beatmapsets = await this.searchBeatmap({
         type: "beatmaps",
         ...searchParams
-      });
+      }) as Array<Beatmapset>;
 
       if (beatmapsets.length === 0) {
         return this.throw(i, "No beatmaps found matching your criteria.");
       }
       // nsfw stuff
-      const beatmapsFiltered = beatmapsets.filter((beatmap: any) => {
+      const beatmapsFiltered = beatmapsets.filter((beatmap: Beatmapset) => {
         if ((i.channel as TextChannel).nsfw) return true;
         else return !beatmap.nsfw;
       });
@@ -338,7 +337,7 @@ export default new class OsuGame extends Command {
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('beatmap_select')
         .setPlaceholder(`Listing ${beatmaps.length} top result${beatmaps.length == 1 ? "" : "s"}. Select to view.`)
-        .addOptions(beatmaps.map((beatmap: any, index: any) => ({
+        .addOptions(beatmaps.map((beatmap: Beatmapset, index: number) => ({
           label: `${beatmap.artist} - ${beatmap.title}`,
           description: `Mapper: ${beatmap.creator} | Status: ${util.toProperCase(beatmap.status)}`,
           value: index.toString()
@@ -347,7 +346,8 @@ export default new class OsuGame extends Command {
       const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
       const message = await i.editReply({ components: [row] });
-
+      
+      // type predicate
       const filter = (interaction: any): interaction is StringSelectMenuInteraction => {
         return interaction.isStringSelectMenu && interaction.isStringSelectMenu() && interaction.customId === 'beatmap_select' && interaction.user.id === i.user.id;
       };
@@ -514,6 +514,6 @@ export default new class OsuGame extends Command {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}`, "x-api-version": "20240130" }
     });
-    return await res.json();
+    return (await res.json()).beatmapsets;
   }
 }

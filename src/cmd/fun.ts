@@ -1,6 +1,6 @@
 import Command from '../struct/handlers/Command';
 import { fun } from '../assets/import';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, Message } from 'discord.js';
 import { ChatInputCommandInteraction } from 'discord.js';
 import Utilities from '../struct/Utilities';
 import AokiClient from '../struct/Client';
@@ -16,7 +16,7 @@ export default new class Fun extends Command {
   };
 
   // 8ball command
-  async "8ball"(i: ChatInputCommandInteraction, query: string, util: any) {
+  async "8ball"(i: ChatInputCommandInteraction, query: string, util: Utilities) {
     if (await util.isProfane(query)) return this.throw(i, "Fix your query, please. At least give me some respect!");
     const eightball = await util.getStatic("8ball");
     return await i.editReply({ content: util.random(eightball) });
@@ -33,7 +33,7 @@ export default new class Fun extends Command {
   };
 
   // fact command
-  async fact(i: ChatInputCommandInteraction, _: any, util: any) {
+  async fact(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     const urls = ["https://catfact.ninja/fact", "https://uselessfacts.jsph.pl/random.json?language=en"];
     const res = await fetch(util.random(urls)).then(res => res.json());
     const content = res.text || res.fact;
@@ -41,7 +41,7 @@ export default new class Fun extends Command {
   };
 
   // today command
-  async today(i: ChatInputCommandInteraction, _: any, util: any) {
+  async today(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     const [month, day] = new Date().toLocaleDateString().trim().split("/");
     const todayRes = await fetch(`https://history.muffinlabs.com/date/${month}/${day}`);
     const todayJs = await todayRes.json();
@@ -50,7 +50,7 @@ export default new class Fun extends Command {
   };
 
   // ship command
-  async ship(i: ChatInputCommandInteraction, _: any, util: any) {
+  async ship(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     const first = i.options.getUser("first")!;
     const second = i.options.getUser("second")!;
     if (first.id == util.id || second.id == util.id) return this.throw(i, "Ew, I'm not a fan of shipping. Choose someone else!");
@@ -86,14 +86,14 @@ export default new class Fun extends Command {
 
   // fortune command
   async fortune(i: ChatInputCommandInteraction, _: string, util: Utilities) {
-    const { cookies } = await util.getStatic("fortune") as { cookies: any };
+    const cookies = await util.getStatic("fortune");
     const cookie = util.random(cookies);
     await i.editReply({ content: cookie });
   };
 
   // truth command
   async truth(i: ChatInputCommandInteraction, _: string, util: Utilities) {
-    const { questions } = await util.getStatic("truth") as { questions: any };
+    const questions = await util.getStatic("truth");
     const question = util.random(questions);
     await i.editReply({ content: question });
   };
@@ -135,10 +135,10 @@ export default new class Fun extends Command {
    * @param {String} url The URL of the API
    * @param {String} path The reply's object path
    */
-  async fetchAndSend(i: ChatInputCommandInteraction, url: string, path: string) {
+  async fetchAndSend(i: ChatInputCommandInteraction, url: string, path: string): Promise<Message> {
     const res = await fetch(url).then(res => res.json());
     let data = path.split('.').reduce((acc, part) => acc[part], res);
-    await i.editReply({ content: data });
+    return await i.editReply({ content: data });
   };
 
   get embed() {

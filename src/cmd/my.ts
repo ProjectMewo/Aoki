@@ -1,10 +1,11 @@
 import Command from '../struct/handlers/Command';
 import * as os from "os";
 import pkg from "../../package.json";
-import { version as DiscordVersion } from 'discord.js';
+import { Attachment, version as DiscordVersion, EmbedBuilder } from 'discord.js';
 import { my } from '../assets/import';
 import { ChatInputCommandInteraction } from 'discord.js';
 import AokiClient from '../struct/Client';
+import Utilities from '../struct/Utilities';
 
 export default new class My extends Command {
   constructor() {
@@ -16,7 +17,7 @@ export default new class My extends Command {
   };
 
   // ping command
-  async ping(i: ChatInputCommandInteraction, _: any, util: any) {
+  async ping(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     await i.reply({ content: "Pinging..." });
 
     const replies = await util.getStatic("ping");
@@ -46,7 +47,7 @@ export default new class My extends Command {
   };
 
   // vote command
-  async vote(i: ChatInputCommandInteraction, _: any, util: any) {
+  async vote(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     // construct reply
     const votes: string[] = ["Vote? Sweet.", "You finally decided to show up?", "Oh, hi. I'm busy, so get it done.", "Not like I'm not busy, but sure."];
     const voteUrl: string = `https://top.gg/bot/https://top.gg/bot/${i.client.user!.id}`;
@@ -84,8 +85,8 @@ export default new class My extends Command {
   };
 
   // fault command
-  async fault(i: ChatInputCommandInteraction, query: string | null, util: any) {
-    const attachment = i.options.getAttachment("attachment");
+  async fault(i: ChatInputCommandInteraction, query: string | null, util: Utilities) {
+    const attachment = i.options.getAttachment("attachment")!;
     // handle exceptions
     if (!query && !attachment) return this.throw(i, "Baka, I can't send nothing. At least give me an error message, an image, or something!");
     // preset embed
@@ -121,17 +122,17 @@ export default new class My extends Command {
       await i.editReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
     };
 
-    const isImageAttachment = (attachment: any) => {
-      return attachment.contentType.includes("image");
+    const isImageAttachment = (attachment: Attachment) => {
+      return attachment.contentType?.includes("image");
     };
 
-    const sendToLogs = async (embed: any) => {
+    const sendToLogs = async (embed: EmbedBuilder) => {
       const channel = i.client.channels.cache.get(util.logChannel);
       if (!channel || !('send' in channel)) return;
       return await channel.send({ embeds: [embed] });
     };
 
-    const sendFeedback = async (i: ChatInputCommandInteraction, embed: any) => {
+    const sendFeedback = async (i: ChatInputCommandInteraction, embed: EmbedBuilder) => {
       await i.editReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
       await sendToLogs(embed);
     };
@@ -154,7 +155,7 @@ export default new class My extends Command {
   };
 
   // eval
-  async eval(i: ChatInputCommandInteraction, query: string, util: any) {
+  async eval(i: ChatInputCommandInteraction, query: string, util: Utilities) {
     if (!util.owners.includes(i.user.id)) {
       return await this.throw(i, 'Baka, you can\'t do that. This command is for my sensei.');
     };
@@ -187,7 +188,7 @@ export default new class My extends Command {
   };
 
   // we use weakmap here to cache the stats so we don't have to always recompute them
-  async stats(i: ChatInputCommandInteraction, _: any, util: any) {
+  async stats(i: ChatInputCommandInteraction, _: string, util: Utilities) {
     const cacheEntry = (i.client as AokiClient).statsCache.get(i.user.id);
     const cacheTTL = 10 * 60 * 1000;
     if (cacheEntry && (Date.now() - cacheEntry.timestamp < cacheTTL)) {

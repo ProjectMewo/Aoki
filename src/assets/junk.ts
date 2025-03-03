@@ -43,12 +43,12 @@ const wolframAnswerPlease = async (
     const response = await fetch(url);
     if (!response.ok) throw new Error("HTTP error, this is normal. Ask again later.");
     const data = await response.json();
-    const answer = (msg.client as any).util.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || "Can't answer that one.";
+    const answer = (msg.client as AokiClient).util.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || "Can't answer that one.";
     msg.reply({ content: answer });
   } catch (error) {
     await msg.reply({
       content: `Oh, something happened. Give my sensei a yell by doing \`/my fault\`:\n\n\`\`\`fix\n${error}\n\`\`\``,
-      flags: MessageFlags.Ephemeral as any
+      flags: 1 << 6
     }).catch(() => { });
   }
 };

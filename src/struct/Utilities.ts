@@ -1,8 +1,22 @@
 // settings and utils
 // some of the functions in here are unreadable and hence are hard to debug
 // when a refactor is necessary to debug things I'll do that
+import { Message } from "discord.js";
 import AokiClient from "./Client";
 import AniSchedule from "./Schedule";
+
+interface StaticData {
+  nsfw: {
+    domains: string[];
+  };
+  ping: string[];
+  "8ball": string[];
+  truth: string[];
+  fortune: string[];
+  profane: {
+    regex: string;
+  };
+}
 
 export default class Utilities {
   public badWordsRegex?: RegExp;
@@ -80,7 +94,7 @@ export default class Utilities {
    * @param {AokiClient} client The client, used to get the channel and warn if needed
    * @returns {void}
    */
-  public processException(event: string, args: Array<any>, client: AokiClient): void {
+  public processException(event: string, args: Array<any>, client: AokiClient): Promise<Message> | void {
     const channel = client.channels.cache.get("864096602952433665");
     const error = args[0];
   
@@ -94,7 +108,7 @@ export default class Utilities {
   
     const message = `\\🛠 ${error.name} caught!\n\`\`\`xl\n${stack}\n.....\n\`\`\``;
   
-    if (channel && typeof (channel as any).send === 'function') return (channel as any).send(message);
+    if (channel && 'send' in channel) return channel.send(message);
     else return client.util.warn(`Channel not found for event '${event}'`, "[PROCESS]");
   };
   /**
@@ -216,10 +230,10 @@ export default class Utilities {
    * @param {Array} array The array to join and limit
    * @param {Number} limit The limit to limit the string output
    * @param {String} connector Value connector like that of `array.join()`
-   * @returns {String}
+   * @returns {Object}
    */
   // this might be hard to read, but all in all it's just a reduce function
-  public joinArrayAndLimit(array: Array<any> = [], limit: number = 1000, connector: string = '\n'): string {
+  public joinArrayAndLimit(array: Array<any> = [], limit: number = 1000, connector: string = '\n'): { text: string, excess: number } {
     return array.reduce((a, c) => {
       const newLength = a.text.length + (a.text.length ? connector.length : 0) + String(c).length;
       return newLength > limit ? { text: a.text, excess: a.excess + 1 } : { text: a.text + (a.text.length ? connector : '') + String(c), excess: a.excess };
@@ -249,9 +263,9 @@ export default class Utilities {
    * Fetch AniList API data
    * @param {String} query GraphQL presentation of the query
    * @param {Object} variables Variables to throw into the graphql
-   * @returns {Promise<object>}
+   * @returns {Promise<any>}
    */
-  public async anilist(query: string, variables: object): Promise<object> {
+  public async anilist(query: string, variables: object): Promise<any> {
     return await fetch('https://graphql.anilist.co', {
       method: "POST",
       body: JSON.stringify({ query, variables }),
@@ -259,7 +273,7 @@ export default class Utilities {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       }
-    }).then(async res => await res.json());
+    }).then(async res => (await res.json()).data);
   };
   /**
    * Format numerical osu! mode to its string equivalent
@@ -399,12 +413,11 @@ export default class Utilities {
   /**
    * Fetches static JSON asset stored on `npoint.io`.
    * @param {String} name Asset name
-   * @returns {Promise<object>}
+   * @returns {Promise<StaticData[T]>}
    */
-  public async getStatic(name: string): Promise<object> {
-    // simplify by adding everything into one file
+  public async getStatic<T extends keyof StaticData>(name: T): Promise<StaticData[T]> {
     const id = "15038d9b7330785beca0";
-    const res = await fetch(`https://api.npoint.io/${id}`).then(async res => await res.json());
+    const res: StaticData = await fetch(`https://api.npoint.io/${id}`).then(async res => res.json());
     return res[name];
   };
   /**

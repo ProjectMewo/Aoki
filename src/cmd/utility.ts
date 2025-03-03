@@ -1,6 +1,13 @@
 import Command from '../struct/handlers/Command';
-import { ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder, User, TextChannel } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  AttachmentBuilder,
+  User,
+  TextChannel
+} from "discord.js";
 import { util } from "../assets/import";
+import Utilities from '../struct/Utilities';
 
 export default new class Utility extends Command {
   public imgur: string;
@@ -73,7 +80,7 @@ export default new class Utility extends Command {
   }
 
   // channel command
-  async channel(i: ChatInputCommandInteraction, _: unknown, util: any): Promise<void> {
+  async channel(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
     this._interaction = i;
     const channel = i.options.getChannel("channel") ?? i.channel;
     if (!channel) return this.throw(i, "Channel not found.");
@@ -92,11 +99,11 @@ export default new class Utility extends Command {
       14: { icon: `${this.imgur}Dfu73ox.png`, type: "Guild Directory" },
       15: { icon: `${this.imgur}q13YoYu.png`, type: "Guild Forum" }
     };
-    // channel.type might be unknown, cast to number if safe,
+    // channel.type might be unknown, cast to number if safe
     const key = (channel as any).type as number;
     const { icon, type } = channelTypes[key] || { icon: "", type: "Unknown" };
     const createdAt = new Date((ch.createdAt as string) || Date.now());
-    const time = util.formatDistance(createdAt, new Date(), { addSuffix: true });
+    const time = util.formatDistance(createdAt, new Date());
     const authorFieldName = `${ch.name}${ch.name.endsWith("s") ? "'" : "'s"} Information`;
     const field = util.keyValueField({
       "Position": ch.position || "Unknown",
@@ -115,7 +122,7 @@ export default new class Utility extends Command {
   }
 
   // server command
-  async server(i: ChatInputCommandInteraction, _: unknown, util: any): Promise<void> {
+  async server(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
     this._interaction = i;
     if (!i.guild) return this.throw(i, "Guild not found.");
     const guild = i.guild;
@@ -158,7 +165,7 @@ export default new class Utility extends Command {
   }
 
   // github command
-  async github(i: ChatInputCommandInteraction, _: unknown, util: any): Promise<void> {
+  async github(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
     this._interaction = i;
     const user = i.options.getString("user") as string;
     const repo = i.options.getString("repo") as string;
@@ -198,15 +205,15 @@ export default new class Utility extends Command {
   }
 
   // npm command
-  async npm(i: ChatInputCommandInteraction, query: string, util: any): Promise<void> {
+  async npm(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
     this._interaction = i;
     const raw = await fetch(`https://registry.npmjs.org/-/v1/search?text=${query}&size=1`, { headers: this.headers }).then(res => res.json());
     const res = raw.objects?.[0]?.package;
     if (!res) return this.throw(i, "Baka, that's an invalid repository. Or did you make a typo?");
     // utilities
     const score = raw.objects[0].score;
-    const maintainers = res.maintainers.map((maintainer: any) => `\`${maintainer.username}\``).join(', ');
-    const keywords = res.keywords?.map((keyword: any) => `\`${keyword}\``).join(', ') || "None";
+    const maintainers = res.maintainers.map((maintainer: { username: string }) => `\`${maintainer.username}\``).join(', ');
+    const keywords = res.keywords?.map((keyword: string) => `\`${keyword}\``).join(', ') || "None";
     const description = [
       `${util.textTruncate(res.description, 75)}\n\n`,
       `**Keywords:** ${keywords}\n`,
@@ -229,18 +236,24 @@ export default new class Utility extends Command {
   }
 
   // urban command
-  async urban(i: ChatInputCommandInteraction, query: string, util: any): Promise<void> {
+  async urban(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
     this._interaction = i;
     if (await util.isProfane(query) && !(i.channel as TextChannel).nsfw) return this.throw(i, "Your query has some profanity in there.\n\nEither get into a NSFW channel, or change your query.");
     const res = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}`, { headers: this.headers }).then(res => res.json());
     if (!res?.list?.length) return this.throw(i, "Hmph, seems like there's no definition for that. Even on Urban Dictionary.\n\nYou know what that means.");
     const definition = res.list[0];
     const nsfw = (i.channel as TextChannel).nsfw;
-    const truncateText = (text: string, maxLength: number): string => util.textTruncate(nsfw ? text : util.cleanProfane(text), maxLength);
+    const truncateText = async (text: string, maxLength: number): Promise<string> => {
+      const cleanedText = nsfw ? text : await util.cleanProfane(text);
+      return util.textTruncate(cleanedText, maxLength);
+    };
+    const definitionText = await truncateText(definition.definition, 1000);
+    const exampleText = await truncateText(definition.example || 'N/A', 1000);
+    const authorText = await truncateText(definition.author || 'N/A', 250);
     const fields = {
-      definition: '```fix\n' + truncateText(definition.definition, 1000) + '\n```',
-      example: '```fix\n' + truncateText(definition.example || 'N/A', 1000) + '\n```',
-      author: '```fix\n' + truncateText(definition.author || 'N/A', 250) + '\n```'
+      definition: '```fix\n' + definitionText + '\n```',
+      example: '```fix\n' + exampleText + '\n```',
+      author: '```fix\n' + authorText + '\n```'
     };
     // make embed
     const embed = this.embed
@@ -256,7 +269,7 @@ export default new class Utility extends Command {
   }
 
   // screenshot command
-  async screenshot(i: ChatInputCommandInteraction, query: string, util: any): Promise<void> {
+  async screenshot(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
     this._interaction = i;
     const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
     if (!query.match(urlRegex)) return this.throw(i, "Baka, that's not a valid URL.\n\nMake sure it starts with either `https://` or `http://`.");
@@ -286,7 +299,7 @@ export default new class Utility extends Command {
   }
 
   // wiki command
-  async wiki(i: ChatInputCommandInteraction, query: string, util: any): Promise<void> {
+  async wiki(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
     this._interaction = i;
     if (await util.isProfane(query) && !(i.channel as TextChannel).nsfw) return this.throw(i, "Your query has something to do with profanity, baka.\n\nEither move to a NSFW channel, or change the query.");
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`).then(async res => await res.json());

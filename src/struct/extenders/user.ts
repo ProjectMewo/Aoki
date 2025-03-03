@@ -1,13 +1,13 @@
 import { User } from 'discord.js';
 import AokiClient from '../Client';
 
-interface UserSettings {
+export interface UserSettings {
   ingamename: string,
   defaultmode: number,
   processmessagepermission: boolean
 };
 
-interface ScheduleData {
+export interface ScheduleData {
   anilistid: number;
   nextep: number;
 }
@@ -63,8 +63,8 @@ const getSchedule = function(this: User & { client: AokiClient }): object {
 /**
  * Set schedule data for this user
  */
-const setSchedule = function(this: User & { client: AokiClient }, data: ScheduleData): object {
-  return this.client.settings.schedules.update(this.id, data);
+const setSchedule = function(this: User & { client: AokiClient }, data: Partial<ScheduleData>): Promise<ScheduleData> {
+  return this.client.settings.schedules.update(this.id, data) as Promise<ScheduleData>;
 };
 
 /**
@@ -81,8 +81,8 @@ declare module "discord.js" {
     owner(): boolean;
     update(data: Partial<UserSettings>): Promise<UserSettings>;
     voted(): Promise<boolean>;
-    getSchedule(): Promise<{ anilistid: number, nextep: number } | null>;
-    setSchedule(data: { anilistid: number, nextep: number }): Promise<void>;
+    getSchedule(): Promise<ScheduleData | null>;
+    setSchedule(data: Partial<ScheduleData>): Promise<ScheduleData>;
   }
 }
 

@@ -1,7 +1,7 @@
 import { Guild } from 'discord.js';
 import AokiClient from '../Client';
 
-interface GuildSettings {
+export interface GuildSettings {
   timestampchannel: string,
   verificationroleid: string,
   verificationstatus: boolean,

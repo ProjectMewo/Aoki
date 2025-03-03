@@ -63,7 +63,7 @@ export default class AniSchedule {
 
     const watched = Array.from(new Set(schedules.map(s => Number(s.anilistid))));
     const episode = Array.from(new Set(schedules.map(s => Number(s.nextep))));
-    const { data } = await this.fetch<{ data: { Page?: { airingSchedules: AiringSchedule[] } } }>(this.schedule, { page: 0, watched, episode });
+    const data = await this.fetch<{ Page?: { airingSchedules: AiringSchedule[] } }>(this.schedule, { page: 0, watched, episode });
 
     if (!data) {
       this.client.util.warn('No data found for schedules.', '[AniSchedule]');
@@ -79,7 +79,7 @@ export default class AniSchedule {
       try {
         const user = await this.client.users.fetch(schedule.id);
         await user.send({ embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000))] });
-        await (user as any).setSchedule({ nextep: Number(schedule.nextep) + 1 });
+        await user.setSchedule({ nextep: Number(schedule.nextep) + 1 });
       } catch (error: any) {
         this.client.util.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
       }

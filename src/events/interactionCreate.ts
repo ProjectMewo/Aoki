@@ -19,7 +19,7 @@ class InteractionCreateEvent extends Event {
       const command = client.commands.get(interaction.commandName);
       if (!command) return;
       try {
-        await command.autocomplete(interaction as any);
+        await command.autocomplete(interaction);
       } catch (error) {
         console.error(error);
       }
@@ -30,7 +30,7 @@ class InteractionCreateEvent extends Event {
       if (interaction.customId.startsWith("verify_")) {
         await interaction.reply({
           content: `Start your verification by clicking [here](${client.dev ? "http://localhost:8080/" : "https://aoki.hackers.moe"}/login?id=${interaction.user.id}&guildId=${interaction.guild!.id}).`,
-          flags: 64
+          flags: 1 << 6
         });
         return;
       } else { return; }
@@ -38,19 +38,24 @@ class InteractionCreateEvent extends Event {
     // if this is a normal command request
     else if (i.isChatInputCommand()) {
       const interaction = i as ChatInputCommandInteraction;
+      // temporarily ignore all chat commands invoked in a DM
+      if (!interaction || !interaction.guild) { 
+        interaction.reply({ content: 'I can\'t do that in your DMs, baka. But maybe one day. Sensei told me he will do it.', ephemeral: true });
+        return;
+      };
       const command = client.commands.get(interaction.commandName);
       if (!command) {
-        await interaction.reply({ content: 'That command is probably gone. It\'ll disappear in a while.', flags: 64 });
+        await interaction.reply({ content: 'That command is probably gone. It\'ll disappear in a while.', flags: 1 << 6 });
         return;
       }
       if (!command.hasPermissions(interaction)) {
-        await interaction.reply({ content: 'Baka, you don\'t have the permissions to use this command.', flags: 64 });
+        await interaction.reply({ content: 'Baka, you don\'t have the permissions to use this command.', flags: 1 << 6 });
         return;
       }
       if (command.isOnCooldown(interaction.user.id)) {
         await interaction.reply({
           content: `Baka, I'm not a spamming machine. Try again in ${command.getRemainingCooldown(interaction.user.id)} seconds.`,
-          flags: 64
+          flags: 1 << 6
         });
         return;
       }

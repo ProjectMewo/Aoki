@@ -1,6 +1,6 @@
 import Event from '../struct/handlers/Event';
 import { wolframAnswerPlease, followUpWithProperTimestamp } from '../assets/junk';
-import { Message } from 'discord.js';
+import { Guild, Message } from 'discord.js';
 import AokiClient from '../struct/Client';
 
 class MessageCreateEvent extends Event {
@@ -23,7 +23,7 @@ class MessageCreateEvent extends Event {
     if (prefixMatch) { await wolframAnswerPlease(prefixMatch, msg); return; }
 
     // match timestamp if the message is in the designated channel of the guild
-    const timestampchannel = (msg.guild as any)?.settings.timestampchannel;
+    const timestampchannel = (msg.guild as Guild)?.settings?.timestampchannel;
     if (msg.channel.id == timestampchannel) {
       const timestampRegex = /(\d+):(\d{2}):(\d{3})\s*(\(((\d+(\|)?,?)+)\))?/gim;
       const timestamps = msg.content.match(timestampRegex);

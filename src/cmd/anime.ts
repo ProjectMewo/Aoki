@@ -1,8 +1,18 @@
 import Command from '../struct/handlers/Command';
 import Pagination from '../struct/Paginator';
-import { EmbedBuilder, ChatInputCommandInteraction, AutocompleteInteraction, TextChannel, MessageReaction, User as DiscordUser } from 'discord.js';
+import {
+  EmbedBuilder,
+  ChatInputCommandInteraction,
+  AutocompleteInteraction,
+  TextChannel,
+  MessageReaction,
+  User as DiscordUser,
+  Message
+} from 'discord.js';
 import { Watching, User } from "../assets/graphql";
 import { anime } from "../assets/import";
+import Utilities from '../struct/Utilities';
+import { UserData, WatchingData } from '../types/anilist';
 
 interface ErrorMessages {
   500: string;
@@ -30,13 +40,13 @@ export default new class Anime extends Command {
   }
 
   // action command
-  public async action(i: ChatInputCommandInteraction, query: string): Promise<any> {
+  public async action(i: ChatInputCommandInteraction, query: string): Promise<Message> {
     const { url } = await this.fetch(`https://waifu.pics/sfw/${query}`);
     return await i.editReply({ embeds: [this.embed.setImage(url)] });
   }
 
   // quote command
-  public async quote(i: ChatInputCommandInteraction): Promise<any> {
+  public async quote(i: ChatInputCommandInteraction): Promise<Message> {
     const { author, anime, quote } = await fetch(`https://waifu.it/api/v4/quote`, {
       headers: { 'Authorization': process.env.WAIFU_IT || "" }
     }).then(async res => await res.json());
@@ -44,9 +54,9 @@ export default new class Anime extends Command {
   }
 
   // random command
-  public async random(i: ChatInputCommandInteraction, _: any, util: any): Promise<any> {
+  public async random(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     // processing api response
-    const type = i.options.getString("type");
+    const type = i.options.getString("type")!;
     const res = (await this.fetch(`${this.jikan_v4}/random/${type}`)).data;
     if (!res) return this.throw(i, this.ErrorMessages.default);
     const stats = {
@@ -54,7 +64,7 @@ export default new class Anime extends Command {
       ...(type === "anime") ?
         {
           "Source": res.source || "No data",
-          "Episodes": res.episodes || "No data", 
+          "Episodes": res.episodes || "No data",
           "Status": res.status || "No data",
           "Schedule": res.broadcast?.day ? `${res.broadcast.day}s` : "No data",
           "Duration": res.duration?.replace(/ per /g, "/") || "No data"
@@ -96,24 +106,24 @@ export default new class Anime extends Command {
   }
 
   // profile command
-  public async profile(i: ChatInputCommandInteraction, query: string, util: any): Promise<any> {
+  public async profile(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     // processing user query
     // this option is enforced, so we put ! here
     const platform = i.options.getString("platform")!;
     if (await util.isProfane(query)) this.throw(i, "Stop sneaking in bad content please, you baka.");
     const fetchData = {
-      al: async () => await util.anilist(User, { search: query }),
+      al: async () => await util.anilist(User, { search: query }) as UserData,
       mal: async () => (await this.fetch(`${this.jikan_v4}/users/${query}/full`)).data
     }
     // platform will always be al or mal, so we cast it to fetchdata
-    const res = await fetchData[platform as keyof typeof fetchData]();
+    let res = await fetchData[platform as keyof typeof fetchData]();
     // handling errors
     if (!res) return this.throw(i, this.ErrorMessages[400]);
     else if (res?.errors) {
       const errorCodes = res.errors;
-      if (errorCodes.some((code: any) => code.status >= 500)) {
+      if (errorCodes.some((code: { status: number }) => code.status >= 500)) {
         return this.throw(i, this.ErrorMessages[500]);
-      } else if (errorCodes.some((code: any) => code.status >= 400)) {
+      } else if (errorCodes.some((code: { status: number }) => code.status >= 400)) {
         return this.throw(i, this.ErrorMessages[400]);
       } else return this.throw(i, this.ErrorMessages.default);
     }
@@ -123,13 +133,17 @@ export default new class Anime extends Command {
     if (platform == "mal") {
       // processing api response
       /**
-       * format AniList array information
+       * format Jikan array information
        * 
        * Method scoped in here is exclusive for animes and mangas
        * @param {Array} arr Array of query info to work with
        * @returns `String`
        */
-      const spreadMap = function (arr: Array<any>) {
+      const spreadMap = function (arr: Array<{
+        title?: string,
+        name?: string,
+        url: string
+      }>) {
         const res = util.joinArrayAndLimit(arr.map((entry) => {
           return `[${entry[entry.title ? "title" : "name"]}](${entry.url.split('/').splice(0, 5).join('/')})`;
         }), 1000, ' • ');
@@ -163,38 +177,52 @@ export default new class Anime extends Command {
         ]);
       return await i.editReply({ embeds: [embed] });
     } else {
+      // we cast res as UserData
+      const data: UserData = res;
       // processing api response
-      const topFields = Object.entries(res.data.User.favourites).map(([query, target]) => {
-        const firstTarget = (target as any).edges.map((entry: any) => {
+      const topFields = Object.entries(data.User.favourites).map((
+        entry: [string, {
+          edges: Array<{
+            node: {
+              title: string | { userPreferred: string, full: string },
+              name: string | { userPreferred: string, full: string },
+              siteUrl: string
+            }
+          }>
+        }
+        ]
+      ) => {
+        const [query, target] = entry;
+        const firstTarget = target.edges.map((entry) => {
           const identifier = entry.node.title || entry.node.name;
           const name = typeof identifier === 'object' ? identifier.userPreferred || identifier.full : identifier;
           return `[**${name}**](${entry.node.siteUrl})`;
         }).join('|') || 'None Listed';
         return `\n**Top 1 ${query}:** ` + firstTarget.split("|")[0];
       });
-      const description = res.data.User.about ? util.textTruncate(util.heDecode(res.data.User.about?.replace(/(<([^>]+)>)/g, '') || ''), 250) : "No description provided";
+      const description = data.User.about ? util.textTruncate(util.heDecode(data.User.about?.replace(/(<([^>]+)>)/g, '') || ''), 250) : "No description provided";
       // extending preset embed
       const embed = presetEmbed
-        .setImage(res.data.User.bannerImage)
-        .setThumbnail(res.data.User.avatar.medium)
-        .setTitle(res.data.User.name)
-        .setURL(res.data.User.siteUrl)
+        .setImage(data.User.bannerImage!)
+        .setThumbnail(data.User.avatar.medium)
+        .setTitle(data.User.name)
+        .setURL(data.User.siteUrl)
         .setDescription(`***About the user:** ${description}*` + `\n${topFields}`);
       return await i.editReply({ embeds: [embed] });
     }
   }
 
   // schedule command
-  public async airing(i: ChatInputCommandInteraction, query: string, util: any): Promise<any> {
+  public async airing(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
     const channelNSFW = (i.channel instanceof TextChannel) ? i.channel.nsfw : false;
     const res = await fetch(`https://api.jikan.moe/v4/schedules?filter=${query}${channelNSFW ? "" : "&sfw=true"}`).then(async res => await res.json());
     // handle error
     if (!res) return this.throw(i, this.ErrorMessages[400]);
     else if (res?.status) {
       const errorCodes = res.status;
-      if (errorCodes.some((code: any) => code.status >= 500)) {
+      if (errorCodes.some((code: { status: number }) => code.status >= 500)) {
         return this.throw(i, this.ErrorMessages[500]);
-      } else if (errorCodes.some((code: any) => code.status >= 400)) {
+      } else if (errorCodes.some((code: { status: number }) => code.status >= 400)) {
         return this.throw(i, this.ErrorMessages[400]);
       } else return this.throw(i, this.ErrorMessages.default);
     }
@@ -207,7 +235,10 @@ export default new class Anime extends Command {
       // helpers
       const description = [
         `${data.score ? `**Score**: ${data.score}\n` : ''}`,
-        `${data.genres.map((x: any) => `[${x.name}](${x.url})`).join(' • ')}\n\n`,
+        `${data.genres.map((x: {
+          name: string,
+          url: string
+        }) => `[${x.name}](${x.url})`).join(' • ')}\n\n`,
         `${data.synopsis ? util.textTruncate(data.synopsis, 300, `... *(read more [here](${data.url}))*`) : "*No synopsis available*"}`
       ].join("");
       const footer = [
@@ -219,7 +250,12 @@ export default new class Anime extends Command {
         { name: 'Type', value: `${data.type || 'Unknown'}`, inline: true },
         { name: 'Started', value: `${new Date(data.aired.from).toISOString().substring(0, 10)}`, inline: true },
         { name: 'Source', value: `${data.source || 'Unknown'}`, inline: true },
-        { name: 'Producers', value: `${data.producers.map((x: any) => `[${x.name}](${x.url})`).join(' • ') || 'None'}`, inline: true },
+        {
+          name: 'Producers', value: `${data.producers.map((x: {
+            name: string,
+            url: string
+          }) => `[${x.name}](${x.url})`).join(' • ') || 'None'}`, inline: true
+        },
         { name: 'Licensors', value: `${data.licensors.join(' • ') || 'None'}`, inline: true },
         { name: '\u200b', value: '\u200b', inline: true }
       ];
@@ -263,7 +299,7 @@ export default new class Anime extends Command {
 
   // search autocomplete
   public async search_autocomplete(i: AutocompleteInteraction, focusedValue: string): Promise<void> {
-    const type = i.options.getString("type");
+    const type = i.options.getString("type")!;
     // we try to use jikan api to try make sense what the user is possibly typing
     const res = await this.fetch(`${this.jikan_v4}/${type}?q=${focusedValue}`);
     const data = res.data; // this is the array we need to work with
@@ -271,30 +307,38 @@ export default new class Anime extends Command {
     // be sure to leave nsfw content out if we're not in such a channel
     const nsfw = (i.channel as TextChannel).nsfw;
     const names = data.filter(
-      (name: any) => {
+      (data: {
+        title?: string,
+        name?: string,
+        rating: string
+      }) => {
         let reqName: string;
-        if (type == "anime" || type == "manga") reqName = name.title;
-        else if (type == "characters" || type == "people") reqName = name.name;
+        if (type == "anime" || type == "manga") reqName = data.title!; // we know for sure this exists
+        else if (type == "characters" || type == "people") reqName = data.name!;
         // reqName will definitely have a value
         // so we ignore the error here by !
-        return reqName!.toLowerCase().includes(focusedValue.toLowerCase()) && (nsfw || !name.rating || !["R-17"].includes(name.rating));
+        return reqName!.toLowerCase().includes(focusedValue.toLowerCase()) && (nsfw || !data.rating || !["R-17"].includes(data.rating));
       }
     );
     // we then limit this list down to 25 results
     const namesLimited = names.slice(0, 25);
     // finally, we respond to the autocomplete interaction
     await i.respond(
-      namesLimited.map((names: any) => ({
-        name: names.name ? names.name : names.title,
-        value: names.mal_id.toString(),
+      namesLimited.map((data: {
+        title?: string,
+        name?: string,
+        mal_id: string | number
+      }) => ({
+        name: data.name ? data.name : data.title,
+        value: data.mal_id.toString(),
       })),
     );
   }
 
   // search command
-  public async search(i: ChatInputCommandInteraction, query: string, util: any): Promise<any> {
+  public async search(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message | void> {
     // processing user query
-    const type = i.options.getString("type");
+    const type = i.options.getString("type")!;
     // try to use jikan api to fetch the query
     // we assume all queries must have been handled by autocomplete, and the value has to be an id
     const jikanURL = (type: string) => {
@@ -360,19 +404,30 @@ export default new class Anime extends Command {
           ]
       ];
       const embed = presetEmbed.addFields(fields);
-      await i.editReply({ embeds: [embed] });
+      return await i.editReply({ embeds: [embed] });
     }
     // character
     else if (type == "characters") {
       // processing api response
-      const spreadMap = function (arr: Array<any>, type: string) {
+      const spreadMap = function (arr: Array<{
+        [key: string]: {
+          title?: string;
+          name?: string;
+          url: string;
+        }
+      }>, type: string): string {
         // if the array is empty we return none listed
         if (!arr?.length) return 'None Listed.';
         // take only first 5 entries to avoid too long outputs
         const limitedArr = arr.slice(0, 5);
-        const res = util.joinArrayAndLimit(limitedArr.map((entry) => {
-          return `[${entry[type][entry[type]?.title ? "title" : "name"]}](${entry[type].url})`;
-        }), 350, ' • ');
+        const res = util.joinArrayAndLimit(
+          limitedArr.map((entry) => {
+            const media = entry[type];
+            return `[${media[media.title ? "title" : "name"]}](${media.url})`;
+          }),
+          350,
+          ' • '
+        );
         // show total count if there are more
         const remaining = arr.length - limitedArr.length;
         return res.text + (remaining > 0 ? ` and ${remaining} more!` : '') || 'None Listed.';
@@ -397,7 +452,13 @@ export default new class Anime extends Command {
     // people
     else if (type == "people") {
       // processing api response
-      const spreadMap = function (arr: Array<any>, type: string) {
+      const spreadMap = function (arr: Array<{
+        [key: string]: {
+          title?: string;
+          name?: string;
+          url: string;
+        }
+      }>, type: string) {
         // if the array is empty we return none listed
         if (!arr?.length) return 'None Listed.';
         // take only first 5 entries to avoid too long outputs
@@ -433,7 +494,7 @@ export default new class Anime extends Command {
   }
 
   // schedule current command
-  public async current(i: ChatInputCommandInteraction, _: any, util: any): Promise<any> {
+  public async current(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     // get user schedules
     const schedule = await i.user.getSchedule();
     // handle exceptions
@@ -442,21 +503,22 @@ export default new class Anime extends Command {
     const res = (await util.anilist(Watching, {
       watched: [schedule.anilistid],
       page: 0
-    })).data.Page.media[0];
+    }) as WatchingData).Page.media[0];
     // handle errors
     if (!res) return this.throw(i, this.ErrorMessages[400]);
     else if (res?.errors) {
       const errorCodes = res.errors;
-      if (errorCodes.some((code: any) => code.status >= 500)) {
+      if (errorCodes.some((code) => code.status >= 500)) {
         return this.throw(i, this.ErrorMessages[500]);
-      } else if (errorCodes.some((code: any) => code.status >= 400)) {
+      } else if (errorCodes.some((code) => code.status >= 400)) {
         return this.throw(i, this.ErrorMessages[400]);
       } else return this.throw(i, this.ErrorMessages.default);
     }
     // handle api response
     const title = `[${res.title.romaji}](${res.siteUrl})`;
-    const nextepisode = res.nextAiringEpisode.episode;
-    const timeUntilAiring = Math.round(res.nextAiringEpisode.timeUntilAiring / 3600);
+    const nextepisode = res.nextAiringEpisode?.episode;
+    // we know if nextAiringEpisode is present, timeUntilAiring will also be present
+    const timeUntilAiring = Math.round(res.nextAiringEpisode?.timeUntilAiring! / 3600) || "Unknown";
     // send response
     return await i.editReply({ content: `You are currently watching **${title}**. Its next episode is **${nextepisode}**, airing in about **${timeUntilAiring} hours**.` });
   }
@@ -469,21 +531,25 @@ export default new class Anime extends Command {
     const data = res.data; // this is the array we need to work with
     // now we filter this array by taking the title
     const names = data.filter(
-      (name: any) => name.title.toLowerCase().includes(focusedValue.toLowerCase())
+      (name: { title: string }) => name.title.toLowerCase().includes(focusedValue.toLowerCase())
     );
     // we then limit this list down to 25 results
     const namesLimited = names.slice(0, 25);
     // finally, we respond to the autocomplete interaction
     await i.respond(
-      namesLimited.map((names: any) => ({
-        name: names.title,
-        value: names.mal_id.toString(),
+      namesLimited.map((data: {
+        title?: string,
+        name?: string,
+        mal_id: string | number
+      }) => ({
+        name: data.title,
+        value: data.mal_id.toString(),
       })),
     );
   }
 
   // schedule add command
-  public async add(i: ChatInputCommandInteraction, query: string, util: any): Promise<any> {
+  public async add(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     // get user schedule
     const schedule = await i.user.getSchedule();
     // handle exceptions
@@ -494,28 +560,28 @@ export default new class Anime extends Command {
     const media = (await util.anilist(Watching, {
       watched: [anilistid],
       page: 0
-    })).data.Page.media[0];
+    }) as WatchingData).Page.media[0];
     // handle errors
     if (!media) return this.throw(i, this.ErrorMessages[400]);
     else if (media?.errors) {
       const errorCodes = media.errors;
-      if (errorCodes.some((code: any) => code.status >= 500)) {
+      if (errorCodes.some((code) => code.status >= 500)) {
         return this.throw(i, this.ErrorMessages[500]);
-      } else if (errorCodes.some((code: any) => code.status >= 400)) {
+      } else if (errorCodes.some((code) => code.status >= 400)) {
         return this.throw(i, this.ErrorMessages[400]);
       } else return this.throw(i, this.ErrorMessages.default);
     }
     if (!["NOT_YET_RELEASED", "RELEASING"].includes(media.status)) return this.throw(i, "Baka, that's not airing. It's not an upcoming one, too. Maybe even finished.");
     // update database
-    await i.user.setSchedule({ anilistid: media.id, nextep: media.nextAiringEpisode.episode });
+    await i.user.setSchedule({ anilistid: media.id, nextep: media.nextAiringEpisode?.episode! });
     // send result
     const title = media.title.romaji;
-    const timeUntilAiring = Math.round(media.nextAiringEpisode.timeUntilAiring / 3600);
+    const timeUntilAiring = Math.round(media.nextAiringEpisode?.timeUntilAiring! / 3600);
     return await i.editReply({ content: `Tracking airing episodes for **${title}**. Next episode is airing in about **${timeUntilAiring} hours**.` });
   }
 
   // schedule remove command
-  public async remove(i: ChatInputCommandInteraction, _: any, util: any): Promise<any> {
+  public async remove(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     // get user schedule
     const schedule = await i.user.getSchedule();
     // handle exceptions
@@ -524,14 +590,14 @@ export default new class Anime extends Command {
     const res = (await util.anilist(Watching, {
       watched: [schedule.anilistid],
       page: 0
-    })).data.Page.media[0];
+    }) as WatchingData).Page.media[0];
     // handle errors
     if (!res) return this.throw(i, this.ErrorMessages[400]);
     else if (res?.errors) {
       const errorCodes = res.errors;
-      if (errorCodes.some((code: any) => code.status >= 500)) {
+      if (errorCodes.some((code) => code.status >= 500)) {
         return this.throw(i, this.ErrorMessages[500]);
-      } else if (errorCodes.some((code: any) => code.status >= 400)) {
+      } else if (errorCodes.some((code) => code.status >= 400)) {
         return this.throw(i, this.ErrorMessages[400]);
       } else return this.throw(i, this.ErrorMessages.default);
     }

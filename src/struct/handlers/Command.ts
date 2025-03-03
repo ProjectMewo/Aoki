@@ -1,18 +1,20 @@
 import { 
+  AutocompleteInteraction,
   ChatInputCommandInteraction, 
   EmbedBuilder, 
   MessageFlags, 
-  PermissionFlagsBits 
+  PermissionFlagsBits,
+  SlashCommandSubcommandsOnlyBuilder
 } from 'discord.js';
 import AokiClient from '../Client';
 
 class Command {
-  public data: any;
-  public permissions: Array<any>;
+  public data: SlashCommandSubcommandsOnlyBuilder;
+  public permissions: Array<BigInt>;
   public cooldown: number;
   private cooldowns: Map<string, number>;
 
-  public constructor(options: { data: any; permissions?: any[]; cooldown?: number }) {
+  public constructor(options: { data: SlashCommandSubcommandsOnlyBuilder; permissions?: Array<BigInt>; cooldown?: number }) {
     this.data = options.data;
     this.permissions = options.permissions || [];
     this.cooldown = options.cooldown || 0;
@@ -90,9 +92,9 @@ class Command {
       }
     };
   };
-  public async autocomplete(i: ChatInputCommandInteraction) {
+  public async autocomplete(i: AutocompleteInteraction) {
     const sub = i.options.getSubcommand();
-    const focusedValue = await (i.options as any).getFocused();
+    const focusedValue = i.options.getFocused();
     const util = (i.client as AokiClient).util;
 
     try {
@@ -107,7 +109,7 @@ class Command {
    * @returns `Promise` The rejected promise
    */
   public async throw(i: ChatInputCommandInteraction, content: string) {
-    await i.editReply({ content, flags: MessageFlags.Ephemeral as any });
+    await i.editReply({ content, flags: 1 << 6 });
     return Promise.reject();
   };
   // Preset embed

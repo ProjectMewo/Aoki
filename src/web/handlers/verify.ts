@@ -1,5 +1,6 @@
 import AokiClient from "../../struct/Client";
 import { Guild, GuildMember } from "discord.js";
+import { GuildSettings } from "../../struct/extenders/guild";
 
 interface VerificationData {
   id: string;
@@ -77,15 +78,6 @@ export default class VerificationHandler {
     });
   }
 
-  async customizeVerificationMessage(guildId: string, customization: Record<string, any>): Promise<void> {
-    await this.client.settings.guilds.update(guildId, {
-      verification: {
-        ...customization,
-        status: true
-      }
-    });
-  }
-
   async handleCallback(url: URL): Promise<Response> {
     try {
       const code = url.searchParams.get("code");
@@ -136,11 +128,11 @@ export default class VerificationHandler {
 
     const guildSettings = await this.client.settings.guilds.findOne("id", guildId);
 
-    if (!(guildSettings as any).verificationstatus) {
+    if (!(guildSettings as GuildSettings).verificationstatus) {
       return new Response("Verification is not enabled for this server.", { status: 400 });
     }
 
-    const role = guild.roles.cache.get((guildSettings as any).verificationroleid);
+    const role = guild.roles.cache.get((guildSettings as GuildSettings).verificationroleid);
     if (!role) {
       return new Response("Verification role not found. Please contact the server administrator.", { status: 500 });
     }

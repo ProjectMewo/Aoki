@@ -1,4 +1,13 @@
-import { Client, GatewayIntentBits, Partials, Options, Collection, REST, Routes } from 'discord.js';
+import { 
+  Client, 
+  GatewayIntentBits, 
+  Partials, 
+  Options, 
+  Collection, 
+  REST, 
+  Routes, 
+  EmbedBuilder
+} from 'discord.js';
 import Settings from './Settings';
 import Utilities from './Utilities';
 import Command from './handlers/Command';
@@ -15,7 +24,10 @@ class AokiClient extends Client {
   public util: Utilities;
   public poster: DBL;
   public schedule: Schedule;
-  public statsCache: Collection<string, any>;
+  public statsCache: Collection<string, { 
+    embed: EmbedBuilder, 
+    timestamp: number 
+  }>;
   public lastStats: number | null;
   public db: typeof Bun.SQL | null;
   public settings: {
@@ -137,11 +149,9 @@ class AokiClient extends Client {
       const event = eventModule.default;
       this.events.set(event.name, event);
       // very sketchy hacky 4am code with undefined somehow appearing
-      if (event.once) {
-        this.once(event.name, (...args: any[]) => (event.execute as any).call(undefined, this, ...args));
-      } else {
-        this.on(event.name, (...args: any[]) => (event.execute as any).call(undefined, this, ...args));
-      }
+      this[event.once ? 'once' : 'on'](event.name, (...args: any[]) =>
+        (event.execute as any).call(undefined, this, ...args)
+      );
     }
 
     this.util.success("Loaded commands and events", "[Loader]");

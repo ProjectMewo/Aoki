@@ -11,12 +11,13 @@ import {
   RoleSelectMenuBuilder,
   ChannelSelectMenuBuilder,
   ChannelType,
-  PermissionFlagsBits,
   ChatInputCommandInteraction,
   ModalSubmitInteraction,
   MessageFlags,
   ColorResolvable,
-  AnySelectMenuInteraction
+  AnySelectMenuInteraction,
+  TextChannel,
+  PermissionFlagsBits
 } from "discord.js";
 import Command from '../struct/handlers/Command';
 import { verify } from '../assets/import';
@@ -36,12 +37,13 @@ export default new class VerifyCommand extends Command {
   constructor() {
     super({
       data: verify,
-      permissions: [],
+      permissions: [PermissionFlagsBits.ManageGuild],
       cooldown: 0
     });
   };
   async toggle(i: ChatInputCommandInteraction): Promise<void> {
-    const guildSettings = (i.guild as any).settings;
+    const guildSettings = i.guild?.settings;
+    if (!guildSettings) return this.throw(i, 'O-Oh, I can\'t seem to fetch this server\'s settings.\n\nOr are you inside my DMs, you baka?');
     const verificationEnabled = guildSettings?.verificationstatus || false;
 
     // disallow toggling if the verification message is not set
@@ -50,7 +52,7 @@ export default new class VerifyCommand extends Command {
       return;
     };
 
-    await (i.guild as any).update({ 'verificationstatus': !verificationEnabled });
+    await i.guild?.update({ 'verificationstatus': !verificationEnabled });
 
     const status = !verificationEnabled ? 'enabled' : 'disabled';
     if (verificationEnabled) {
@@ -62,7 +64,7 @@ export default new class VerifyCommand extends Command {
 
   async customize(i: ChatInputCommandInteraction): Promise<void> {
     await i.deferReply({ flags: 64 });
-    const guildSettings = (i.guild as any).settings;
+    const guildSettings = i.guild!.settings;
 
     let customization: Customization = guildSettings || {
       verificationtitle: 'Verify your osu! account',
@@ -236,13 +238,13 @@ export default new class VerifyCommand extends Command {
 
   async saveVerification(i: AnySelectMenuInteraction, customization: Customization): Promise<void> {
     if (!customization.verificationchannelid) {
-      await i.reply({ content: 'Please select a channel for the verification message.', flags: MessageFlags.Ephemeral as any });
+      await i.reply({ content: 'Please select a channel for the verification message.', flags: MessageFlags.Ephemeral });
       return;
     }
 
     const channel = await i.guild?.channels.fetch(customization.verificationchannelid);
     if (!channel) {
-      await i.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral as any });
+      await i.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral });
       return;
     }
 
@@ -256,10 +258,10 @@ export default new class VerifyCommand extends Command {
 
     // check if there is already a message before
     // delete the old one to send the newer one
-    if ((i.guild as any).settings?.verificationmessageid) {
+    if (i.guild?.settings?.verificationmessageid) {
       try {
         const fetchChannel = i.guild?.channels.cache.get(i.guild.settings.verificationchannelid);
-        const oldMessage = fetchChannel ? await (fetchChannel as any).messages.fetch((i.guild as any).settings?.verificationmessageid) : null;
+        const oldMessage = fetchChannel ? await (fetchChannel as TextChannel).messages.fetch(i.guild.settings?.verificationmessageid) : null;
         if (oldMessage) {
           await oldMessage.delete();
         }
@@ -270,12 +272,14 @@ export default new class VerifyCommand extends Command {
       }
     }
 
-    const verificationMessage = await (channel as any).send({ embeds: [verificationEmbed], components: [verificationRow] });
+    const verificationMessage = await (channel as TextChannel).send({ embeds: [verificationEmbed], components: [verificationRow] });
 
-    await (i.guild as any).update({
+    await i.guild!.update({
       ...customization,
       verificationmessageid: verificationMessage.id,
-      verificationstatus: true
+      verificationstatus: true,
+      verificationroleid: customization.verificationroleid || undefined,
+      verificationchannelid: customization.verificationchannelid || undefined
     });
 
     await i.reply({ content: 'Verification message saved and posted in the selected channel.\n\nPlease **DO NOT** delete the verification message. You\'ll have to set it up again.', flags: 64 });
