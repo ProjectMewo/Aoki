@@ -22,16 +22,12 @@ You want to know more right now? Head to the [info file](/INFO.md), or [invite h
 
 ## Tech stacks
 ### Language
-Aoki is written in **JavaScript** on production builds. For type-safe versions, this branch has **experimental** support for TypeScript, which reduces random runtime errors. There are no plans to rewrite it into another language yet, and community adaptation is welcome.
+Previously, Aoki was written in **JavaScript**. To better adapt to modern standards, Aoki is rewritten in TypeScript, which reduces random runtime errors. There are no plans to rewrite it into another language yet, and community adaptation is welcome.
 
-On JavaScript branches and tags, only ESM is supported. CommonJS is not.
-
-On TypeScript branch (which is this branch here), a lot of hacky code written by an insane developer at 4AM in the morning has been placed in here, which needs fixing. Urgently. Hence the experimental warning.
+On JavaScript releases, only ESM is supported. CommonJS is not.
 
 ### Database
-Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but release v4.2 has support for `mongoose`. Both logics are interchargable, please check the [Client.ts](/src/struct/Client.ts) file for more info.
-
-In the future, to better support new infrastructure, Aoki will use **PostgreSQL** instead, using the new built-in `Bun#sql` module. The v4.3 branch and this TypeScript branch has **very, very experimental** support for it, as such please use with caution.
+To better support new infrastructure, Aoki now uses **PostgreSQL** instead, using the new built-in `Bun#sql` module. The feature is **very experimental**, as such please use with caution.
 
 > [!WARNING]
 > Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.4**. For your own database safety, it is recommended that you update using `bun upgrade`.
