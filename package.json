@@ -2,13 +2,12 @@
   "name": "aoki-next",
   "version": "4.4.0",
   "description": "aoki, but working with discord gateway",
-  "main": "src/main.js",
+  "main": "src/main.ts",
   "scripts": {
-    "dev": "bun src/main.js --dev",
-    "build": "bun src/build.js",
+    "dev": "bun src/main.ts --dev",
+    "build": "bun src/build.ts",
     "start": "bun main.js"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ProjectMewo/Aoki"

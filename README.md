@@ -22,7 +22,7 @@ You want to know more right now? Head to the [info file](/INFO.md), or [invite h
 
 ## Tech stacks
 ### Language
-Aoki is written in **JavaScript** on production builds. For type-safe versions, this branch has **very experimental** support for TypeScript, which reduces random runtime errors. There are no plans to rewrite it into another language yet, and community adaptation is welcome.
+Aoki is written in **JavaScript** on production builds. For type-safe versions, this branch has **experimental** support for TypeScript, which reduces random runtime errors. There are no plans to rewrite it into another language yet, and community adaptation is welcome.
 
 On JavaScript branches and tags, only ESM is supported. CommonJS is not.
 
@@ -44,12 +44,12 @@ Aoki officially supports **Bun v1.2.4+**.
 - It has built-in support for PostgreSQL, which is also very fast.
 
 ### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.ts](/src/struct/Utilities.ts). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than a single megabyte.
+Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.ts](/src/struct/Utilities.ts). This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy.
+
+The libraries? Bun does that. Will anything else appear in the production folder? No. It's in Bun's cache.
 
 ### Future-proof
-Check the [roadmap](https://github.com/ProjectMewo/Aoki/issues/6) for future planned implementations.
-
-This TypeScript rewrite has not been planned, though...
+Check the [roadmap](#6) for future planned implementations.
 
 ## Local development setup
 Make sure you have Bun v1.2.4+ on your local machine. [Install it here](https://bun.sh).
@@ -76,6 +76,7 @@ aoki
 │   ├── struct     # code structure files
 │   │   └── extenders   # altering discord.ts core
 │   │   └── handlers    # handlers
+│   ├── types      # type definition for things
 │   ├── events     # Discord.ts events
 │   ├── web        # web API (barebones)
 │   └── cmd        # main commands files
