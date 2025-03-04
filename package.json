@@ -11,7 +11,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AokiOfficial/Aoki"
+    "url": "git+https://github.com/ProjectMewo/Aoki"
   },
   "keywords": [
     "discord",
@@ -21,9 +21,9 @@
   "author": "shimeji.rin",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/AokiOfficial/Aoki/issues"
+    "url": "https://github.com/ProjectMewo/Aoki/issues"
   },
-  "homepage": "https://github.com/AokiOfficial/Aoki#readme",
+  "homepage": "https://github.com/ProjectMewo/Aoki#readme",
   "devDependencies": {
     "@types/bun": "^1.2.4",
     "discord.js": "^14.18.0"

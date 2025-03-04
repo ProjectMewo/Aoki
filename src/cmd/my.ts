@@ -61,7 +61,7 @@ export default new class My extends Command {
     // construct message parts
     const description: string = [
       "Oh, it's you? Hey, I'm **Aoki**. It only means a mere blue tree, but sensei (`shimeji.rin`, by the way) can't do anything about it, unfortunately.\n",
-      "Everyone calls me a tsundere. Even my sensei does that on my [Github](https://github.com/AokiOfficial/Aoki) - yes, I'm **open-source**, and documented. But I don't think I am one, it's just because *I occasionally slap people*, sorry."
+      "Everyone calls me a tsundere. Even my sensei does that on my [Github](https://github.com/ProjectMewo/Aoki) - yes, I'm **open-source**, and documented. But I don't think I am one, it's just because *I occasionally slap people*, sorry."
     ].join("\n");
     const fields: { name: string, value: string }[] = [
       {

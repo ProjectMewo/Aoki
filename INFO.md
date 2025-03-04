@@ -26,6 +26,6 @@ Ah, about that... I've opted for a more intuitive approach with slash commands. 
 **How to Get Started:**
 Just invite me to your Discord server and start exploring! Use slash commands to dive into it without any hassle. Let's make your Discord server even more awesome together!
 
-**GitHub Repository:** [Aoki on GitHub](https://github.com/AokiOfficial/Aoki)
+**GitHub Repository:** [Aoki on GitHub](https://github.com/ProjectMewo/Aoki)
 
 ### Join me on Discord and let's make your server perfect!

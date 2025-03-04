@@ -1,13 +1,15 @@
 <h1 align="center"><img src='https://i.imgur.com/Nar1fRE.png' height='100'><br>Aoki</br></h1>
 <p align="center">a multi-purpose Discord application to spice up your experiences.<br>focus mainly on anime, fun and utility.</br></p>
-<p align="center">
-  <a href="https://www.typescriptlang.org/">
-    <img src="https://i.imgur.com/t12LZSY.png" alt="Powered by TypeScript" height="36"/>
-  </a>
-  <a href="https://www.digitalocean.com/pricing/droplets/">
-    <img src="https://i.imgur.com/9rZ8bLb.png" alt="Runs on... wherever you want it to be" height="36"/>
-  </a>
-</p>
+
+<div align="center">
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=704992714109878312)
+[![License](https://img.shields.io/github/license/ProjectMewo/Aoki?style=for-the-badge)](https://github.com/ProjectMewo/Aoki/blob/main/LICENSE)
+[![Stars](https://img.shields.io/github/stars/ProjectMewo/Aoki?style=for-the-badge)](https://github.com/ProjectMewo/Aoki/stargazers)
+[![Issues](https://img.shields.io/github/issues/ProjectMewo/Aoki?style=for-the-badge)](https://github.com/ProjectMewo/Aoki/issues)
+
+</div>
 
 ---
 ## Information about this project
@@ -27,13 +29,13 @@ On JavaScript branches and tags, only ESM is supported. CommonJS is not.
 On TypeScript branch (which is this branch here), a lot of hacky code written by an insane developer at 4AM in the morning has been placed in here, which needs fixing. Urgently. Hence the experimental warning.
 
 ### Database
-Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but release v4.2 has support for `mongoose`. Both logics are interchargable, please check the [Client.js](/src/struct/Client.js) file for more info.
+Aoki uses **MongoDB** in production (v4.1). She uses the `mongodb` library, but release v4.2 has support for `mongoose`. Both logics are interchargable, please check the [Client.ts](/src/struct/Client.ts) file for more info.
 
 In the future, to better support new infrastructure, Aoki will use **PostgreSQL** instead, using the new built-in `Bun#sql` module. The v4.3 branch and this TypeScript branch has **very, very experimental** support for it, as such please use with caution.
 
 > [!WARNING]
 > Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.4**. For your own database safety, it is recommended that you update using `bun upgrade`.
-> Technical information about this is in the [Settings.js file](/src/struct/Settings.js).
+> Technical information about this is in the [Settings.ts file](/src/struct/Settings.ts).
 
 ### Runtime
 Aoki officially supports **Bun v1.2.4+**.
@@ -42,10 +44,10 @@ Aoki officially supports **Bun v1.2.4+**.
 - It has built-in support for PostgreSQL, which is also very fast.
 
 ### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.js](/src/struct/Utilities.js). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than a single megabyte.
+Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.ts](/src/struct/Utilities.ts). This is why the project is very small in disk space size and codebase size. After building, the entire codebase and libraries weigh just a fraction more than a single megabyte.
 
 ### Future-proof
-Check the [roadmap](https://github.com/AokiOfficial/Aoki/issues/6) for future planned implementations.
+Check the [roadmap](https://github.com/ProjectMewo/Aoki/issues/6) for future planned implementations.
 
 This TypeScript rewrite has not been planned, though...
 
@@ -66,24 +68,24 @@ aoki
 ├── ...
 ├── README.md
 ├── LICENSE
-├── package.json
+├── package.tson
 ├── .env.example   # example secret keys file
 ├── src            # project source code
 │   ├── ...
 │   ├── assets     # static JS files
 │   ├── struct     # code structure files
-│   │   └── extenders   # altering discord.js core
+│   │   └── extenders   # altering discord.ts core
 │   │   └── handlers    # handlers
-│   ├── events     # Discord.js events
+│   ├── events     # Discord.ts events
 │   ├── web        # web API (barebones)
 │   └── cmd        # main commands files
 └── 
 ```
 The project follows a class-based approach to commands, events and extenders. 
-- To make a new command, make a class extending [Command.js](/src/struct/handlers/Command.js).
-- To handle a new event, make a class extending [Event.js](/src/struct/handlers/Event.js).
+- To make a new command, make a class extending [Command.ts](/src/struct/handlers/Command.ts).
+- To handle a new event, make a class extending [Event.ts](/src/struct/handlers/Event.ts).
 
-After that, to load the new files, statically import them in [Client.js](/src/struct/Client.js), inside the `loadModules` function.
+After that, to load the new files, statically import them in [Client.ts](/src/struct/Client.ts), inside the `loadModules` function.
 
 ## Code License & Contribution
 [GPL-3.0](/LICENSE).
@@ -93,7 +95,7 @@ This is a learning project pushed to production, use any code that makes sense t
 To contribute, simply make a fork of this repository, make your changes, then make a pull request. There is a template ready for a standard PR.
 
 To work with the codebase, specifically this branch, make sure:
-- You do not edit `tsconfig.json` to make whatever you want works.
+- You do not edit `tsconfig.tson` to make whatever you want works.
 - You document the code wherever relevant; i.e. stuff that will be hard to look at without it, if you're making a PR.
 - You keep the overall structure intact and consistent. Sync with other files if there is already one (or some) of the same format.
 - You stay sane and happy.
