@@ -4,7 +4,8 @@ import {
   EmbedBuilder,
   AttachmentBuilder,
   User,
-  TextChannel
+  TextChannel,
+  Message
 } from "discord.js";
 import { util } from "../assets/import";
 import Utilities from '../struct/Utilities';
@@ -28,7 +29,7 @@ export default new class Utility extends Command {
   }
 
   // avatar command
-  async avatar(i: ChatInputCommandInteraction): Promise<void> {
+  async avatar(i: ChatInputCommandInteraction): Promise<Message> {
     this._interaction = i;
     const user: User = i.options.getUser("user") || i.user;
     // handle different sizes
@@ -48,11 +49,11 @@ export default new class Utility extends Command {
       .setAuthor({ name: `${user.username}'s Avatar` })
       .setDescription(description)
       .setImage(avatar(2048));
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // banner command
-  async banner(i: ChatInputCommandInteraction): Promise<void> {
+  async banner(i: ChatInputCommandInteraction): Promise<Message> {
     this._interaction = i;
     const user: User = i.options.getUser("user") || i.user;
     // force fetch user
@@ -76,11 +77,11 @@ export default new class Utility extends Command {
       .setAuthor({ name: `${user.username}'s Banner` })
       .setDescription(description)
       .setImage(bannerURL(2048)!);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // channel command
-  async channel(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
+  async channel(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<Message> {
     this._interaction = i;
     const channel = i.options.getChannel("channel") ?? i.channel;
     if (!channel) return this.throw(i, "Channel not found.");
@@ -118,11 +119,11 @@ export default new class Utility extends Command {
       .setAuthor({ name: authorFieldName })
       .setThumbnail(icon)
       .addFields([{ name: "\u2000", value: field }]);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // server command
-  async server(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
+  async server(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<Message> {
     this._interaction = i;
     if (!i.guild) return this.throw(i, "Guild not found.");
     const guild = i.guild;
@@ -161,11 +162,11 @@ export default new class Utility extends Command {
         { name: "General Info", value: generalInfoField },
         { name: "Channels Info", value: channelInfoField }
       ]);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // github command
-  async github(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<void> {
+  async github(i: ChatInputCommandInteraction, _: unknown, util: Utilities): Promise<Message> {
     this._interaction = i;
     const user = i.options.getString("user") as string;
     const repo = i.options.getString("repo") as string;
@@ -201,11 +202,11 @@ export default new class Utility extends Command {
       .setThumbnail(res.owner.avatar_url)
       .setDescription(`${res.description}\n\n`)
       .addFields([{ name: "\u2000", value: field }]);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // npm command
-  async npm(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
+  async npm(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     this._interaction = i;
     const raw = await fetch(`https://registry.npmjs.org/-/v1/search?text=${query}&size=1`, { headers: this.headers }).then(res => res.json());
     const res = raw.objects?.[0]?.package;
@@ -232,11 +233,11 @@ export default new class Utility extends Command {
       .setURL(`https://www.npmjs.com/package/${res.name}`)
       .setDescription(description)
       .addFields([{ name: "\u2000", value: field }]);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // urban command
-  async urban(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
+  async urban(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     this._interaction = i;
     if (await util.isProfane(query) && !(i.channel as TextChannel).nsfw) return this.throw(i, "Your query has some profanity in there.\n\nEither get into a NSFW channel, or change your query.");
     const res = await fetch(`https://api.urbandictionary.com/v0/define?term=${query}`, { headers: this.headers }).then(res => res.json());
@@ -265,11 +266,11 @@ export default new class Utility extends Command {
         { name: 'Submitted by', value: fields.author },
         { name: 'Profane Word?', value: 'Yell at my sensei through `/my fault`, the patch should be added in a few working days.' }
       ]);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // screenshot command
-  async screenshot(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
+  async screenshot(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     this._interaction = i;
     const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
     if (!query.match(urlRegex)) return this.throw(i, "Baka, that's not a valid URL.\n\nMake sure it starts with either `https://` or `http://`.");
@@ -292,14 +293,14 @@ export default new class Utility extends Command {
       const imageBuffer = Buffer.from(new Uint8Array(buffer));
       const image = new AttachmentBuilder(imageBuffer, { name: "image.png" });
       const embed = this.embed.setImage("attachment://image.png");
-      await i.editReply({ embeds: [embed], files: [image] });
+      return await i.editReply({ embeds: [embed], files: [image] });
     } catch {
       return this.throw(i, "Something's wrong with that URL.\n\nCheck if you made a typo.");
     }
   }
 
   // wiki command
-  async wiki(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<void> {
+  async wiki(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     this._interaction = i;
     if (await util.isProfane(query) && !(i.channel as TextChannel).nsfw) return this.throw(i, "Your query has something to do with profanity, baka.\n\nEither move to a NSFW channel, or change the query.");
     const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`).then(async res => await res.json());
@@ -316,7 +317,7 @@ export default new class Utility extends Command {
       .setThumbnail(thumbnail)
       .setURL(res.content_urls.desktop.page)
       .setDescription(description);
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   }
 
   // internal utilities

@@ -1,7 +1,7 @@
 import Command from '../struct/handlers/Command';
 import * as os from "os";
 import pkg from "../../package.json";
-import { Attachment, version as DiscordVersion, EmbedBuilder } from 'discord.js';
+import { Attachment, version as DiscordVersion, EmbedBuilder, Message } from 'discord.js';
 import { my } from '../assets/import';
 import { ChatInputCommandInteraction } from 'discord.js';
 import AokiClient from '../struct/Client';
@@ -17,7 +17,7 @@ export default new class My extends Command {
   };
 
   // ping command
-  async ping(i: ChatInputCommandInteraction, _: string, util: Utilities) {
+  async ping(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     await i.reply({ content: "Pinging..." });
 
     const replies = await util.getStatic("ping");
@@ -26,11 +26,11 @@ export default new class My extends Command {
       .replace(/{{user}}/g, i.user.username)
       .replace(/{{ms}}/g, Math.round(i.client.ws.ping));
 
-    await i.editReply({ content: reply });
+    return await i.editReply({ content: reply });
   };
 
   // permission command
-  async rights(i: ChatInputCommandInteraction) {
+  async rights(i: ChatInputCommandInteraction): Promise<Message> {
     const query: string = i.options.getString("to")!.toLowerCase();
     const value: boolean = i.options.getBoolean("should_be")!;
     const settings = i.user.settings;
@@ -40,24 +40,24 @@ export default new class My extends Command {
       processmessagepermission: "read & process your messages",
     };
     if (res[query as keyof typeof res] == value) {
-      await i.editReply({ content: `Alright, I ${value ? "will" : "won't"} **${properQuery[query]}**.` });
+      return await i.editReply({ content: `Alright, I ${value ? "will" : "won't"} **${properQuery[query]}**.` });
     } else {
       return this.throw(i, "The database might be having problems. Try executing this again.");
     };
   };
 
   // vote command
-  async vote(i: ChatInputCommandInteraction, _: string, util: Utilities) {
+  async vote(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     // construct reply
     const votes: string[] = ["Vote? Sweet.", "You finally decided to show up?", "Oh, hi. I'm busy, so get it done.", "Not like I'm not busy, but sure."];
     const voteUrl: string = `https://top.gg/bot/https://top.gg/bot/${i.client.user!.id}`;
     const vote: string = `${util.random(votes)} [Do that here.](<${voteUrl}>)\n\n||If you decided to vote, thank you. You'll get extra perks in the future.||`;
     // send reply
-    await i.editReply({ content: vote });
+    return await i.editReply({ content: vote });
   };
 
   // info command
-  async info(i: ChatInputCommandInteraction) {
+  async info(i: ChatInputCommandInteraction): Promise<Message> {
     // construct message parts
     const description: string = [
       "Oh, it's you? Hey, I'm **Aoki**. It only means a mere blue tree, but sensei (`shimeji.rin`, by the way) can't do anything about it, unfortunately.\n",
@@ -81,11 +81,11 @@ export default new class My extends Command {
       .setThumbnail("https://i.imgur.com/Nar1fRE.png")
       .setFooter({ text: `Made with ❤` });
     // send
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   };
 
   // fault command
-  async fault(i: ChatInputCommandInteraction, query: string | null, util: Utilities) {
+  async fault(i: ChatInputCommandInteraction, query: string | null, util: Utilities): Promise<Message<boolean> | undefined> {
     const attachment = i.options.getAttachment("attachment")!;
     // handle exceptions
     if (!query && !attachment) return this.throw(i, "Baka, I can't send nothing. At least give me an error message, an image, or something!");
@@ -114,12 +114,12 @@ export default new class My extends Command {
       return await res.json();
     };
 
-    const sendErrorGibberish = async (i: ChatInputCommandInteraction) => {
+    const sendErrorGibberish = async (i: ChatInputCommandInteraction): Promise<Message> => {
       await i.editReply({ content: "I see you typing gibberish there, you baka." });
       await delay(3000);
       await i.editReply({ content: "You're not sending [these](https://i.imgur.com/C5tvxfp.png) through me, please." });
       await delay(3000);
-      await i.editReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
+      return await i.editReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
     };
 
     const isImageAttachment = (attachment: Attachment) => {
@@ -132,30 +132,30 @@ export default new class My extends Command {
       return await channel.send({ embeds: [embed] });
     };
 
-    const sendFeedback = async (i: ChatInputCommandInteraction, embed: EmbedBuilder) => {
+    const sendFeedback = async (i: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<Message> => {
       await i.editReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
-      await sendToLogs(embed);
+      return await sendToLogs(embed) as Message<boolean>;
     };
 
     // handle user query
     if (query && !attachment) {
       const gibberishCheck = await detectGibberish(query);
       if (gibberishCheck.noise > 0.5) {
-        await sendErrorGibberish(i);
+        return await sendErrorGibberish(i);
       } else {
-        await sendFeedback(i, preset);
+        return await sendFeedback(i, preset);
       };
     } else if (attachment) {
       if (!isImageAttachment(attachment)) {
         return await this.throw(i, "Appreciate your attachment, but for now we only support images.");
       };
       preset.setImage(attachment.url);
-      await sendFeedback(i, preset);
+      return await sendFeedback(i, preset);
     };
   };
 
   // eval
-  async eval(i: ChatInputCommandInteraction, query: string, util: Utilities) {
+  async eval(i: ChatInputCommandInteraction, query: string, util: Utilities): Promise<Message> {
     if (!util.owners.includes(i.user.id)) {
       return await this.throw(i, 'Baka, you can\'t do that. This command is for my sensei.');
     };
@@ -180,15 +180,15 @@ export default new class My extends Command {
         }
       ]);
     
-      await i.editReply({ embeds: [embed] });
+      return await i.editReply({ embeds: [embed] });
     } catch (error) {
       console.error(error);
-      await i.editReply({ content: `Baka, you messed up.\n\`\`\`fix\n${error}\n\`\`\`` });
+      return await i.editReply({ content: `Baka, you messed up.\n\`\`\`fix\n${error}\n\`\`\`` });
     }
   };
 
   // we use weakmap here to cache the stats so we don't have to always recompute them
-  async stats(i: ChatInputCommandInteraction, _: string, util: Utilities) {
+  async stats(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     const cacheEntry = (i.client as AokiClient).statsCache.get(i.user.id);
     const cacheTTL = 10 * 60 * 1000;
     if (cacheEntry && (Date.now() - cacheEntry.timestamp < cacheTTL)) {
@@ -234,6 +234,6 @@ export default new class My extends Command {
       ]);
 
     (i.client as AokiClient).statsCache.set(i.user.id, { embed, timestamp: Date.now() });
-    await i.editReply({ embeds: [embed] });
+    return await i.editReply({ embeds: [embed] });
   };
 };

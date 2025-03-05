@@ -447,7 +447,7 @@ export default new class Anime extends Command {
         { name: `They're voiced by...`, value: spreadMap(data.voices, "person") }
       ];
       const embed = presetEmbed.addFields(fields);
-      await i.editReply({ embeds: [embed] });
+      return await i.editReply({ embeds: [embed] });
     }
     // people
     else if (type == "people") {

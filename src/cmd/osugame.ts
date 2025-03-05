@@ -13,7 +13,8 @@ import {
   TextChannel,
   User as DiscordUser,
   StringSelectMenuInteraction,
-  MessageReaction
+  MessageReaction,
+  Message
 } from "discord.js";
 import { osugame } from "../assets/import";
 import { Beatmapset } from '../types/beatmapset';
@@ -45,7 +46,7 @@ export default new class OsuGame extends Command {
     this.dev = false;
   };
   // set command
-  async set(i: ChatInputCommandInteraction, _: string, util: Utilities) {
+  async set(i: ChatInputCommandInteraction, _: string, util: Utilities): Promise<Message> {
     const user = i.options.getString("username")!;
     const mode = util.osuNumberModeFormat(i.options.getString("mode")!);
     // handle exceptions
@@ -150,7 +151,7 @@ export default new class OsuGame extends Command {
         iconURL: i.client.user!.displayAvatarURL()
       });
 
-    await i.editReply({ embeds: [embed], files: [profile.image] });
+    return await i.editReply({ embeds: [embed], files: [profile.image] });
   };
   // set_timestamp_channel command
   async set_timestamp_channel(i: ChatInputCommandInteraction) {

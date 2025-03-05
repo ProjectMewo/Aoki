@@ -108,7 +108,7 @@ class Command {
    * @param {String} content The content to send
    * @returns `Promise` The rejected promise
    */
-  public async throw(i: ChatInputCommandInteraction, content: string) {
+  public async throw(i: ChatInputCommandInteraction, content: string): Promise<never> {
     await i.editReply({ content, flags: 1 << 6 });
     return Promise.reject();
   };
