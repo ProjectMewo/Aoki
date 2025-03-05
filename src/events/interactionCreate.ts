@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Interaction } from 'discord.js';
+import { AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Interaction, MessageFlags } from 'discord.js';
 import Event from '../struct/handlers/Event';
 import AokiClient from '../struct/Client';
 
@@ -30,7 +30,7 @@ class InteractionCreateEvent extends Event {
       if (interaction.customId.startsWith("verify_")) {
         await interaction.reply({
           content: `Start your verification by clicking [here](${client.dev ? "http://localhost:8080/" : "https://aoki.hackers.moe"}/login?id=${interaction.user.id}&guildId=${interaction.guild!.id}).`,
-          flags: 1 << 6
+          flags: MessageFlags.Ephemeral
         });
         return;
       } else { return; }
@@ -45,17 +45,17 @@ class InteractionCreateEvent extends Event {
       };
       const command = client.commands.get(interaction.commandName);
       if (!command) {
-        await interaction.reply({ content: 'That command is probably gone. It\'ll disappear in a while.', flags: 1 << 6 });
+        await interaction.reply({ content: 'That command is probably gone. It\'ll disappear in a while.', flags: MessageFlags.Ephemeral });
         return;
       }
       if (!command.hasPermissions(interaction)) {
-        await interaction.reply({ content: 'Baka, you don\'t have the permissions to use this command.', flags: 1 << 6 });
+        await interaction.reply({ content: 'Baka, you don\'t have the permissions to use this command.', flags: MessageFlags.Ephemeral });
         return;
       }
       if (command.isOnCooldown(interaction.user.id)) {
         await interaction.reply({
           content: `Baka, I'm not a spamming machine. Try again in ${command.getRemainingCooldown(interaction.user.id)} seconds.`,
-          flags: 1 << 6
+          flags: MessageFlags.Ephemeral
         });
         return;
       }

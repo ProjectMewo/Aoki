@@ -1,20 +1,18 @@
 import { 
   AutocompleteInteraction,
   ChatInputCommandInteraction, 
-  EmbedBuilder, 
-  MessageFlags, 
-  PermissionFlagsBits,
+  EmbedBuilder,
   SlashCommandSubcommandsOnlyBuilder
 } from 'discord.js';
 import AokiClient from '../Client';
 
 class Command {
   public data: SlashCommandSubcommandsOnlyBuilder;
-  public permissions: Array<BigInt>;
+  public permissions: Array<bigint>;
   public cooldown: number;
   private cooldowns: Map<string, number>;
 
-  public constructor(options: { data: SlashCommandSubcommandsOnlyBuilder; permissions?: Array<BigInt>; cooldown?: number }) {
+  public constructor(options: { data: SlashCommandSubcommandsOnlyBuilder; permissions?: Array<bigint>; cooldown?: number }) {
     this.data = options.data;
     this.permissions = options.permissions || [];
     this.cooldown = options.cooldown || 0;
@@ -29,7 +27,7 @@ class Command {
     if (!this.permissions.length) return true;
 
     const member = i.guild?.members.cache.get(i.user.id);
-    return this.permissions.every((permission: keyof typeof PermissionFlagsBits) => member?.permissions.has(PermissionFlagsBits[permission]));
+    return this.permissions.every((permission) => member?.permissions.has(permission));
   }
   /**
    * Check if given user is on cooldown for this command
@@ -109,7 +107,7 @@ class Command {
    * @returns `Promise` The rejected promise
    */
   public async throw(i: ChatInputCommandInteraction, content: string): Promise<never> {
-    await i.editReply({ content, flags: 1 << 6 });
+    await i.editReply({ content });
     return Promise.reject();
   };
   // Preset embed

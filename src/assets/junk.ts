@@ -1,6 +1,6 @@
 // specific functions
 // these do super specific things to be here
-import { Message, MessageFlags } from 'discord.js';
+import { Message } from 'discord.js';
 import AokiClient from "../struct/Client";
 
 // generally these won't fit in the main code, so I name it junk.js
@@ -44,11 +44,10 @@ const wolframAnswerPlease = async (
     if (!response.ok) throw new Error("HTTP error, this is normal. Ask again later.");
     const data = await response.json();
     const answer = (msg.client as AokiClient).util.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || "Can't answer that one.";
-    msg.reply({ content: answer });
+    throw new Error(answer);
   } catch (error) {
     await msg.reply({
-      content: `Oh, something happened. Give my sensei a yell by doing \`/my fault\`:\n\n\`\`\`fix\n${error}\n\`\`\``,
-      flags: 1 << 6
+      content: `Oh, something happened. Give my sensei a yell by doing \`/my fault\`:\n\n\`\`\`fix\n${error}\n\`\`\``
     }).catch(() => { });
   }
 };
