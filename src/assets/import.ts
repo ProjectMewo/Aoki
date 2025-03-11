@@ -136,29 +136,10 @@ const util = new SlashCommandBuilder()
 
 const my = new SlashCommandBuilder()
   .setName("my")
-  .setDescription("commands directly related to me or my development.")
+  .setDescription("personal commands.")
   .addSubcommand(cmd => cmd
     .setName("ping")
-    .setDescription("check latency... or it's you wanting to be insulted.")
-  )
-  // .addSubcommand(cmd => cmd
-  //   .setName("vote")
-  //   .setDescription("vote for me on top.gg to show some support!")
-  // )
-  .addSubcommand(cmd => cmd
-    .setName("info")
-    .setDescription("essentially a \"help\" command.")
-  )
-  .addSubcommand(cmd => cmd
-    .setName("fault")
-    .setDescription("is anything wrong? having good ideas? share it!")
-    .addStringOption(option => option
-      .setName("query")
-      .setDescription("the issue/suggestion you wanna send.")
-      .setMaxLength(1000)
-      .setMinLength(15)
-    )
-    .addAttachmentOption(option => option.setName("attachment").setDescription("literally the attachment."))
+    .setDescription("check if I'm alive")
   )
   .addSubcommand(cmd => cmd
     .setName("stats")
@@ -171,7 +152,8 @@ const my = new SlashCommandBuilder()
       .setName("to")
       .setDescription("the permission name")
       .addChoices(...[
-        { name: "read & process your messages", value: "processmessagepermission" }
+        { name: "read & process your messages", value: "processmessagepermission" },
+        { name: "count your messages for leveling", value: "countmessagetolevel" }
       ])
       .setRequired(true)
     )
@@ -190,6 +172,26 @@ const my = new SlashCommandBuilder()
       .setRequired(true)
     )
   )
+  .addSubcommand(cmd => cmd
+    .setName("fault")
+    .setDescription("found a bug? tell me here.")
+    .addStringOption(option => option
+      .setName("query")
+      .setDescription("issue description, if needed.")
+    )
+    .addAttachmentOption(option => option
+      .setName("attachment")
+      .setDescription("an image for the issue, if needed.")
+    )
+  )
+  .addSubcommand(cmd => cmd
+    .setName("info")
+    .setDescription("curious about me? check here.")
+  )
+  .addSubcommand(cmd => cmd
+    .setName("vote")
+    .setDescription("vote for me on top.gg!")
+  );
 
 const anime = new SlashCommandBuilder()
   .setName("anime")

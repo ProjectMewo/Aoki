@@ -1,11 +1,11 @@
 import Event from '../struct/handlers/Event';
-import { wolframAnswerPlease, followUpWithProperTimestamp } from '../assets/junk';
-import { Guild, Message } from 'discord.js';
+import { Message, Guild } from 'discord.js';
 import AokiClient from '../struct/Client';
+import { followUpWithProperTimestamp, wolframAnswerPlease } from '../assets/junk';
 
 class MessageCreateEvent extends Event {
   constructor() {
-    super('messageCreate');
+    super('messageCreate', false);
   }
 
   /**
@@ -14,8 +14,12 @@ class MessageCreateEvent extends Event {
    * @param {Object} msg Message object from Discord
    */
   public async execute(client: AokiClient, msg: Message) {
-    // if the settings for processing this user's messages is off, do nothing
-    if (msg.author.bot || !msg.author.settings.processmessagepermission) return;
+    // if this is a bot, ignore it
+    if (msg.author.bot) return;
+
+    // check if the user allow us to process their messages
+    // if not, end there, do nothing below
+    if (!msg.author.settings.processmessagepermission) return;
 
     // match "hey aoki" or "yo aoki" or bot mention
     const prefixRegex = new RegExp(`^(?:(?:hey|yo),? aoki,? )|^<@!?${client.user?.id}>`, 'i');
@@ -28,7 +32,7 @@ class MessageCreateEvent extends Event {
       const timestampRegex = /(\d+):(\d{2}):(\d{3})\s*(\(((\d+(\|)?,?)+)\))?/gim;
       const timestamps = msg.content.match(timestampRegex);
       if (timestamps) { await followUpWithProperTimestamp(msg, timestamps, timestampRegex); return; }
-    };
+    }
   }
 }
 

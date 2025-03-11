@@ -5,8 +5,7 @@ import AokiClient from '../struct/Client';
 class InteractionCreateEvent extends Event {
   public constructor() {
     super('interactionCreate');
-  }
-
+  };
   /**
    * Execute the event
    * @param {AokiClient} client Client object
@@ -38,20 +37,24 @@ class InteractionCreateEvent extends Event {
     // if this is a normal command request
     else if (i.isChatInputCommand()) {
       const interaction = i as ChatInputCommandInteraction;
+      const command = client.commands.get(interaction.commandName);
+      
       // temporarily ignore all chat commands invoked in a DM
       if (!interaction || !interaction.guild) { 
-        interaction.reply({ content: 'I can\'t do that in your DMs, baka. But maybe one day. Sensei told me he will do it.', ephemeral: true });
+        await interaction.reply({ content: 'I can\'t do that in your DMs, baka. But maybe one day. Sensei told me he will do it.', ephemeral: true });
         return;
-      };
-      const command = client.commands.get(interaction.commandName);
+      }
+
       if (!command) {
         await interaction.reply({ content: 'That command is probably gone. It\'ll disappear in a while.', flags: MessageFlags.Ephemeral });
         return;
       }
+
       if (!command.hasPermissions(interaction)) {
         await interaction.reply({ content: 'Baka, you don\'t have the permissions to use this command.', flags: MessageFlags.Ephemeral });
         return;
       }
+
       if (command.isOnCooldown(interaction.user.id)) {
         await interaction.reply({
           content: `Baka, I'm not a spamming machine. Try again in ${command.getRemainingCooldown(interaction.user.id)} seconds.`,
@@ -59,6 +62,7 @@ class InteractionCreateEvent extends Event {
         });
         return;
       }
+
       try {
         await command.execute(interaction);
         if (command.cooldown) command.setCooldown(interaction.user.id);
