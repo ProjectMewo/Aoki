@@ -1,7 +1,5 @@
 .env
-bun.lockb
 bun.lock
 node_modules
 package-lock.json
 dist/
-src/build.js

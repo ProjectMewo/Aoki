@@ -1,17 +1,16 @@
 {
   "name": "aoki-next",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "aoki, but working with discord gateway",
-  "main": "src/main.js",
+  "main": "src/main.ts",
   "scripts": {
-    "dev": "bun src/main.js --dev",
-    "build": "bun src/build.js",
+    "dev": "bun src/main.ts --dev",
+    "build": "bun src/build.ts",
     "start": "bun main.js"
   },
-  "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AokiOfficial/Aoki"
+    "url": "git+https://github.com/ProjectMewo/Aoki"
   },
   "keywords": [
     "discord",
@@ -21,12 +20,11 @@
   "author": "shimeji.rin",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/AokiOfficial/Aoki/issues"
+    "url": "https://github.com/ProjectMewo/Aoki/issues"
   },
-  "homepage": "https://github.com/AokiOfficial/Aoki#readme",
+  "homepage": "https://github.com/ProjectMewo/Aoki#readme",
   "devDependencies": {
-    "discord.js": "^14.18.0",
-    "esbuild": "^0.25.0",
-    "mongodb": "^6.13.1"
+    "@types/bun": "^1.2.4",
+    "discord.js": "^14.18.0"
   }
 }
