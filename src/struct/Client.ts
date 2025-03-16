@@ -181,8 +181,14 @@ class AokiClient extends Client {
     } else {
       await rest.put(
         Routes.applicationCommands(process.env.APPID as string),
+        { body: [] }
+      ).catch(console.error);
+      this.utils.logger.success("Deleted previous commands", "[Logger]");
+      await rest.put(
+        Routes.applicationCommands(process.env.APPID as string),
         { body: commandData }
       ).catch(console.error);
+      this.utils.logger.success("Set new commands", "[Logger]");
     }
   };
 

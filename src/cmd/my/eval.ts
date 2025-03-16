@@ -37,7 +37,7 @@ export default class Eval extends Subcommand {
       // instead of the global context of a safer approach
       // (0, eval)(query). This is a common practice in
       // Discord bots.
-      const evaled = eval(query);
+      const evaled = new Function('i', `return (async () => { ${query} })()`)(i);
       const processedEval = typeof evaled !== 'string' 
         ? JSON.stringify(evaled, null, 2)
         : evaled;

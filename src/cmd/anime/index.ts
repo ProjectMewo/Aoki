@@ -5,6 +5,7 @@ import Random from "./random";
 import Profile from "./profile";
 import Airing from "./airing";
 import Search from "./search";
+import Gelbooru from "./gelbooru";
 
 export default class Anime extends Command {
   constructor() {
@@ -18,7 +19,8 @@ export default class Anime extends Command {
         new Random,
         new Profile,
         new Airing,
-        new Search
+        new Search,
+        new Gelbooru
       ],
     })
   };

@@ -14,7 +14,10 @@ export default class Action extends Subcommand {
         description: 'The type of action to get',
         required: true,
         choices: [
+          { name: 'waifu', value: 'waifu' },
           { name: 'neko', value: 'neko' },
+          { name: 'shinobu', value: 'shinobu' },
+          { name: 'megumin', value: 'megumin' },
           { name: 'bully', value: 'bully' },
           { name: 'cuddle', value: 'cuddle' },
           { name: 'cry', value: 'cry' },
@@ -25,20 +28,17 @@ export default class Action extends Subcommand {
           { name: 'pat', value: 'pat' },
           { name: 'smug', value: 'smug' },
           { name: 'bonk', value: 'bonk' },
+          { name: 'yeet', value: 'yeet' },
           { name: 'blush', value: 'blush' },
           { name: 'smile', value: 'smile' },
           { name: 'wave', value: 'wave' },
           { name: 'highfive', value: 'highfive' },
+          { name: 'handhold', value: 'handhold' },
           { name: 'nom', value: 'nom' },
           { name: 'bite', value: 'bite' },
           { name: 'glomp', value: 'glomp' },
           { name: 'slap', value: 'slap' },
-          { name: 'kick', value: 'kick' },
-          { name: 'happy', value: 'happy' },
-          { name: 'wink', value: 'wink' },
-          { name: 'poke', value: 'poke' },
-          { name: 'dance', value: 'dance' },
-          { name: 'cringe', value: 'cringe' }
+          { name: 'kick', value: 'kick' }
         ]
       }]
     });
@@ -50,7 +50,7 @@ export default class Action extends Subcommand {
     const actionType = i.options.getString("type")!;
     
     try {
-      const response = await fetch(`https://waifu.pics/sfw/${actionType}`);
+      const response = await fetch(`https://waifu.pics/api/sfw/${actionType}`);
       
       if (!response.ok) {
         return AokiError.API_ERROR({
