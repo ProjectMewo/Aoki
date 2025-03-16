@@ -55,12 +55,14 @@ export interface AirDateMedia {
 }
 
 export interface AirDateNoQueryResponse {
+  errors?: Array<{ status: number }>;
   Page: {
     media: AirDateMedia[];
   };
 }
 
 export interface AirDateQueryResponse {
+  errors?: Array<{ status: number }>;
   Media: AirDateMedia;
 }
 
@@ -125,6 +127,7 @@ export interface Favourites {
 }
 
 export interface UserResponse {
+  errors?: Array<{ status: number }>;
   User: {
     name: string;
     about?: string;
@@ -161,6 +164,7 @@ export interface WatchingMedia {
 }
 
 export interface WatchingQueryResponse {
+  errors?: Array<{ status: number }>;
   Page: {
     pageInfo: WatchingPageInfo;
     media: WatchingMedia[];

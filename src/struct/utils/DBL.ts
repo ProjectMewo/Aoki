@@ -1,6 +1,6 @@
 import AokiClient from "./Client";
 
-// a mock
+// Mock for a DBL library instead of installing it
 export default class DBL {
   public client: AokiClient;
   public token: string | undefined;
@@ -11,7 +11,7 @@ export default class DBL {
 
   public async post() {
     const server_count = this.client.guilds.cache.size;
-    if (server_count === this.client.lastStats) return;
+    if (server_count === this.client.lastGuildCount) return;
 
     if (!this.client.user?.id) return;
     return fetch(`https://top.gg/api/bots/${this.client.user.id}/stats`, {
@@ -23,9 +23,9 @@ export default class DBL {
       }
     }).then(res => {
       if (!res.ok) throw new Error("Failed to post"); else {
-        this.client.util.success("Posted statistics to top.gg", "[Top.gg]");
-        this.client.lastStats = server_count;
+        this.client.utils.logger.success("Posted statistics to top.gg", "[Top.gg]");
+        this.client.lastGuildCount = server_count;
       }
-    }).catch(err => this.client.util.error(`Something happened, debugging might work: ${err}`, "[Top.gg]"));
+    }).catch(err => this.client.utils.logger.error(`Something happened, debugging might work: ${err}`, "[Top.gg]"));
   };
 }

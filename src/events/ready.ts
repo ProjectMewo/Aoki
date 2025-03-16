@@ -1,11 +1,13 @@
 import Event from '../struct/handlers/Event';
 import { ActivityType } from 'discord.js';
-import { logOnReady } from '../assets/junk';
 import AokiClient from '../struct/Client';
 
 class ReadyEvent extends Event {
   constructor() {
-    super('ready', true);
+    super({
+      name: 'ready',
+      once: true
+    });
   }
   /**
    * Execute the event
@@ -14,8 +16,8 @@ class ReadyEvent extends Event {
   public async execute(client: AokiClient) {
     const activities = [
       "/my info",
-      `I'm in ${client.util.commatize(client.guilds.cache.size)} servers!`,
-      `I'm with ${client.util.commatize(client.guilds.cache.reduce((a, b) => a + b.memberCount, 0))} users!`
+      `I'm in ${client.utils.string.commatize(client.guilds.cache.size)} servers!`,
+      `I'm with ${client.utils.string.commatize(client.guilds.cache.reduce((a, b) => a + b.memberCount, 0))} users!`
     ];
 
     if (!client.dev) {
@@ -23,7 +25,7 @@ class ReadyEvent extends Event {
       // when the client is ready, making it available for use.
       client.user!.setPresence({ status: "online" });
       const updateStatus = () => {
-        const pickedStatus = client.util.random(activities);
+        const pickedStatus = client.utils.array.random(activities);
         client.user!.setActivity(pickedStatus, { type: ActivityType.Custom });
       };
       updateStatus();
@@ -37,10 +39,10 @@ class ReadyEvent extends Event {
     await client.schedule.init();
 
     // post stats to dbl every start up (configure to restart every n hours)
-    if (!client.dev) await client.poster.post();
+    if (!client.dev) await client.utils.dbl.post();
 
     // log on ready
-    logOnReady(client);
+    client.utils.misc.logOnReady(client);
   };
 }
 

@@ -27,11 +27,10 @@ Previously, Aoki was written in **JavaScript**. To better adapt to modern standa
 On JavaScript releases, only ESM is supported. CommonJS is not.
 
 ### Database
-To better support new infrastructure, Aoki now uses **PostgreSQL** instead, using the new built-in `Bun#sql` module. The feature is **very experimental**, as such please use with caution.
-
-> [!WARNING]
-> Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.4**. For your own database safety, it is recommended that you update using `bun upgrade`.
-> Technical information about this is in the [Settings.ts file](/src/struct/Settings.ts).
+Aoki is built with MongoDB and the `mongodb` library. Other databases are available if you want them instead:
+- PostgreSQL - release 4.2 and 4.3 uses `Bun#sql` under the hood.
+- MongoDB with `mongoose` was a JavaScript implementation in release 4.1.
+- Cloudflare's `D1` database was also a JavaScript implementation for Aoki serverless in release `<=3.0`.
 
 ### Runtime
 Aoki officially supports **Bun v1.2.4+**.
@@ -64,7 +63,7 @@ aoki
 ├── ...
 ├── README.md
 ├── LICENSE
-├── package.tson
+├── package.json
 ├── .env.example   # example secret keys file
 ├── src            # project source code
 │   ├── ...
@@ -72,17 +71,14 @@ aoki
 │   ├── struct     # code structure files
 │   │   └── extenders   # altering discord.ts core
 │   │   └── handlers    # handlers
+│   │   └── utils       # fragmented utilities
 │   ├── types      # type definition for things
 │   ├── events     # Discord.ts events
 │   ├── web        # web API (barebones)
-│   └── cmd        # main commands files
+│   └── cmd        # main commands directories
 └── 
 ```
-The project follows a class-based approach to commands, events and extenders. 
-- To make a new command, make a class extending [Command.ts](/src/struct/handlers/Command.ts).
-- To handle a new event, make a class extending [Event.ts](/src/struct/handlers/Event.ts).
-
-After that, to load the new files, statically import them in [Client.ts](/src/struct/Client.ts), inside the `loadModules` function.
+To implement new stuff, read [INSTRUCTIONS.md](/INSTRUCTIONS.md).
 
 ## Code License & Contribution
 [GPL-3.0](/LICENSE).

@@ -1,35 +1,32 @@
-/**
- * Initializes the database schema
- * @param {*} sql 
- */
-export default async (sql: typeof Bun.sql) => {
-  await sql`CREATE TABLE IF NOT EXISTS users (
-    id BIGINT PRIMARY KEY NOT NULL,
-    ingamename TEXT,
-    defaultmode TEXT,
-    processmessagepermission BOOLEAN
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS schedules (
-    id BIGINT PRIMARY KEY NOT NULL,
-    anilistid INTEGER NOT NULL,
-    nextep INTEGER NOT NULL
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS guilds (
-    id BIGINT PRIMARY KEY,
-    timestampchannel BIGINT,
-    verificationstatus BOOLEAN,
-    verificationroleid TEXT,
-    verificationchannelid BIGINT,
-    verificationmessageid BIGINT,
-    verificationtitle TEXT,
-    verificationdescription TEXT,
-    verificationthumbnail TEXT,
-    verificationcolor TEXT
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS verifications (
-    id BIGINT PRIMARY KEY,
-    state TEXT NOT NULL,
-    createdat TEXT NOT NULL,
-    guildId BIGINT NOT NULL
-  )`;
-}
+// Default schema for the database
+// @typedef {Object} Schema
+export default {
+  users: {
+    inGameName: null,
+    defaultMode: 0,
+    processMessagePermission: true
+  },
+  schedules: {
+    anilistId: null,
+    nextEp: null
+  },
+  guilds: {
+    timestampChannel: null,
+    verification: {
+      status: false,
+      roleId: null,
+      channelId: null,
+      messageId: null,
+      title: null,
+      description: null,
+      thumbnail: null,
+      color: null
+    },
+  },
+  verifications: {
+    id: null,
+    state: null,
+    createdAt: null,
+    guildId: null
+  }
+};

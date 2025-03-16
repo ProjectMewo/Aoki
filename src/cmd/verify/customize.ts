@@ -1,77 +1,65 @@
-// some methods here does not belong to a command
-// it's for splitting up functions for fixing in the future
-import {
+import { Subcommand } from "@struct/handlers/Subcommand";
+import { 
+  ChatInputCommandInteraction, 
+  EmbedBuilder,
+  TextChannel,
+  AnySelectMenuInteraction,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
   RoleSelectMenuBuilder,
   ChannelSelectMenuBuilder,
   ChannelType,
-  ChatInputCommandInteraction,
-  ModalSubmitInteraction,
-  MessageFlags,
   ColorResolvable,
-  AnySelectMenuInteraction,
-  TextChannel,
-  PermissionFlagsBits
+  ModalSubmitInteraction,
+  PermissionFlagsBits,
+  MessageFlags
 } from "discord.js";
-import Command from '../struct/handlers/Command';
-import { verify } from '../assets/import';
 
 interface Customization {
-  verificationtitle?: string;
-  verificationthumbnail?: string;
-  verificationdescription?: string;
-  verificationroleid?: string | null;
-  verificationchannelid?: string | null;
-  verificationcolor?: string;
-  verificationstatus?: boolean;
-  verificationmessageid?: string;
+  verification: {
+    title: string;
+    thumbnail: string;
+    description: string;
+    roleId: string;
+    channelId: string;
+    color: string;
+    status: boolean;
+  };
 }
 
-export default new class VerifyCommand extends Command {
+export default class Customize extends Subcommand {
   constructor() {
     super({
-      data: verify,
-      permissions: [PermissionFlagsBits.ManageGuild],
-      cooldown: 0
+      name: 'customize',
+      description: 'Customize the verification message',
+      permissions: ['ManageGuild'],
+      options: []
     });
   };
-  async toggle(i: ChatInputCommandInteraction): Promise<void> {
-    const guildSettings = i.guild?.settings;
-    if (!guildSettings) return this.throw(i, 'O-Oh, I can\'t seem to fetch this server\'s settings.\n\nOr are you inside my DMs, you baka?');
-    const verificationEnabled = guildSettings?.verificationstatus || false;
 
-    // disallow toggling if the verification message is not set
-    if (!guildSettings?.verificationmessageid) {
-      await i.reply('Please set the verification message and channel using `/verify customize` before enabling the feature.');
+  async execute(i: ChatInputCommandInteraction): Promise<void> {
+    await i.deferReply({ flags: MessageFlags.Ephemeral });
+    const guildSettings = i.guild!.settings;
+
+    if (!guildSettings || !guildSettings.verification.status) {
+      await i.editReply({ content: 'The verification system is disabled. Please enable it first.' });
       return;
     };
 
-    await i.guild?.update({ 'verificationstatus': !verificationEnabled });
-
-    const status = !verificationEnabled ? 'enabled' : 'disabled';
-    if (verificationEnabled) {
-      await i.reply(`Received your ticket. Verification feature has been ${status}.`);
-    } else {
-      await i.reply(`Received your ticket. Verification feature has been ${status}.\n\nIf this is your first time setting this up, please set the verification message and channel using \`/verify customize\`.`);
-    }
-  }
-
-  async customize(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply({ flags: 64 });
-    const guildSettings = i.guild!.settings;
-
-    let customization: Customization = guildSettings || {
-      verificationtitle: 'Verify your osu! account',
-      verificationthumbnail: i.guild!.iconURL() || "",
-      verificationdescription: 'Click the button below to verify your osu! account and gain access to the server.',
-      verificationroleid: null,
-      verificationchannelid: null
+    let customization: Customization = {
+      verification: {
+        title: guildSettings?.verification.title || 'Verify your osu! account',
+        thumbnail: guildSettings?.verification.thumbnail || i.guild!.iconURL() || "",
+        description: guildSettings?.verification.description || 'Click the button below to verify your osu! account and gain access to the server.',
+        roleId: guildSettings?.verification.roleId || '',
+        channelId: guildSettings?.verification.channelId || '',
+        color: guildSettings?.verification.color || '#FFFFFF',
+        status: guildSettings?.verification.status || false
+      }
     };
 
     const updatePreview = async (): Promise<void> => {
@@ -101,25 +89,25 @@ export default new class VerifyCommand extends Command {
       } else if (interaction.customId === 'select_role') {
         const role = await i.guild?.roles.fetch(interaction.values[0]);
         if (!role) {
-          return await interaction.reply({ content: 'Selected role not found. Please try again.', flags: 64 });
+          return await interaction.reply({ content: 'Selected role not found. Please try again.', flags: MessageFlags.Ephemeral });
         }
         if (role.position >= i.guild!.members.me!.roles.highest.position) {
-          return await interaction.reply({ content: 'Baka, that role is higher than my highest role. I can\'t assign that to other users.', flags: 64 });
+          return await interaction.reply({ content: 'Baka, that role is higher than my highest role. I can\'t assign that to other users.', flags: MessageFlags.Ephemeral });
         }
-        customization.verificationroleid = interaction.values[0];
-        await interaction.reply({ content: `Verification role updated.`, flags: 64 });
+        customization.verification.roleId = interaction.values[0];
+        await interaction.reply({ content: `Verification role updated.`, flags: MessageFlags.Ephemeral });
         await updatePreview();
       } else if(interaction.customId === 'select_channel') {
         const channel = await i.guild?.channels.fetch(interaction.values[0]);
         if (!channel) {
-          return await interaction.reply({ content: 'Selected channel not found. Please try again.', flags: 64 });
+          return await interaction.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral });
         }
         if (!channel.permissionsFor(i.client.user!)?.has(PermissionFlagsBits.SendMessages)) {
-          await interaction.reply({ content: 'Baka, I can\'t send messages in there. Check the permissions you gave me.', flags: 64 });
+          await interaction.reply({ content: 'Baka, I can\'t send messages in there. Check the permissions you gave me.', flags: MessageFlags.Ephemeral });
           return;
         }
-        customization.verificationchannelid = interaction.values[0];
-        await interaction.reply({ content: `Verification channel updated.`, flags: 64 });
+        customization.verification.channelId = interaction.values[0];
+        await interaction.reply({ content: `Verification channel updated.`, flags: MessageFlags.Ephemeral });
         await updatePreview();
       }
     });
@@ -150,10 +138,10 @@ export default new class VerifyCommand extends Command {
 
   createPreviewEmbed(customization: Customization): EmbedBuilder {
     return new EmbedBuilder()
-      .setTitle(customization.verificationtitle || "Verify your osu! account")
-      .setThumbnail(customization.verificationthumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
-      .setDescription(customization.verificationdescription || "Click the button below to verify your osu! account and gain access to the server.")
-      .setColor(customization.verificationcolor as ColorResolvable || '#FFFFFF')
+      .setTitle(customization.verification.title || "Verify your osu! account")
+      .setThumbnail(customization.verification.thumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
+      .setDescription(customization.verification.description || "Click the button below to verify your osu! account and gain access to the server.")
+      .setColor(customization.verification.color as ColorResolvable || '#FFFFFF')
       .setFooter({ text: `Last updated: ${new Date().toLocaleString()}` });
   }
 
@@ -183,21 +171,21 @@ export default new class VerifyCommand extends Command {
       .setCustomId('title')
       .setLabel('Title')
       .setStyle(TextInputStyle.Short)
-      .setValue(customization.verificationtitle || "Verify your osu! account")
+      .setValue(customization.verification.title || "Verify your osu! account")
       .setRequired(true);
 
     const descriptionInput = new TextInputBuilder()
       .setCustomId('description')
       .setLabel('Description')
       .setStyle(TextInputStyle.Paragraph)
-      .setValue(customization.verificationdescription || "Click the button below to verify your osu! account and gain access to the server.")
+      .setValue(customization.verification.description || "Click the button below to verify your osu! account and gain access to the server.")
       .setRequired(true);
 
     const thumbnailInput = new TextInputBuilder()
       .setCustomId('thumbnail')
       .setLabel('Thumbnail URL')
       .setStyle(TextInputStyle.Short)
-      .setValue(customization.verificationthumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
+      .setValue(customization.verification.thumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
       .setRequired(false);
 
     const colorInput = new TextInputBuilder()
@@ -205,7 +193,7 @@ export default new class VerifyCommand extends Command {
       .setLabel('Embed Color (Hex Code)')
       .setStyle(TextInputStyle.Short)
       .setMaxLength(7)
-      .setValue(customization.verificationcolor || "#FFFFFF")
+      .setValue(customization.verification.color || "#FFFFFF")
       .setRequired(false);
 
     modal.addComponents(
@@ -223,26 +211,26 @@ export default new class VerifyCommand extends Command {
         time: 300000
       });
 
-      customization.verificationtitle = modalSubmission.fields.getTextInputValue('title');
-      customization.verificationdescription = modalSubmission.fields.getTextInputValue('description');
-      customization.verificationthumbnail = modalSubmission.fields.getTextInputValue('thumbnail');
-      customization.verificationcolor = modalSubmission.fields.getTextInputValue('color');
+      customization.verification.title = modalSubmission.fields.getTextInputValue('title');
+      customization.verification.description = modalSubmission.fields.getTextInputValue('description');
+      customization.verification.thumbnail = modalSubmission.fields.getTextInputValue('thumbnail');
+      customization.verification.color = modalSubmission.fields.getTextInputValue('color');
 
       await updatePreview();
-      await modalSubmission.reply({ content: 'Preview updated. You can make more changes or save the configuration.', flags: 64 });
+      await modalSubmission.reply({ content: 'Preview updated. You can make more changes or save the configuration.', flags: MessageFlags.Ephemeral });
     } catch (error: any) {
       console.error('Modal submission error:', error);
-      await i.followUp({ content: 'An error occurred while processing your input. Please try again.', flags: 64 }).catch(console.error);
+      await i.followUp({ content: 'An error occurred while processing your input. Please try again.', flags: MessageFlags.Ephemeral }).catch(console.error);
     }
   }
 
   async saveVerification(i: AnySelectMenuInteraction, customization: Customization): Promise<void> {
-    if (!customization.verificationchannelid) {
+    if (!customization.verification.channelId) {
       await i.reply({ content: 'Please select a channel for the verification message.', flags: MessageFlags.Ephemeral });
       return;
     }
 
-    const channel = await i.guild?.channels.fetch(customization.verificationchannelid);
+    const channel = await i.guild?.channels.fetch(customization.verification.channelId);
     if (!channel) {
       await i.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral });
       return;
@@ -258,10 +246,10 @@ export default new class VerifyCommand extends Command {
 
     // check if there is already a message before
     // delete the old one to send the newer one
-    if (i.guild?.settings?.verificationmessageid) {
+    if (i.guild?.settings?.verification.messageId) {
       try {
-        const fetchChannel = i.guild?.channels.cache.get(i.guild.settings.verificationchannelid);
-        const oldMessage = fetchChannel ? await (fetchChannel as TextChannel).messages.fetch(i.guild.settings?.verificationmessageid) : null;
+        const fetchChannel = i.guild?.channels.cache.get(i.guild.settings.verification.channelId!);
+        const oldMessage = fetchChannel ? await (fetchChannel as TextChannel).messages.fetch(i.guild.settings?.verification.messageId) : null;
         if (oldMessage) {
           await oldMessage.delete();
         }
@@ -276,12 +264,12 @@ export default new class VerifyCommand extends Command {
 
     await i.guild!.update({
       ...customization,
-      verificationmessageid: verificationMessage.id,
-      verificationstatus: true,
-      verificationroleid: customization.verificationroleid || undefined,
-      verificationchannelid: customization.verificationchannelid || undefined
+      verification: {
+        messageId: verificationMessage.id,
+        ...customization.verification
+      }
     });
 
-    await i.reply({ content: 'Verification message saved and posted in the selected channel.\n\nPlease **DO NOT** delete the verification message. You\'ll have to set it up again.', flags: 64 });
+    await i.reply({ content: 'Verification message saved and posted in the selected channel.\n\nPlease **DO NOT** delete the verification message. You\'ll have to set it up again.', flags: MessageFlags.Ephemeral });
   };
 }

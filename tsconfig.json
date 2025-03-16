@@ -14,7 +14,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@local-types/*": ["src/types/*"],
+      "@utils/*": ["src/struct/utils/*"],
+      "@struct/*": ["src/struct/*"],
+    }
   },
   "include": [
     "src",
