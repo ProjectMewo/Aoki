@@ -87,11 +87,7 @@ export default class Gelbooru extends Subcommand {
     try {
       // Fetch images from Gelbooru
       const url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=25&tags=${encodeURIComponent(tags)}${rating}${process.env.GELBOORU_KEY}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Aoki Discord'
-        }
-      });
+      const response = await fetch(url);
       
       if (!response.ok) {
         return AokiError.API_ERROR({
@@ -113,7 +109,7 @@ export default class Gelbooru extends Subcommand {
       // Create embeds for each post
       const embeds = data.post.map((post, index) => {
         // Filter tags for display (limit length)
-        const tagList = post.tags.split(' ').slice(0, 10).join(', ');
+        const tagList = post.tags.split(' ').slice(0, 10).map(tag => `\`${tag}\``).join(', ');
         const additionalTags = post.tags.split(' ').length > 10 ? `... and ${post.tags.split(' ').length - 10} more` : '';
         
         return new EmbedBuilder()
