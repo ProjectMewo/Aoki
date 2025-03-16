@@ -45,17 +45,17 @@ export default class Generator extends Subcommand {
       return await i.respond(
         res.map((t: { id: string, name: string }) => (
           { name: t.name, value: t.id }
-        )) || []
+        )).slice(0, 20) || []
       );
     }
     // Filter the templates based on the user's input
     // We also only want the ones with 2 "lines" 
     // (as in top and bottom text)
-    const templates = res.filter((t: { id: string, name: string, lines: number }) => t.id.includes(focused) && t.lines === 2);
+    const templates = res.filter((t: { id: string, name: string, lines: number }) => t.id.includes(focused) && t.lines === 2).slice(0, 20);
     // Send the response
     await i.respond(
       templates.map((t: { id: string, name: string }) => (
-        { name: t.name, value: t.id }
+      { name: t.name, value: t.id }
       )) || []
     );
   }
