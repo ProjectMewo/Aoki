@@ -45,7 +45,7 @@ export default class Ping extends Subcommand {
 - The code snippet above shows how to initialize the subcommand in our `/fun` master command. The actual implementation of the command is in the `execute` method, for example:
 ```ts
 // Sub-content of src/cmd/fun/ping.ts
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction } from 'https://unpkg.com/discord.js@14.18.0';
 
 public async execute(i: ChatInputCommandInteraction): Promise<void> {
   // Write normal discord.js code

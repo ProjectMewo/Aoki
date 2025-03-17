@@ -56,12 +56,6 @@ export default class Gelbooru extends Subcommand {
           name: 'tags',
           description: 'Tags to search for (separate with spaces)',
           required: true,
-        },
-        {
-          type: 'boolean',
-          name: 'nsfw',
-          description: 'Include NSFW results (only works in NSFW channels)',
-          required: false,
         }
       ]
     });
@@ -70,23 +64,19 @@ export default class Gelbooru extends Subcommand {
   async execute(i: ChatInputCommandInteraction): Promise<void> {
     await i.deferReply();
     
-    const tags = i.options.getString("tags")!.trim();
-    const nsfw = i.options.getBoolean("nsfw") || false;
-    
-    // Check if NSFW is requested in a non-NSFW channel
-    if (nsfw && i.channel?.isTextBased() && !(i.channel as TextChannel).nsfw) {
+    // Check if the command is used in an NSFW channel
+    if (i.channel?.isTextBased() && !(i.channel as TextChannel).nsfw) {
       return AokiError.USER_INPUT({
         sender: i,
-        content: "NSFW content can only be viewed in channels marked as NSFW."
+        content: "This command can only be used in channels marked as NSFW."
       });
     }
     
-    // Determine rating based on NSFW flag
-    const rating = nsfw ? "" : "&rating=general";
+    const tags = i.options.getString("tags")!.trim();
     
     try {
       // Fetch images from Gelbooru
-      const url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=25&tags=${encodeURIComponent(tags)}${rating}${process.env.GELBOORU_KEY}`;
+      const url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=25&tags=${encodeURIComponent(tags)}${process.env.GELBOORU_KEY}`;
       const response = await fetch(url);
       
       if (!response.ok) {
@@ -105,7 +95,7 @@ export default class Gelbooru extends Subcommand {
           content: "No results found for those tags. Try different tags."
         });
       }
-      
+
       // Create embeds for each post
       const embeds = data.post.map((post, index) => {
         // Filter tags for display (limit length)

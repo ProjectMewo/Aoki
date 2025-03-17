@@ -62,6 +62,16 @@ export default class Add extends Subcommand {
     await i.deferReply();
     
     try {
+      // Check if the bot can DM the user
+      try {
+        await i.user.send("I'm just checking if I can send you messages. Please ignore this message.");
+      } catch (error) {
+        return AokiError.USER_INPUT({
+          sender: i,
+          content: "Baka, I can't send you DMs. Please enable DMs from server members and try again."
+        });
+      }
+
       // Check if user already has a schedule
       const schedule = await i.user.getSchedule();
       

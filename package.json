@@ -27,6 +27,7 @@
   "homepage": "https://github.com/ProjectMewo/Aoki#readme",
   "devDependencies": {
     "discord.js": "^14.18.0",
+    "esbuild": "^0.25.1",
     "mongodb": "^6.14.2"
   }
 }
