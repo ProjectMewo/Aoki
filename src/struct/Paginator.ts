@@ -142,7 +142,10 @@ export default class Pagination {
     
     // Set up filter based on option
     const userFilter = (interaction: MessageComponentInteraction) => {
-      return filter === 'userOnly' ? interaction.user.id === userId : true;
+      if (filter === 'userOnly') {
+        return interaction.user.id == userId;
+      }
+      return true;
     };
     
     this._collector = this._message.createMessageComponentCollector({

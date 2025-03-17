@@ -4,7 +4,7 @@ const envVariables = [
   'TOKEN_DEV', 'APPID_DEV', 'TOKEN', 'APPID', 'GUILD', 'MONGO_KEY',
   'OSU_KEY', 'OSU_ID', 'OSU_SECRET', 'OSU_DEV_ID', 'OSU_DEV_SECRET',
   'DBL_TOKEN', 'IMG_KEY', 'WOLFRAM_KEY', 'SCREENSHOT_KEY', 'RAPID_KEY',
-  'UPLOAD_KEY', 'WAIFU_IT', 'WAIFU_IM', 'PORT', 'VERIF_GUILD'
+  'UPLOAD_KEY', 'WAIFU_IT', 'WAIFU_IM', 'PORT', 'VERIF_GUILD', 'GELBOORU_KEY'
 ];
 
 const define = envVariables.reduce((acc: { [key: string]: string }, key) => {
