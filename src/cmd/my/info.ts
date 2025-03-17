@@ -26,6 +26,10 @@ export default class Info extends Subcommand {
       {
         name: "Why isn't there a help command?",
         value: "I have written descriptions for them, they're slash commands. Just follow them to get what you want, *sigh*. I'm busy, I don't have time to write those."
+      },
+      {
+        name: "How can I take you to my server?",
+        value: "Oh, you want me in your server? Great. [Click here to take me there.](https://discord.com/oauth2/authorize?client_id=898267773755947018&permissions=8&scope=applications.commands%20bot)\nI'm quite exited to see what you have."
       }
     ];
     
