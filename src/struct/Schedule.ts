@@ -1,6 +1,7 @@
 import { Schedule } from "../assets/graphql";
 import { EmbedBuilder } from "discord.js";
 import AokiClient from "./Client";
+import AnilistUtil from "@utils/AniList";
 
 interface ScheduleEntry {
   id: string;
@@ -35,16 +36,22 @@ export default class AniSchedule {
     langflags: Array<{ lang: string, flag: string }>;
   };
   private schedule: typeof Schedule;
+  private anilistUtil: AnilistUtil;
 
   constructor(client: AokiClient) {
     this.client = client;
-    const { mediaFormat, months, mediaGenres, langflags } = client.util;
-    this.info = { mediaFormat, months, defaultgenres: mediaGenres, langflags };
+    this.anilistUtil = new AnilistUtil(client);
+    this.info = { 
+      mediaFormat: this.anilistUtil.mediaFormat, 
+      months: this.anilistUtil.months, 
+      defaultgenres: this.anilistUtil.mediaGenres, 
+      langflags: this.anilistUtil.langflags
+    };
     this.schedule = Schedule;
   }
 
   public async fetch<T>(query: string, variables: object): Promise<T> {
-    return this.client.util.anilist(query, variables) as Promise<T>;
+    return this.anilistUtil.fetch(query, variables) as Promise<T>;
   }
 
   private reInit(): void {
@@ -55,7 +62,12 @@ export default class AniSchedule {
     let schedules: ScheduleEntry[];
     try {
       if (!this.client.db) return;
-      schedules = await this.client.db!`SELECT * FROM schedules;`;
+      schedules = await this.client.db.collection("schedules").find({}).toArray()
+        .then(docs => docs.map(doc => ({
+          id: doc.id,
+          anilistid: doc.anilistid,
+          nextep: doc.nextep
+        } as ScheduleEntry))).catch(() => []);
     } catch {
       schedules = [];
     }
@@ -66,7 +78,7 @@ export default class AniSchedule {
     const data = await this.fetch<{ Page?: { airingSchedules: AiringSchedule[] } }>(this.schedule, { page: 0, watched, episode });
 
     if (!data) {
-      this.client.util.warn('No data found for schedules.', '[AniSchedule]');
+      this.client.utils.logger.warn('No data found for schedules.', '[AniSchedule]');
       return;
     }
 
@@ -79,9 +91,9 @@ export default class AniSchedule {
       try {
         const user = await this.client.users.fetch(schedule.id);
         await user.send({ embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000))] });
-        await user.setSchedule({ nextep: Number(schedule.nextep) + 1 });
+        await user.setSchedule({ nextEp: Number(schedule.nextep) + 1 });
       } catch (error: any) {
-        this.client.util.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
+        this.client.utils.logger.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
       }
     }
     this.reInit();
@@ -97,7 +109,7 @@ export default class AniSchedule {
     const description = [
       `You baka, episode **${entry.episode}** of **[${entry.media.title.romaji}](${entry.media.siteUrl})**`,
       entry.media.episodes === entry.episode ? ' **(it\'s the final episode)** ' : ' ',
-      `is up. ${this.client.util.random([
+      `is up. ${this.client.utils.array.random([
         'Not like I wanted to remind you or something.',
         'Sensei made me DM you. I didn\'t want to do that.',
         'Alright, me back to my routine.',

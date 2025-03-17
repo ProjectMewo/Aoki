@@ -1,17 +1,6 @@
 import { Guild } from 'discord.js';
 import AokiClient from '../Client';
-
-export interface GuildSettings {
-  timestampchannel: string,
-  verificationroleid: string,
-  verificationstatus: boolean,
-  verificationchannelid: string,
-  verificationmessageid: string,
-  verificationtitle: string,
-  verificationdescription: string,
-  verificationthumbnail: string,
-  verificationcolor: string
-}
+import { GuildSettings } from '@local-types/settings';
 
 /**
  * Get a guild's settings
@@ -23,15 +12,17 @@ const settings = function(this: Guild & { client: AokiClient }): GuildSettings {
     return stored as GuildSettings;
   }
   const defaultSettings: GuildSettings = {
-    timestampchannel: "",
-    verificationroleid: "",
-    verificationstatus: false,
-    verificationchannelid: "",
-    verificationmessageid: "",
-    verificationtitle: "",
-    verificationdescription: "",
-    verificationthumbnail: "",
-    verificationcolor: ""
+    timestampChannel: "",
+    verification: {
+      roleId: "",
+      status: false,
+      channelId: "",
+      messageId: "",
+      title: "",
+      description: "",
+      thumbnail: "",
+      color: ""
+    }
   };
   return defaultSettings;
 };

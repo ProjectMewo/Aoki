@@ -11,10 +11,23 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@local-types/*": ["src/types/*"],
+      "@utils/*": ["src/struct/utils/*"],
+      "@struct/*": ["src/struct/*"],
+    }
   },
   "include": [
     "src",
