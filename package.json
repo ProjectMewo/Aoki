@@ -4,11 +4,11 @@
   "description": "aoki, but working with discord gateway",
   "main": "src/main.ts",
   "scripts": {
+    "build": "bun src/build.ts",
     "dev": "bun src/main.ts --dev",
     "dev:publish": "bun src/main.ts --dev --publish-commands",
-    "build": "bun src/build.ts",
-    "publish": "bun main.js --publish-commands",
-    "start": "bun main.js"
+    "prod": "bun main.js",
+    "prod:publish": "bun main.js --publish-commands"
   },
   "repository": {
     "type": "git",

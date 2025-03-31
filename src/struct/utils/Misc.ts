@@ -68,7 +68,8 @@ export default class MiscUtil {
       const data = await response.json();
       const textUtil = new TextUtil();
       const answer = textUtil.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || "Can't answer that one.";
-      throw new Error(answer);
+      // ???? what did I do here
+      await msg.reply({ content: answer });
     } catch (error) {
       return AokiError.INTERNAL({
         sender: msg,

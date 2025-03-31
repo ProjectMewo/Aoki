@@ -4,7 +4,6 @@ import Rights from "./rights";
 import Vote from "./vote";
 import Info from "./info";
 import Fault from "./fault";
-import Eval from "./eval";
 import Stats from "./stats";
 import Invite from "./invite";
 
@@ -20,7 +19,6 @@ export default class My extends Command {
         new Vote,
         new Info,
         new Fault,
-        new Eval,
         new Stats,
         new Invite
       ],

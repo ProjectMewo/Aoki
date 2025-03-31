@@ -27,7 +27,7 @@ class MessageCreateEvent extends Event {
 
     // check if the user allow us to process their messages
     // if not, end there.
-    if (!msg.author.settings.processmessagepermission) return;
+    if (!msg.author.settings.processMessagePermission) return;
 
     // match "hey aoki" or "yo aoki" or bot mention
     const prefixRegex = new RegExp(`^(?:(?:hey|yo),? aoki,? )|^<@!?${client.user?.id}>`, 'i');
@@ -39,7 +39,7 @@ class MessageCreateEvent extends Event {
 
     // match timestamp if the message is in the designated
     // channel of the guild
-    const timestampchannel = msg.guild.settings.timestampchannel;
+    const timestampchannel = msg.guild.settings.timestampChannel;
     if (msg.channel.id == timestampchannel) {
       const timestampRegex = /(\d+):(\d{2}):(\d{3})\s*(\(((\d+(\|)?,?)+)\))?/gim;
       const timestamps = msg.content.match(timestampRegex);

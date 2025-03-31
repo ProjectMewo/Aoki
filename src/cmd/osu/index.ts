@@ -4,6 +4,8 @@ import Profile from "./profile";
 import TimestampChannel from "./timestamp-channel";
 import CountryLeaderboard from "./country-leaderboard";
 import Beatmap from "./beatmap";
+import VerifyArtist from "./verify-artist";
+import TrackLicense from "./track-license";
 
 export default class Osu extends Command {
   constructor() {
@@ -17,6 +19,8 @@ export default class Osu extends Command {
         new TimestampChannel,
         new CountryLeaderboard,
         new Beatmap,
+        new VerifyArtist,
+        new TrackLicense,
       ],
     })
   };
