@@ -1,10 +1,10 @@
 import { build } from 'esbuild';
 
 const envVariables = [
-  'TOKEN_DEV', 'APPID_DEV', 'TOKEN', 'APPID', 'GUILD', 'MONGO_KEY',
+  'TOKEN_DEV', 'APPID_DEV', 'TOKEN', 'APPID', 'GUILD', 'MONGO_URI',
   'OSU_KEY', 'OSU_ID', 'OSU_SECRET', 'OSU_DEV_ID', 'OSU_DEV_SECRET',
   'DBL_TOKEN', 'IMG_KEY', 'WOLFRAM_KEY', 'SCREENSHOT_KEY', 'RAPID_KEY',
-  'UPLOAD_KEY', 'WAIFU_IT', 'WAIFU_IM', 'PORT', 'VERIF_GUILD', 'GELBOORU_KEY', 'SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'
+  'WAIFU_IT', 'PORT', 'GELBOORU_KEY', 'SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'
 ];
 
 const define = envVariables.reduce((acc: { [key: string]: string }, key) => {
@@ -23,16 +23,4 @@ build({
   target: 'node18',
   outfile: 'dist/main.js',
   define,
-}).catch(() => process.exit(1));
-build({
-  entryPoints: ['src/main.js'],
-  bundle: true,
-  minify: true,
-  sourcemap: false,
-  keepNames: true,
-  format: "esm",
-  platform: 'node',
-  target: 'node18',
-  outfile: 'dist/main.js',
-  define
 }).catch(() => process.exit(1));

@@ -3,3 +3,4 @@ bun.lock
 node_modules
 package-lock.json
 dist/
+eng.traineddata
