@@ -24,6 +24,10 @@ declare module 'discord.js' {
     schedule: Schedule;
     statsCache: Collection<string, { embed: EmbedBuilder, timestamp: number }>;
     lastGuildCount: number | null;
+    osuV2Token: {
+      access_token: string | null,
+      expires_at: number | null
+    };
     db: Db | null;
     settings: {
       users: Settings;

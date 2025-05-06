@@ -1,6 +1,7 @@
 import { User } from 'discord.js';
 import AokiClient from '../Client';
 import { UserSettings, ScheduleData } from '@local-types/settings';
+import defSchemaSettings from '../../assets/schema';
 
 /**
  * Get a global user's settings
@@ -10,11 +11,7 @@ const settings = function(this: User & { client: AokiClient }): UserSettings {
   if (stored && Object.keys(stored).length > 0) {
     return stored as UserSettings;
   }
-  const defaultSettings: UserSettings = {
-    inGameName: "",
-    defaultMode: 0,
-    processMessagePermission: true
-  };
+  const defaultSettings: UserSettings = defSchemaSettings.users;
   return defaultSettings;
 };
 
@@ -46,8 +43,8 @@ const voted = async function(this: User & { client: AokiClient }): Promise<boole
 /**
  * Check whether this user has already set up AniSchedule
  */
-const getSchedule = function(this: User & { client: AokiClient }): object {
-  return this.client.settings.schedules.findOne({ id: this.id });
+const getSchedule = function(this: User & { client: AokiClient }): Partial<ScheduleData> {
+  return this.client.settings.schedules.findOne({ id: this.id }) as Partial<ScheduleData>;
 };
 
 /**

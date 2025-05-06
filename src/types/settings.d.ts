@@ -1,4 +1,9 @@
 /**
+ * The possible values for the current round of the tournament.
+ */
+export type TournamentRound = "" | "Qualifiers" | "Group Stage" | "Round of 32" | "Round of 16" | "Quarterfinals" | "Semifinals" | "Finals" | "Grand Finals";
+
+/**
  * @interface GuildSettings
  * Represents the configuration settings for a guild.
  */
@@ -43,7 +48,59 @@ export interface GuildSettings {
      * The color of the verification message embed, typically in hexadecimal format.
      */
     color: string
-  }>
+  }>,
+  /**
+   * The (osu!) tournament settings for this guild
+   */
+  tournament: {
+    /**
+     * The name of the tournament
+     */
+    name: string,
+    /**
+     * The abbreviation of the tournament
+     */
+    abbreviation: string,
+    /**
+     * The current round of the tournament
+     */
+    currentRound: TournamentRound,
+    /**
+     * The available mappools of the tournament
+     */
+    mappools: Array<Mappool>,
+    /**
+     * The role IDs of a basic tournament setting
+     * Assign role IDs to this as an array
+     */
+    roles: {
+      /**
+       * The role IDs of host of this tournament
+       */
+      host: Array<string>,
+      /**
+       * The role IDs of advisor of this tournament
+       */
+      advisor: Array<string>,
+      /**
+       * The role IDs of mappooler of this tournament
+       */
+      mappooler: Array<string>,
+      /**
+       * The role IDs of custom mapper of this tournament
+       */
+      customMapper: Array<string>,
+      /**
+       * The role IDs of test/replayers of this tournament
+       */
+      testReplayer: Array<string>,
+      /**
+       * The role IDs of streamers of this tournament
+       */
+      streamer: Array<string>
+    }
+  }
+  
 }
 
 /**
@@ -78,4 +135,50 @@ export interface ScheduleData {
    * The next episode we're tracking.
    */
   nextEp: number;
+}
+
+export interface VerificationSettings {
+  id: string,
+  state: string,
+  createdAt: string,
+  guildId: string
+}
+
+/**
+ * @interface Suggestion
+ * Represents a suggestion for a mappool.
+ */
+export interface Suggestion {
+  slot: string;
+  urls: Array<string>;
+}
+
+/**
+ * @interface Replay
+ * Represents a replay for a slot.
+ */
+export interface Replay {
+  replayer: string;
+  slot: string;
+  messageUrl: string;
+}
+
+/**
+ * @interface Mappool
+ * Represents a mappool for a tournament.
+ */
+export interface Mappool {
+  round: TournamentRound;
+  slots: Array<string>;
+  maps: Array<{
+    slot: string;
+    url: string;
+    fullRecognizer: string;
+  }>;
+  replays: Array<Replay>;
+  suggestions: Array<Suggestion>;
+  /**
+   * The ID of the channel where replays for this round are sent.
+   */
+  replayChannelId?: string;
 }

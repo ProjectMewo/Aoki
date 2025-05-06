@@ -1,6 +1,7 @@
 import { Guild } from 'discord.js';
 import AokiClient from '../Client';
 import { GuildSettings } from '@local-types/settings';
+import defSchemaSettings from '../../assets/schema';
 
 /**
  * Get a guild's settings
@@ -11,19 +12,7 @@ const settings = function(this: Guild & { client: AokiClient }): GuildSettings {
   if (stored && Object.keys(stored).length > 0) {
     return stored as GuildSettings;
   }
-  const defaultSettings: GuildSettings = {
-    timestampChannel: "",
-    verification: {
-      roleId: "",
-      status: false,
-      channelId: "",
-      messageId: "",
-      title: "",
-      description: "",
-      thumbnail: "",
-      color: ""
-    }
-  };
+  const defaultSettings: GuildSettings = defSchemaSettings.guilds;
   return defaultSettings;
 };
 

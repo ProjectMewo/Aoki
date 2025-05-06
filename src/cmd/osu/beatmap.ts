@@ -12,15 +12,11 @@ import {
 } from "discord.js";
 import { Beatmapset } from "../../types/beatmapset";
 import AokiError from "@struct/handlers/AokiError";
+import AokiClient from "@struct/Client";
 
 export default class Beatmap extends Subcommand {
   private baseUrl: string;
-  // @ts-ignore
-  private api_v1: string;
   private api_v2: string;
-  private api_oa: string;
-  private osuV2Token: { access_token: string, expires_at: number } | null;
-  private dev: boolean;
   
   constructor() {
     super({
@@ -123,11 +119,7 @@ export default class Beatmap extends Subcommand {
     });
     
     this.baseUrl = "https://osu.ppy.sh";
-    this.api_v1 = `${this.baseUrl}/api`;
     this.api_v2 = `${this.baseUrl}/api/v2`;
-    this.api_oa = `${this.baseUrl}/oauth/token`;
-    this.osuV2Token = null;
-    this.dev = false;
   }
   
   async execute(i: ChatInputCommandInteraction): Promise<void> {
@@ -155,6 +147,7 @@ export default class Beatmap extends Subcommand {
       };
 
       const beatmapsets = await this.searchBeatmap({
+        client: i.client,
         type: "beatmaps",
         ...searchParams
       }) as Array<Beatmapset>;
@@ -248,40 +241,8 @@ export default class Beatmap extends Subcommand {
   }
   
   // API helper methods
-  async getOsuV2Token() {
-    // Avoid spamming the osu api
-    // If the token is still valid, return it
-    if (this.osuV2Token && this.osuV2Token.expires_at > Date.now()) {
-      return this.osuV2Token.access_token;
-    }
-    
-    // Otherwise ask for it using our credentials
-    const params = new URLSearchParams({
-      client_id: this.dev ? process.env.OSU_DEV_ID! : process.env.OSU_ID!,
-      client_secret: this.dev ? process.env.OSU_DEV_SECRET! : process.env.OSU_SECRET!,
-      grant_type: 'client_credentials',
-      scope: 'public'
-    });
-    
-    const res = await fetch(this.api_oa, {
-      method: 'POST',
-      body: params,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    
-    const data = await res.json();
-    
-    // Then save it for later fetches until the end of the cycle
-    this.osuV2Token = {
-      access_token: data.access_token,
-      expires_at: Date.now() + (data.expires_in - 60) * 1000
-    };
-    
-    return data.access_token;
-  }
-
   async searchBeatmap(params: any) {
-    const token = await this.getOsuV2Token();
+    const token = await (params.client as AokiClient).requestV2Token();
     
     // Build URL with query parameters
     const query = Object.entries(params)

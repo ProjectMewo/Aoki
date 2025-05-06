@@ -4,6 +4,7 @@ import { Message } from 'discord.js';
 import AokiClient from "@struct/Client";
 import AokiError from '@struct/handlers/AokiError';
 import TextUtil from '@utils/String';
+import { createWorker } from 'tesseract.js';
 
 const textUtil = new TextUtil;
 
@@ -75,6 +76,23 @@ export default class MiscUtil {
         sender: msg,
         content: `Oh, something happened. Give my sensei a yell by doing \`/my fault\`:\n\n\`\`\`fix\n${error}\n\`\`\``
       });
+    }
+  }
+
+  /**
+   * Perform OCR on an image to extract text
+   * @param {Buffer} imageBuffer The image buffer
+   * @returns {Promise<string>} The extracted text
+   */
+  public async performOCR(imageBuffer: Buffer): Promise<string> {
+    const worker = await createWorker();
+    try {
+      await worker.load();
+      await worker.reinitialize('eng');
+      const { data: { text } } = await worker.recognize(imageBuffer);
+      return text;
+    } finally {
+      await worker.terminate();
     }
   }
 }

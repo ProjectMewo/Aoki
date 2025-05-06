@@ -1,32 +1,74 @@
 // Default schema for the database
 // @typedef {Object} Schema
+import { 
+  GuildSettings,
+  ScheduleData,
+  UserSettings,
+  VerificationSettings
+} from "@local-types/settings";
+
 export default {
   users: {
-    inGameName: null,
+    inGameName: "",
     defaultMode: 0,
     processMessagePermission: true
-  },
+  } as UserSettings,
+
   schedules: {
-    anilistId: null,
-    nextEp: null
-  },
+    anilistId: 0,
+    nextEp: 0
+  } as ScheduleData,
+
   guilds: {
-    timestampChannel: null,
+    timestampChannel: "",
     verification: {
       status: false,
-      roleId: null,
-      channelId: null,
-      messageId: null,
-      title: null,
-      description: null,
-      thumbnail: null,
-      color: null
+      roleId: "",
+      channelId: "",
+      messageId: "",
+      title: "",
+      description: "",
+      thumbnail: "",
+      color: ""
     },
-  },
+    tournament: {
+      name: "",
+      abbreviation: "",
+      currentRound: "",
+      mappools: [{
+        round: "",
+        slots: [],
+        maps: [{
+          slot: "",
+          url: "",
+          fullRecognizer: ""
+        }],
+        suggestions: [{
+          slot: "",
+          urls: []
+        }],
+        replays: [{
+          slot: "",
+          replayer: "",
+          messageUrl: ""
+        }],
+        replayChannelId: ""
+      }],
+      roles: {
+        host: [],
+        advisor: [],
+        mappooler: [],
+        customMapper: [],
+        testReplayer: [],
+        streamer: []
+      }
+    }
+  } as GuildSettings,
+
   verifications: {
-    id: null,
-    state: null,
-    createdAt: null,
-    guildId: null
-  }
+    id: "",
+    state: "",
+    createdAt: "",
+    guildId: ""
+  } as VerificationSettings
 };

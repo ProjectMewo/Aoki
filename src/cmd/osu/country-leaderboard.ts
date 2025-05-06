@@ -5,14 +5,12 @@ import {
 } from "discord.js";
 import Pagination from "../../struct/Paginator";
 import AokiError from "@struct/handlers/AokiError";
+import AokiClient from "@struct/Client";
 
 export default class CountryLeaderboard extends Subcommand {
   private baseUrl: string;
   private api_v1: string;
   private api_v2: string;
-  private api_oa: string;
-  private osuV2Token: { access_token: string, expires_at: number } | null;
-  private dev: boolean;
   
   constructor() {
     super({
@@ -63,9 +61,6 @@ export default class CountryLeaderboard extends Subcommand {
     this.baseUrl = "https://osu.ppy.sh";
     this.api_v1 = `${this.baseUrl}/api`;
     this.api_v2 = `${this.baseUrl}/api/v2`;
-    this.api_oa = `${this.baseUrl}/oauth/token`;
-    this.osuV2Token = null;
-    this.dev = false;
   }
   
   async execute(i: ChatInputCommandInteraction): Promise<void> {
@@ -95,8 +90,8 @@ export default class CountryLeaderboard extends Subcommand {
     try {
       // Concurrently fetch the first 2 pages of country leaderboard
       const [page1, page2] = await Promise.all([
-        this.fetchRankingList({ type: "performance", country_code: countryCode, mode }),
-        this.fetchRankingList({ type: "performance", country_code: countryCode, mode, page: 2 }),
+        this.fetchRankingList({ client: i.client as AokiClient, type: "performance", country_code: countryCode, mode }),
+        this.fetchRankingList({ client: i.client as AokiClient, type: "performance", country_code: countryCode, mode, page: 2 }),
       ]);
       
       const rankings = [...page1.ranking, ...page2.ranking];
@@ -116,6 +111,7 @@ export default class CountryLeaderboard extends Subcommand {
         const chunk = userIds.slice(j, j + chunkSize);
         const results = await Promise.allSettled(chunk.map(userId =>
           this.listAllUserScores({
+            client: i.client as AokiClient,
             type: "user_beatmap_all",
             user_id: userId,
             beatmap_id: beatmapId,
@@ -151,7 +147,7 @@ export default class CountryLeaderboard extends Subcommand {
 
       const scoresPerPage = 5;
       const totalPages = Math.ceil(countryScores.length / scoresPerPage);
-      const beatmapDetails = await this.fetchBeatmapDetails({ type: "difficulty", id: beatmapId });
+      const beatmapDetails = await this.fetchBeatmapDetails({ client: i.client as AokiClient, type: "difficulty", id: beatmapId });
       const beatmapTitle = `${beatmapDetails.beatmapset.artist} - ${beatmapDetails.beatmapset.title} [${beatmapDetails.version}]`;
       const pages = new Pagination();
 
@@ -191,12 +187,8 @@ export default class CountryLeaderboard extends Subcommand {
         pages.add(embed);
       }
 
-      const content =
-        "**Notes:** \n- Scores from inactive players will not be shown.\n- Only players in the top 100 of that country are fetched.";
-      const msg = await i.editReply({ content, embeds: [pages.currentPage] });
-
       pages.handle({
-        sender: msg,
+        sender: i,
         filter: 'userOnly',
         time: 90000
       });
@@ -212,38 +204,6 @@ export default class CountryLeaderboard extends Subcommand {
   }
   
   // API helper methods
-  async getOsuV2Token() {
-    // Avoid spamming the osu api
-    // If the token is still valid, return it
-    if (this.osuV2Token && this.osuV2Token.expires_at > Date.now()) {
-      return this.osuV2Token.access_token;
-    }
-    
-    // Otherwise ask for it using our credentials
-    const params = new URLSearchParams({
-      client_id: this.dev ? process.env.OSU_DEV_ID! : process.env.OSU_ID!,
-      client_secret: this.dev ? process.env.OSU_DEV_SECRET! : process.env.OSU_SECRET!,
-      grant_type: 'client_credentials',
-      scope: 'public'
-    });
-    
-    const res = await fetch(this.api_oa, {
-      method: 'POST',
-      body: params,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    
-    const data = await res.json();
-    
-    // Then save it for later fetches until the end of the cycle
-    this.osuV2Token = {
-      access_token: data.access_token,
-      expires_at: Date.now() + (data.expires_in - 60) * 1000
-    };
-    
-    return data.access_token;
-  }
-
   async findUserById(userId: string, options: { type: string }) {
     const params = new URLSearchParams({
       k: process.env["OSU_KEY"] || "",
@@ -258,8 +218,8 @@ export default class CountryLeaderboard extends Subcommand {
     return data[0] || null;
   }
 
-  async fetchRankingList({ type, country_code, mode, page = 1 }: { type: string, country_code: string, mode: string, page?: number }) {
-    const token = await this.getOsuV2Token();
+  async fetchRankingList({ client, type, country_code, mode, page = 1 }: { client: AokiClient, type: string, country_code: string, mode: string, page?: number }) {
+    const token = await client.requestV2Token();
     const url = `${this.api_v2}/rankings/${mode}/${type}?country=${country_code}&cursor[page]=${page}`;
     
     const res = await fetch(url, {
@@ -269,8 +229,8 @@ export default class CountryLeaderboard extends Subcommand {
     return await res.json();
   }
 
-  async listAllUserScores({ type, user_id, beatmap_id, mode, include_fails, limit }: { type: string, user_id: string, beatmap_id: number, mode: string, include_fails: number, limit: number }) {
-    const token = await this.getOsuV2Token();
+  async listAllUserScores({ client, type, user_id, beatmap_id, mode, include_fails, limit }: { client: AokiClient, type: string, user_id: string, beatmap_id: number, mode: string, include_fails: number, limit: number }) {
+    const token = await client.requestV2Token();
     const url = [
       `${this.api_v2}/beatmaps/${beatmap_id}`, // beatmap path
       `/scores/users/${user_id}/all`, // all user scores on beatmap
@@ -291,8 +251,8 @@ export default class CountryLeaderboard extends Subcommand {
     return responses.scores;
   }
 
-  async fetchBeatmapDetails({ type, id }: { type: string, id: number }) {
-    const token = await this.getOsuV2Token();
+  async fetchBeatmapDetails({ client, type, id }: { client: AokiClient, type: string, id: number }) {
+    const token = await client.requestV2Token();
     const url = `${this.api_v2}/beatmaps/${id}?type=${type}`;
     
     const res = await fetch(url, {

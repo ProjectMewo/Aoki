@@ -61,6 +61,14 @@ class AokiClient extends Client {
    */
   public lastGuildCount: number | null;
   /**
+   * The osu! v2 token and the expiry time of the token of this client instance
+   * @type {Object}
+   */
+  public osuV2Token: {
+    access_token: string | null,
+    expires_at: number | null
+  };
+  /**
    * The MongoDB client instance of this client
    * @type {MongoClient | null}
    * @private
@@ -73,7 +81,7 @@ class AokiClient extends Client {
   public db: Db | null;
   /**
    * The settings collection of this client
-   * @type {Settings}
+   * @type {Object}
    */
   public settings: {
     users: Settings;
@@ -110,6 +118,10 @@ class AokiClient extends Client {
     this.schedule = new Schedule(this);
     this.statsCache = new Collection();
     this.lastGuildCount = null;
+    this.osuV2Token = {
+      access_token: null,
+      expires_at: 0
+    };
     this.dbClient = null;
     this.db = null;
     this.settings = {
@@ -149,6 +161,8 @@ class AokiClient extends Client {
       import('../cmd/anime'),
       import('../cmd/verify'),
       import('../cmd/schedule'),
+      import('../cmd/mappool'),
+      import('../cmd/tourney')
     ]);
     for (const commandModule of commandModules) {
       const Command = new commandModule.default;
@@ -217,7 +231,7 @@ class AokiClient extends Client {
    * @returns {Promise<void>}
    */
   private async loadDatabase(): Promise<void> {
-    const url = process.env.MONGO_KEY!;
+    const url = process.env.MONGO_URI!;
     this.dbClient = await MongoClient.connect(url, {
       serverApi: {
         version: ServerApiVersion.v1,
@@ -256,6 +270,43 @@ class AokiClient extends Client {
   };
 
   /**
+   * Request an osu! API v2 token, then saves it.
+   * Returns the token, or possibly nothing if there's an error.
+   * @returns {Promise<string | null>}
+   */
+  public async requestV2Token(): Promise<string | null> {
+    // Avoid spamming the osu api
+    // If the token is still valid, return it
+    if (this.osuV2Token && this.osuV2Token.expires_at || 0 > Date.now()) {
+      return this.osuV2Token.access_token;
+    }
+    
+    // Otherwise ask for it using our credentials
+    const params = new URLSearchParams({
+      client_id: this.dev ? process.env.OSU_DEV_ID! : process.env.OSU_ID!,
+      client_secret: this.dev ? process.env.OSU_DEV_SECRET! : process.env.OSU_SECRET!,
+      grant_type: 'client_credentials',
+      scope: 'public'
+    });
+    
+    const res = await fetch("https://osu.ppy.sh/oauth/token", {
+      method: 'POST',
+      body: params,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    
+    const data = await res.json();
+    
+    // Then save it for later fetches until the end of the cycle
+    this.osuV2Token = {
+      access_token: data.access_token,
+      expires_at: Date.now() + (data.expires_in - 60) * 1000
+    };
+    
+    return data.access_token;
+  };
+
+  /**
    * Load everything
    * @returns {Promise<void>}
    */
@@ -268,7 +319,8 @@ class AokiClient extends Client {
     await Promise.all([
       this.loadEvents(),
       this.loadDatabase(),
-      this.loadCommands()
+      this.loadCommands(),
+      this.requestV2Token()
     ]);
 
     new AokiWebAPI(this).serve();

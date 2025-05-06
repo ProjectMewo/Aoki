@@ -1,3 +1,5 @@
+import levenshtein from 'fast-levenshtein';
+
 /**
  * Utility class for text and string manipulation
  */
@@ -91,6 +93,59 @@ export default class TextUtil {
    */
   public toProperCase(str: string): string {
     return str.replace(/([^\W_]+[^\s-]*) */g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
+  }
+
+  /**
+   * Find the known entry that matches the input string the closest.
+   * @param input The input string
+   * @param titles The known entries to match against
+   * @param threshold The threshold to match
+   * @returns {String | null}
+   */
+  public findClosestTitle(input: string, titles: string[], threshold = 75): string | null {
+    input = input.toLowerCase();
+    let bestMatch = null;
+    let bestDistance = Infinity;
+
+    for (const title of titles) {
+      const distance = levenshtein.get(input, title.toLowerCase());
+      if (distance < bestDistance && distance <= threshold) {
+        bestDistance = distance;
+        bestMatch = title;
+      }
+    }
+
+    return bestMatch;
+  }
+
+  /**
+   * Check if a string contains a sequence of words that match one or more entries in a known array
+   * @param filename The name of the string to match
+   * @param knownTitles The known array of words to match
+   * @returns {Array<string>}
+   */
+  public findAllMatchingTitles(filename: string, knownTitles: string[]): string[] {
+    const cleaned = filename
+      .replace(/[_\-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+    const words = cleaned.split(" ");
+    const matches: string[] = [];
+
+    for (const title of knownTitles) {
+      const titleWords = title.toLowerCase().split(" ");
+      for (let i = 0; i <= words.length - titleWords.length; i++) {
+        const slice = words.slice(i, i + titleWords.length);
+        if (slice.join(" ") === titleWords.join(" ")) {
+          matches.push(title);
+          break;
+        }
+      }
+    }
+
+    return matches;
   }
 
   /**
