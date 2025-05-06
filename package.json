@@ -25,9 +25,11 @@
     "url": "https://github.com/ProjectMewo/Aoki/issues"
   },
   "homepage": "https://github.com/ProjectMewo/Aoki#readme",
-  "devDependencies": {
+  "dependencies": {
+    "@types/fast-levenshtein": "^0.0.4",
     "discord.js": "^14.18.0",
     "esbuild": "^0.25.1",
+    "fast-levenshtein": "^3.0.0",
     "mongodb": "^6.14.2"
   }
 }
