@@ -33,15 +33,10 @@ Aoki is built with MongoDB and the `mongodb` library. Other databases are availa
 - Cloudflare's `D1` database was also a JavaScript implementation for Aoki serverless in release `<=3.0`.
 
 ### Runtime
-Aoki officially supports **Bun v1.2.4+**.
-- It has native `.env` loading support, so loading it won't be an issue.
-- It has built-in `serve()` for web stuff, which is very fast.
-- It has built-in support for PostgreSQL, which is also very fast.
+Aoki officially supports **Bun v1.2.4+**. Any Node version should also work as long as it's above the minimum requirement for `discord.js`.
 
 ### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.ts](/src/struct/Utilities.ts). This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy.
-
-The libraries? Bun does that. Will anything else appear in the production folder? No. It's in Bun's cache.
+Aoki **heavily relies** on APIs and external projects, and most redundant libraries and bite-sized utilities are implemented inside the [utils](/src/struct/utils/) directory. This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy. The rest of it is for bundling libraries.
 
 ### Future-proof
 Check the [roadmap](#6) for future planned implementations.
@@ -69,11 +64,11 @@ aoki
 │   ├── ...
 │   ├── assets     # static JS files
 │   ├── struct     # code structure files
-│   │   └── extenders   # altering discord.ts core
+│   │   └── extenders   # altering discord.js core
 │   │   └── handlers    # handlers
 │   │   └── utils       # fragmented utilities
 │   ├── types      # type definition for things
-│   ├── events     # Discord.ts events
+│   ├── events     # Discord.js events
 │   ├── web        # web API (barebones)
 │   └── cmd        # main commands directories
 └── 
