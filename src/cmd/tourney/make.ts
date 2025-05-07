@@ -8,7 +8,7 @@ export default class Make extends Subcommand {
     super({
       name: 'make',
       description: 'create a new tournament in this server',
-      permissions: ['Administrator'],
+      permissions: ['ManageGuild'],
       options: [
         {
           type: 'string',

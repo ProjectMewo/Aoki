@@ -13,7 +13,7 @@ export default class Delete extends Subcommand {
     super({
       name: 'delete',
       description: 'delete the current tournament in this server',
-      permissions: ['Administrator'],
+      permissions: [],
       options: []
     });
   }
@@ -47,7 +47,7 @@ export default class Delete extends Subcommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: i,
-        content: 'You do not have permission to add maps to the mappool. Only hosts can do this.'
+        content: 'You do not have permission to delete this tournament. Only hosts can do this.'
       });
     }
 
