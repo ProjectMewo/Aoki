@@ -45,7 +45,7 @@ export default class ViewSuggestions extends Subcommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: i,
-        content: 'You do not have permission to view map suggestions. Only tournament organizers, advisors, poolers, and replayers can access this command.'
+        content: 'You do not have permission to view map suggestions. Only tournament organizers, advisors, poolers and test/replayers can access this command.'
       });
     }
 

@@ -32,9 +32,7 @@ export default class Delete extends Subcommand {
     }
 
     // Check permission - only hosts can delete the tournament
-    const permittedRoles = [
-      ...settings.roles.host
-    ];
+    const permittedRoles = settings.roles.host;
 
     let userRoles;
     if (i.member!.roles instanceof GuildMemberRoleManager) {
@@ -89,8 +87,7 @@ export default class Delete extends Subcommand {
           advisor: [],
           mappooler: [],
           testReplayer: [],
-          customMapper: [],
-          streamer: []
+          customMapper: []
         }
       }
     });

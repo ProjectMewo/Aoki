@@ -34,7 +34,7 @@ export default class View extends Subcommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: i,
-        content: 'You do not have permission to view the mappool. Only hosts, advisors, mappoolers, and replayers can access this command.'
+        content: 'You do not have permission to view the mappool. Only hosts, advisors, mappoolers and test/replayers can access this command.'
       });
     }
 

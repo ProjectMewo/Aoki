@@ -42,7 +42,6 @@ export default class Replays extends Subcommand {
     const permittedRoles = [
       ...settings.roles.host,
       ...settings.roles.advisor,
-      ...settings.roles.streamer,
       ...settings.roles.testReplayer
     ];
 
@@ -55,7 +54,7 @@ export default class Replays extends Subcommand {
 
     const hasPermittedRole = permittedRoles.some(roleId => userRoles.includes(roleId));
     if (!hasPermittedRole) {
-      await i.editReply({ content: 'You do not have permission to view replays. Only tournament organizers, advisors, streamers, and replayers can access this command.' });
+      await i.editReply({ content: 'You do not have permission to view replays. Only tournament organizers, advisors and test/replayers can access this command.' });
       return;
     }
 

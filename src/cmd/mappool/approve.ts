@@ -59,7 +59,7 @@ export default class Approve extends Subcommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: i,
-        content: 'You do not have permission to add maps to the mappool. Only hosts, advisors, and mappoolers can do this.'
+        content: 'You do not have permission to add maps to the mappool. Only hosts, advisors and mappoolers can do this.'
       });
     }
 
@@ -96,7 +96,7 @@ export default class Approve extends Subcommand {
     if (!fullUrlPattern.test(url) && !shortUrlPattern.test(url)) {
       return AokiError.USER_INPUT({
         sender: i,
-        content: 'Invalid beatmap URL. Please provide either a full URL (e.g., <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) or a shortened URL (e.g., <https://osu.ppy.sh/b/5678>).\b\bURL schemes starting with <https://osu.ppy.sh/beatmap> is not allowed due to current limitations.'
+        content: 'Invalid beatmap URL. Please provide either a full URL (e.g., <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) or a shortened URL (e.g., <https://osu.ppy.sh/b/5678>).\n\nURL schemes starting with <https://osu.ppy.sh/beatmap> is not allowed due to current limitations.'
       });
     }
 

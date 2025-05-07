@@ -93,11 +93,7 @@ export interface GuildSettings {
       /**
        * The role IDs of test/replayers of this tournament
        */
-      testReplayer: Array<string>,
-      /**
-       * The role IDs of streamers of this tournament
-       */
-      streamer: Array<string>
+      testReplayer: Array<string>
     }
   }
   

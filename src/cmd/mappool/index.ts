@@ -9,7 +9,7 @@ export default class Mappool extends Command {
   constructor() {
     super({
       name: 'mappool',
-      description: 'mappool management for tournaments',
+      description: 'mappool management for (osu!) tournaments',
       cooldown: 0,
       subcommands: [
         new Approve,

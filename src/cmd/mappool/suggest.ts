@@ -68,7 +68,7 @@ export default class Suggest extends Subcommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: i,
-        content: 'You do not have permission to suggest maps for the mappool. Only organizers, advisors, mappoolers, and test/replayers can suggest maps.'
+        content: 'You do not have permission to suggest maps for the mappool. Only organizers, advisors, mappoolers and test/replayers can suggest maps.'
       });
     }
     // Add code to handle the map suggestion

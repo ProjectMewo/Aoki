@@ -10,7 +10,7 @@ export default class Tournament extends Command {
   constructor() {
     super({
       name: 'tourney',
-      description: 'tournament management commands',
+      description: '(osu!) tournament management commands',
       cooldown: 0,
       subcommands: [
         new AddRole,

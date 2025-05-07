@@ -59,8 +59,7 @@ export default {
         advisor: [],
         mappooler: [],
         customMapper: [],
-        testReplayer: [],
-        streamer: []
+        testReplayer: []
       }
     }
   } as GuildSettings,
