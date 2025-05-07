@@ -174,5 +174,6 @@ export enum ErrorType {
   NOT_FOUND = 'not_found',
   NSFW = 'nsfw',
   COOLDOWN = 'cooldown',
-  INTERNAL = 'internal'
+  INTERNAL = 'internal',
+  SELF_CONTRUCTED = 'self_constructed'
 }

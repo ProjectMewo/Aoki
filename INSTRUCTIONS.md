@@ -2,6 +2,33 @@
 
 This is a guide on how to work with the Aoki codebase.
 
+## Error Handling
+
+Error handling in Aoki must be routed through the [AokiError.ts handler](/src/struct/handlers/AokiError.ts):
+```ts
+import AokiError from '@struct/handlers/AokiError';
+...
+return AokiError[shorthand_method]({
+  sender: i,     // variable with a `send` or `reply` function
+  content: ""    // content of the error
+  // more parameters here...
+});
+...
+```
+This makes sure all errors are properly categorized and prioritized. The file has multiple shorthand functions for common errors throughout the development of the app, but you can construct one yourself if it's rare enough:
+```ts
+import AokiError from '@struct/handlers/AokiError';
+import { ErrorTypes } from '@struct/handlers/AokiError';
+...
+const error = new AokiError({ 
+  ...options, 
+  type: ErrorTypes.SELF_CONSTRUCTED 
+});
+void error.handle();
+// logic if this should be ephemeral or logged...
+...
+```
+
 ## Commands
 
 Aoki's commands follow a very special flow to get to Discord:
@@ -52,7 +79,7 @@ public async execute(i: ChatInputCommandInteraction): Promise<void> {
   await i.reply({ content: "I am watching you!" });
 };
 ```
-- After you've made a new subcommand, it's time to let the master command know its presence. Because this project is statically built with Bun (very similar to `esbuild`), using `node:fs` is not recommended:
+- After you've made a new subcommand, it's time to let the master command know its presence. Because this project is statically built with `esbuild`, you can't use `node:fs`:
 ```ts
 // src/cmd/fun/index.ts
 import Command from '@struct/handlers/Command';
@@ -85,7 +112,7 @@ private async loadCommands(): Promise<void> {
   ...
 };
 ```
-- Run the development bot and publish the command with `bun dev:publish`
+- Run the development bot and publish the command with `bun dev:publish`. Make sure you include your own guild ID in your `.env` file!
 - Voilà! Your command is now on Discord, as `/fun ping`.
 
 *This document is work-in-progress. New changes are expected.*
