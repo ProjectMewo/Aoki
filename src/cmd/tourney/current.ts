@@ -1,7 +1,7 @@
 import { TournamentRound } from "@local-types/settings";
 import AokiError from "@struct/handlers/AokiError";
 import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, GuildMemberRoleManager } from "discord.js";
+import { ChatInputCommandInteraction, GuildMemberRoleManager, MessageFlags } from "discord.js";
 
 export default class Current extends Subcommand {
   constructor() {
@@ -47,7 +47,7 @@ export default class Current extends Subcommand {
       if (!settings.currentRound) {
         await i.reply({ 
           content: `**${settings.name}** (${settings.abbreviation}) doesn't have a current active round set.\n\nUse \`/tourney current [round]\` to set one.`,
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
         return;
       }
@@ -62,7 +62,7 @@ export default class Current extends Subcommand {
       
       await i.reply({
         content: `**${settings.name}** (${settings.abbreviation}) is currently in the **${settings.currentRound}** stage.\n\n${slotInfo}`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
       return;
     }

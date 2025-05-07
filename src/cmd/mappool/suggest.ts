@@ -1,6 +1,6 @@
 import AokiError from "@struct/handlers/AokiError";
 import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, GuildMemberRoleManager } from "discord.js";
+import { ChatInputCommandInteraction, GuildMemberRoleManager, MessageFlags } from "discord.js";
 
 export default class Suggest extends Subcommand {
   constructor() {
@@ -126,12 +126,12 @@ export default class Suggest extends Subcommand {
       
       await i.reply({
         content: `Successfully added your suggestion for slot ${slot} in the ${currentRound} mappool.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     } else {
       await i.reply({
         content: `This map has already been suggested for slot ${slot}.`,
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   }
