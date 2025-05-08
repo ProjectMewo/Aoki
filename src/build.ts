@@ -13,7 +13,7 @@ const define = envVariables.reduce((acc: { [key: string]: string }, key) => {
 }, {});
 
 build({
-  entryPoints: ['src/main.js'],
+  entryPoints: ['src/main.ts'],
   bundle: true,
   minify: true,
   sourcemap: false,
