@@ -1,6 +1,6 @@
 import AokiClient from "../../struct/Client";
 import { Guild, GuildMember } from "discord.js";
-import { GuildSettings } from "@local-types/settings";
+import { GuildSettings, UserSettings } from "@local-types/settings";
 import BaseHandler from "./BaseHandler";
 
 interface VerificationData {
@@ -209,6 +209,11 @@ export default class VerificationHandler extends BaseHandler {
    */
   private async saveUserData(id: string, user: OsuUser): Promise<void> {
     const defaultmode = this.client.utils.osu.numberModeFormat(user.playmode);
+    // Check if this user allow us to save their osu! profile details
+    const userSettings = await this.client.settings.users.findOne({ id }) as UserSettings | null;
+    // If not, don't do anything and exit this function
+    if (!userSettings?.saveOsuUserAccount) return;
+    // Otherwise we save it like normal
     await this.client.settings.users.update(id, {
       ingamename: user.username,
       defaultmode,

@@ -6,7 +6,7 @@ export default class Rights extends Subcommand {
   constructor() {
     super({
       name: 'rights',
-      description: 'configure your personal settings',
+      description: 'configure your personal privacy settings',
       permissions: [],
       options: [
         {
@@ -15,7 +15,8 @@ export default class Rights extends Subcommand {
           description: 'what permission to configure',
           required: true,
           choices: [
-            { name: 'read & process your messages', value: 'processmessagepermission' }
+            { name: 'read & process your messages', value: 'processMessagePermission' },
+            { name: 'save your osu! account details on verification', value: 'saveOsuUserAccount' }
           ]
         },
         {
@@ -43,7 +44,8 @@ export default class Rights extends Subcommand {
     const res = await i.user.update({ [query]: value });
     
     const properQuery: { [key: string]: string } = {
-      processmessagepermission: "read & process your messages",
+      processMessagePermission: "read & process your messages",
+      saveOsuUserAccount: "save your osu! account details on verification"
     };
     
     if (res[query as keyof typeof res] == value) {

@@ -11,7 +11,8 @@ export default {
   users: {
     inGameName: "",
     defaultMode: 0,
-    processMessagePermission: true
+    processMessagePermission: true,
+    saveOsuUserAccount: true
   } as UserSettings,
 
   schedules: {

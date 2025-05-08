@@ -26,10 +26,13 @@
   },
   "homepage": "https://github.com/ProjectMewo/Aoki#readme",
   "dependencies": {
-    "@types/fast-levenshtein": "^0.0.4",
     "discord.js": "^14.18.0",
     "esbuild": "^0.25.1",
     "fast-levenshtein": "^3.0.0",
     "mongodb": "^6.14.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.12",
+    "@types/fast-levenshtein": "^0.0.4"
   }
 }

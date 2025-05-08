@@ -115,7 +115,11 @@ export interface UserSettings {
   /**
    * Indicates whether we can process this user's messages.
    */
-  processMessagePermission: boolean
+  processMessagePermission: boolean,
+  /**
+   * Indicates whether we can save this user's osu! account details on verification success.
+   */
+  saveOsuUserAccount: boolean
 };
 
 /**
