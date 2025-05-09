@@ -96,7 +96,7 @@ export default class Gelbooru extends Subcommand {
       });
     }
     
-    const tags = i.options.getString("tags")!.trim() + ` rating:${i.options.getString("rating") || 'general'}`;
+    const tags = i.options.getString("tags", true).trim() + ` rating:${i.options.getString("rating") || 'general'}`;
     
     try {
       // Fetch images from Gelbooru

@@ -21,6 +21,8 @@ build({
   format: "esm",
   platform: 'node',
   target: 'node18',
+  // install this on the host
+  external: ['sharp'],
   outfile: 'dist/main.js',
   define,
 }).catch(() => process.exit(1));

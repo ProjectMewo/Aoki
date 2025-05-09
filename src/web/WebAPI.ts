@@ -35,7 +35,7 @@ export default class AokiWebAPI {
   constructor(client: AokiClient) {
     this.client = client;
     this.port = Number(process.env.PORT) || 3000;
-    this.baseUrl = client.dev ? "http://localhost:8080" : "https://aoki.hackers.moe";
+    this.baseUrl = client.dev ? "http://localhost:3000" : "https://aoki.hackers.moe";
     
     // Initialize handlers
     this.verificationHandler = new VerificationHandler(client);
@@ -117,7 +117,7 @@ export default class AokiWebAPI {
    */
   public serve(): void {
     Bun.serve({
-      port: this.port,
+      port: this.port || 3000,
       fetch: (request) => this.handleRequest(request)
     });
   }
