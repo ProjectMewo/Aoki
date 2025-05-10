@@ -57,6 +57,23 @@ const modal = new Modal()
 
 They *aren't* components.
 
+By the way, you might be asking about the size and performance, where did I take that info from, when Seyfert have [benchmarked them all](https://www.seyfert.dev/benchmark)? I battle-tested both Seyfert and Discord.js in a not-very-fair competition on my Discord apps, as in:
+
+- Runtime: Bun v1.2.12 (latest).
+- Discord.js: main Aoki client (~350 servers, ~70k members), no sharding, source code in [the `typescript-next` branch](https://github.com/ProjectMewo/Aoki/tree/typescript-next) (which includes more things than this branch)
+- Seyfert A: main Aoki client, source code is this branch. Sharding is done through their internal functions and stuff like that.
+- Seyfert B: a dev bot in a singular server.
+
+Results over a couple of hours (around 3 hours+):
+
+- Discord.js: [around 170MB](https://i.imgur.com/Jry6SOZ.png).
+- Seyfert A: [around 130MB](https://i.imgur.com/JjjZm9o.png).
+- Seyfert B: [around 100MB](https://i.imgur.com/JV0Zvwd.png).
+
+There's virtually no difference. The benchmark they showed you is nothing short of... not-very-ideal test cases for a moderately large app to a very large app to rely on for a complete rewrite.
+
+**tl;dr:** Don't 100% trust the internet.
+
 ### Huge slander. Why did you try then?
 I hate Discord.js.
 
