@@ -1,59 +1,54 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
+import AokiError from "@struct/AokiError";
 import { 
-  Attachment,
-  ChatInputCommandInteraction, 
-  EmbedBuilder 
-} from "discord.js";
-import AokiError from "@struct/handlers/AokiError";
+  CommandContext, 
+  createAttachmentOption, 
+  createStringOption, 
+  Declare, 
+  Embed, 
+  SubCommand, 
+  Options, 
+  Attachment 
+} from "seyfert";
 
-export default class Fault extends Subcommand {
-  constructor() {
-    super({
-      name: 'fault',
-      description: 'report an issue with the bot',
-      permissions: [],
-      options: [
-        {
-          type: 'string',
-          name: 'query',
-          description: 'description of the issue',
-          required: false
-        },
-        {
-          type: 'attachment',
-          name: 'attachment',
-          description: 'an image related to the issue',
-          required: false
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    const query = i.options.getString("query");
-    const attachment = i.options.getAttachment("attachment");
+const options = {
+  query: createStringOption({
+    description: 'description of the issue',
+    required: false
+  }),
+  attachment: createAttachmentOption({
+    description: 'an image related to the issue',
+    required: false
+  })
+};
 
-    await i.deferReply();
+@Declare({
+  name: 'fault',
+  description: 'report an issue with the bot'
+})
+@Options(options)
+export default class Fault extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const query = ctx.options.query;
+    const attachment = ctx.options.attachment;
+
+    await ctx.deferReply();
     
     // handle exceptions
     if (!query && !attachment) {
       return AokiError.USER_INPUT({
-        sender: i,
+        sender: ctx.interaction,
         content: "Baka, I can't send nothing. At least give me an error message, an image, or something!"
       });
     }
     
     // preset embed
-    const preset = new EmbedBuilder()
+    const preset = new Embed()
       .setColor(10800862)
       .setTitle(`New issue!`)
       .setThumbnail("https://i.imgur.com/1xMJ0Ew.png")
-      .setFooter({ text: "Take care of these, I'm out", iconURL: i.user.displayAvatarURL() })
-      .setDescription(`*Sent by **${i.user.username}***\n\n**Description:** ${query || "None"}\n**Image:** ${attachment ? "" : "None"}`)
+      .setFooter({ text: "Take care of these, I'm out", iconUrl: ctx.author.avatarURL() })
+      .setDescription(`*Sent by **${ctx.author.username}***\n\n**Description:** ${query || "None"}\n**Image:** ${attachment ? "" : "None"}`)
       .setTimestamp();
-    
-    // Defer the reply since this might take some time
-    await i.deferReply();
     
     // construct some utility functions
     const delay = async (ms: number) => {
@@ -74,21 +69,30 @@ export default class Fault extends Subcommand {
     };
 
     const sendErrorGibberish = async () => {
-      await i.editReply({ content: "I see you typing gibberish there, you baka." });
+      await ctx.editOrReply({ content: "I see you typing gibberish there, you baka." });
       await delay(3000);
-      await i.editReply({ content: "You're not sending [these](https://i.imgur.com/C5tvxfp.png) through me, please." });
+      await ctx.editOrReply({ content: "You're not sending [these](https://i.imgur.com/C5tvxfp.png) through me, please." });
       await delay(3000);
-      await i.editReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
+      await ctx.editOrReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
     };
 
     const isImageAttachment = (att: Attachment | null) => {
       return att?.contentType?.includes("image");
     };
 
-    const sendToLogs = async (embed: EmbedBuilder) => {
-      const channel = i.client.channels.cache.get(i.client.config.logChannel);
-      if (!channel || !('send' in channel)) return;
-      return await channel.send({ embeds: [embed] });
+    // Try to send to log channel if configured
+    const sendToLogs = async (embed: Embed) => {
+      try {
+        const logChannelId = process.env.LOG_CHANNEL;
+        if (!logChannelId) return;
+        
+        const channel = await ctx.client.channels.fetch(logChannelId);
+        if (channel) {
+          await ctx.client.messages.write(channel.id, { embeds: [embed] });
+        }
+      } catch (error) {
+        console.error("Failed to send to logs:", error);
+      }
     };
 
     // handle user query
@@ -98,19 +102,21 @@ export default class Fault extends Subcommand {
         await sendErrorGibberish();
         return;
       } else {
-        await i.editReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
+        await ctx.editOrReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
         await sendToLogs(preset);
         return;
       }
-    } else if (attachment) {
+    } 
+    
+    // handle image attachment
+    if (attachment) {
       if (!isImageAttachment(attachment)) {
-        return AokiError.USER_INPUT({
-          sender: i,
-          content: "Appreciate your attachment, but for now we only support images."
-        });
+        await ctx.editOrReply({ content: "Appreciate your attachment, but for now we only support images." });
+        return;
       }
+      
       preset.setImage(attachment.url);
-      await i.editReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
+      await ctx.editOrReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
       await sendToLogs(preset);
       return;
     }

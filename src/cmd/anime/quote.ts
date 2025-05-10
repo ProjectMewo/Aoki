@@ -1,42 +1,49 @@
-import AokiError from "@struct/handlers/AokiError";
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  Declare, 
+  Embed, 
+  SubCommand 
+} from "seyfert";
 
-export default class Quote extends Subcommand {
-  constructor() {
-    super({
-      name: 'quote',
-      description: 'Get a random anime quote',
-      options: [],
-      permissions: []
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    
+@Declare({
+  name: 'quote',
+  description: 'Get a random anime quote.'
+})
+export default class Quote extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    await ctx.deferReply();
+
     try {
       const response = await fetch(`https://waifu.it/api/v4/quote`, {
         headers: { 'Authorization': process.env.WAIFU_IT || "" }
       });
-      
+
       if (!response.ok) {
         return AokiError.API_ERROR({
-          sender: i,
+          sender: ctx.interaction,
           content: "There was an error getting a quote. Try again later, or my sensei probably messed up."
         });
       }
-      
+
       const data = await response.json();
-      
-      await i.editReply({ 
-        content: `**${data.author}** from **${data.anime}**:\n\n*${data.quote}*` 
-      });
+
+      const embed = new Embed()
+        .setColor(10800862)
+        .setTitle("Random Anime Quote")
+        .setDescription(`**${data.author}** from **${data.anime}**:\n\n*${data.quote}*`)
+        .setFooter({
+          text: `Requested by ${ctx.interaction.user.username}`,
+          iconUrl: ctx.author.avatarURL()
+        })
+        .setTimestamp(new Date());
+
+      await ctx.editOrReply({ embeds: [embed] });
     } catch (error) {
       return AokiError.API_ERROR({
-        sender: i,
+        sender: ctx.interaction,
         content: "There was an error getting a quote. Try again later, or my sensei probably messed up."
       });
     }
-  };
+  }
 }

@@ -1,18 +1,12 @@
-import AokiError from "@struct/handlers/AokiError";
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { CommandContext, Declare, SubCommand } from "seyfert";
 
-export default class Advice extends Subcommand {
-  constructor() {
-    super({
-      name: 'advice',
-      description: 'get a random piece of advice.',
-      permissions: [],
-      options: []
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
+@Declare({
+  name: 'advice',
+  description: 'get a random piece of advice.'
+})
+export default class Advice extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
     try {
       // fetch advice from the API
       const response = await fetch("https://api.adviceslip.com/advice");
@@ -22,12 +16,12 @@ export default class Advice extends Subcommand {
       const advice = data.slip.advice;
       
       // send the response
-      await i.reply({ content: advice });
+      await ctx.write({ content: advice });
     } catch {
       return AokiError.API_ERROR({
-        sender: i,
+        sender: ctx.interaction,
         content: "Failed to fetch advice. Try again later."
       });
     }
-  };
+  }
 }

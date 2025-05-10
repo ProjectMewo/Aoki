@@ -1,6 +1,6 @@
-import { Schedule } from "../assets/graphql";
-import { EmbedBuilder } from "discord.js";
-import AokiClient from "./Client";
+import { Schedule } from "@assets/graphql";
+import { Embed } from "seyfert";
+import AokiClient from "@struct/Client";
 import AnilistUtil from "@utils/AniList";
 
 interface ScheduleEntry {
@@ -78,7 +78,7 @@ export default class AniSchedule {
     const data = await this.fetch<{ Page?: { airingSchedules: AiringSchedule[] } }>(this.schedule, { page: 0, watched, episode });
 
     if (!data) {
-      this.client.utils.logger.warn('No data found for schedules.', '[AniSchedule]');
+      this.client.logger.warn('No data found for schedules.');
       return;
     }
 
@@ -89,17 +89,17 @@ export default class AniSchedule {
       if (!entry) continue;
 
       try {
-        const user = await this.client.users.fetch(schedule.id);
-        await user.send({ embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000))] });
-        await user.setSchedule({ nextEp: Number(schedule.nextep) + 1 });
+        await this.client.users.fetch(schedule.id, true);
+        await this.client.users.write(schedule.id, { embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000))] });
+        // await user.setSchedule({ nextEp: Number(schedule.nextep) + 1 });
       } catch (error: any) {
-        this.client.utils.logger.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
+        this.client.logger.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
       }
     }
     this.reInit();
   }
 
-  private _makeAnnouncementEmbed(entry: AiringSchedule, date: Date): EmbedBuilder {
+  private _makeAnnouncementEmbed(entry: AiringSchedule, date: Date): Embed {
     const sites = ['Amazon', 'Animelab', 'AnimeLab', 'Crunchyroll', 'Funimation', 'Hidive', 'Hulu', 'Netflix', 'Viz'];
     const watch = entry.media.externalLinks?.filter(link => sites.includes(link.site))
       .map(link => `[${link.site}](${link.url})`).join(' • ') || null;
@@ -126,7 +126,7 @@ export default class AniSchedule {
       entry.media.studios.edges.length ? `Studio: ${entry.media.studios.edges[0].node.name}` : null
     ].filter(Boolean).join('  •  ');
 
-    return new EmbedBuilder()
+    return new Embed()
       .setColor(10800862)
       .setThumbnail(entry.media.coverImage.large)
       .setTitle('AniSchedule')

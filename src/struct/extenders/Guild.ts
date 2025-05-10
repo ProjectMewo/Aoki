@@ -1,4 +1,4 @@
-import { Guild } from 'discord.js';
+import { Guild } from 'seyfert';
 import AokiClient from '../Client';
 import { GuildSettings } from '@local-types/settings';
 import defSchemaSettings from '../../assets/schema';
@@ -26,7 +26,7 @@ const update = function(this: Guild & { client: AokiClient }, obj: Partial<Guild
 };
 
 // Module augmentation for discord.js to extend Guild
-declare module "discord.js" {
+declare module "seyfert" {
   interface Guild {
     settings: GuildSettings;
     update(data: Partial<GuildSettings>): Promise<GuildSettings>;

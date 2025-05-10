@@ -1,3 +1,5 @@
+import { ColorResolvable } from "seyfert/lib/common";
+
 /**
  * The possible values for the current round of the tournament.
  */
@@ -47,7 +49,7 @@ export interface GuildSettings {
     /**
      * The color of the verification message embed, typically in hexadecimal format.
      */
-    color: string
+    color: ColorResolvable
   }>,
   /**
    * The (osu!) tournament settings for this guild

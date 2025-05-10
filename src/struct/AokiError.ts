@@ -1,9 +1,5 @@
-import { 
-  ChatInputCommandInteraction, 
-  Message, 
-  MessageFlags 
-} from 'discord.js';
-import LogUtility from '@utils/Logger';
+import { ChatInputCommandInteraction, Message } from 'seyfert';
+import { MessageFlags } from 'seyfert/lib/types';
 
 /**
  * Custom error class for standardized error handling.
@@ -63,13 +59,13 @@ export default class AokiError extends Error {
       // For ephemeral errors, just send the message without logging
       if (this.ephemeral) {
         if (this.sender instanceof ChatInputCommandInteraction) {
-          if (this.sender.replied || this.sender.deferred) {
-            await this.sender.followUp({
+          if (this.sender.replied) {
+            await this.sender.editOrReply({
               content: this.message,
               flags: MessageFlags.Ephemeral
             });
           } else {
-            await this.sender.reply({
+            await this.sender.write({
               content: this.message,
               flags: MessageFlags.Ephemeral
             });
@@ -80,18 +76,17 @@ export default class AokiError extends Error {
         return;
       }
 
-      const logUtil = new LogUtility;
       // Log the error to console (only for non-ephemeral errors)
-      logUtil.error(`${this.type.toUpperCase()}: ${this.message}`, '[AokiError]');
+      this.sender.client.logger.error(`${this.type.toUpperCase()}: ${this.message}`);
       
       // Send message to user based on interaction or message type
       if (this.sender instanceof ChatInputCommandInteraction) {
-        if (this.sender.replied || this.sender.deferred) {
-          await this.sender.followUp({
+        if (this.sender.replied) {
+          await this.sender.editOrReply({
             content: this.message
           });
         } else {
-          await this.sender.reply({
+          await this.sender.write({
             content: this.message
           });
         }
@@ -100,7 +95,7 @@ export default class AokiError extends Error {
       }
     } catch (err) {
       // If handling the error fails, log this secondary error
-      console.error('Error while handling AokiError:', err);
+      this.sender.client.logger.error('Error while handling AokiError: ' + err);
     }
   }
 

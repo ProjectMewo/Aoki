@@ -12,37 +12,28 @@
 </div>
 
 ---
-## Information about this project
+## Information about this branch
 
-***For users***, Aoki is your tsundere helper in Discord, the modern world's favorite messaging app. She "specializes in providing advanced anime information and handy utilities, all within your Discord server." Soon, she'll have native support for [osu!](https://osu.ppy.sh), but now with various things not available in other applications.
+> [!NOTE]
+> This branch serves as a **proof-of-concept** of (some parts of) Aoki ported to [Seyfert](https://www.seyfert.dev). It is not stable and will not be so until Seyfert becomes more stable and better structured.
 
-You want to know more right now? Head to the [info file](/INFO.md), or [invite her now](https://discord.com/oauth2/authorize?client_id=704992714109878312).
+***For you developers***, this branch is a [Seyfert](https://www.seyfert.dev) implementation of Aoki. A part of her, though, because Seyfert's structure is utterly messy to work with when it comes to very complex structuring from Discord.js.
 
-***For developers***, Aoki is a Discord application, available as both a gateway-based app (the current release) and a serverless app (before v4). The serverless app is for Cloudflare Workers. Tagged versions after v3 can be hosted anywhere with Bun and process persistence.
+From my benchmarkings, Seyfert's resource usage will ***only** matter to you* when you hit about **1,000 guilds** and above, which also means you probably have a codebase you wouldn't spend time rewrite all of it with the current state of Seyfert —  a hot mess at version 3. Other than that it makes no difference. Just more complex code.
 
-## Tech stacks
-### Language
-Previously, Aoki was written in **JavaScript**. To better adapt to modern standards, Aoki is rewritten in TypeScript, which reduces random runtime errors. There are no plans to rewrite it into another language yet, and community adaptation is welcome.
+The pros of this library is that you ditch all the command/event/so on loaders you usually have to write from scratch, and a pretty good base to modularize what you want to add. The cons, well, it's *too barebones* to be able to scale to complexity. That's probably why not a lot of people use it although it's been there since 2022.
 
-On JavaScript releases, only ESM is supported. CommonJS is not.
+Another cons of this library is that it... it does not have a documentation that makes sense. The place they lead you to is a *guide*, not a documentation. The lack of JSDoc comments in their source code and the lack of proper documentation in both their source code and their guide is the reason I will never go back — believe it or not, this is in their source code:
 
-### Database
-Aoki is built with MongoDB and the `mongodb` library. Other databases are available if you want them instead:
-- PostgreSQL - release 4.2 and 4.3 uses `Bun#sql` under the hood.
-- MongoDB with `mongoose` was a JavaScript implementation in release 4.1.
-- Cloudflare's `D1` database was also a JavaScript implementation for Aoki serverless in release `<=3.0`.
+![nice documentation](VvuyzKn.png)
 
-### Runtime
-Aoki officially supports **Bun v1.2.4+**. Any Node version should also work as long as it's above the minimum requirement for `discord.js`.
+Also the guide is very, *very* poor in detail. I've made plenty of TypeScript applications, check that out if you like. I understood half the guide, the vital part? Figure it out yourself because you just need to "let the autocomplete of your editor guide you and discover all the possibilities you have." Helpful, thanks.
 
-### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries and bite-sized utilities are implemented inside the [utils](/src/struct/utils/) directory. This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy. The rest of it is for bundling libraries.
-
-### Future-proof
-Check the [roadmap](#6) for future planned implementations.
+### Huge slander. Why did you try then?
+I hate Discord.js.
 
 ## Local development setup
-Make sure you have Bun v1.2.4+ on your local machine. [Install it here](https://bun.sh).
+Make sure you have Bun v1.2.4+ on your local machine. [Install it here](https://bun.sh). Seyfert also supports Node or whatever it does, check their docs, but I made it work with Bun.
 
 Place all the necessary keys required by first renaming the `.env.example` file to `.env`, and then fill it. **It is recommended that you use only the DEV variant of the keys.**
 
@@ -50,30 +41,6 @@ Start the dev client by running this one-liner (which installs all dependencies 
 ```bash
 bun i && npm run dev
 ```
-
-## Project structure
-The file tree is fairly simple in construction.
-```bash
-aoki
-├── ...
-├── README.md
-├── LICENSE
-├── package.json
-├── .env.example   # example secret keys file
-├── src            # project source code
-│   ├── ...
-│   ├── assets     # static JS files
-│   ├── struct     # code structure files
-│   │   └── extenders   # altering discord.js core
-│   │   └── handlers    # handlers
-│   │   └── utils       # fragmented utilities
-│   ├── types      # type definition for things
-│   ├── events     # Discord.js events
-│   ├── web        # web API (barebones)
-│   └── cmd        # main commands directories
-└── 
-```
-To implement new stuff, read [INSTRUCTIONS.md](/INSTRUCTIONS.md).
 
 ## Code License & Contribution
 [GPL-3.0](/LICENSE).

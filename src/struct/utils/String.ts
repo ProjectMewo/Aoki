@@ -1,9 +1,7 @@
-import levenshtein from 'fast-levenshtein';
-
 /**
  * Utility class for text and string manipulation
  */
-export default class TextUtil {
+export default class StringUtil {
   private namedEntityRegex: RegExp;
   private decodeRegex: RegExp;
   private encodeMap: { [key: string]: string };
@@ -96,6 +94,29 @@ export default class TextUtil {
   }
 
   /**
+    * Calculates the Levenshtein distance between two strings
+    * @param {string} a The first string
+    * @param {string} b The second string
+    * @returns {number} The Levenshtein distance
+    */
+  public levenshtein(a: string, b: string): number {
+    const matrix: number[][] = Array.from({ length: a.length + 1 }, (_, i) =>
+      Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+    );
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1, // Deletion
+          matrix[i][j - 1] + 1, // Insertion
+          matrix[i - 1][j - 1] + cost // Substitution
+        );
+      }
+    }
+    return matrix[a.length][b.length];
+  };
+
+  /**
    * Find the known entry that matches the input string the closest.
    * @param input The input string
    * @param titles The known entries to match against
@@ -108,7 +129,7 @@ export default class TextUtil {
     let bestDistance = Infinity;
 
     for (const title of titles) {
-      const distance = levenshtein.get(input, title.toLowerCase());
+      const distance = this.levenshtein(input, title.toLowerCase());
       if (distance < bestDistance && distance <= threshold) {
         bestDistance = distance;
         bestMatch = title;

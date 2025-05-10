@@ -1,4 +1,4 @@
-import { Collection } from "discord.js";
+import { Collection } from "seyfert";
 import AokiClient from "./Client";
 /**
  * Manages settings for a specific table.

@@ -4,3 +4,5 @@ node_modules
 package-lock.json
 dist/
 eng.traineddata
+cmd.json
+old-src

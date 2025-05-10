@@ -1,38 +1,54 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  createChannelOption, 
+  Declare, 
+  Embed, 
+  SubCommand, 
+  Options 
+} from "seyfert";
 
-export default class Channel extends Subcommand {
-  constructor() {
-    super({
-      name: 'channel',
-      description: 'get information about a channel',
-      permissions: [],
-      options: [
-        {
-          type: 'channel',
-          name: 'channel',
-          description: 'the channel to get information about',
-          required: false
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    const channel = i.options.getChannel("channel") ?? i.channel;
-    
-    if (!channel) {
-      throw new Error("Channel not found.");
+const options = {
+  channel: createChannelOption({
+    description: 'the channel to get information about',
+    required: false
+  })
+};
+
+@Declare({
+  name: 'channel',
+  description: 'get information about a channel'
+})
+@Options(options)
+export default class Channel extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const { channel } = ctx.options;
+    const targetChannel = channel ?? ctx.channel;
+
+    if (!targetChannel) {
+      throw AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: "Channel not found."
+      });
     }
-    
-    // Ensure channel has a name property
-    if (!('name' in channel)) {
-      throw new Error("Invalid channel type.");
+
+    if (!('name' in targetChannel)) {
+      throw AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: "Invalid channel type."
+      });
     }
-    
-    const ch = channel as { name: string; createdAt: Date | string; position?: number; nsfw?: boolean; slowmode?: number; topic?: string; id: string };
-    
+
+    const ch = targetChannel as { 
+      name: string; 
+      createdAt: Date | string; 
+      position?: number; 
+      nsfw?: boolean; 
+      slowmode?: number; 
+      topic?: string; 
+      id: string 
+    };
+
     const imgur = "https://i.imgur.com/";
     const channelTypes: { [key: number]: { icon: string; type: string } } = {
       0: { icon: `${imgur}IkQqhRj.png`, type: "Text Channel" },
@@ -46,16 +62,15 @@ export default class Channel extends Subcommand {
       14: { icon: `${imgur}Dfu73ox.png`, type: "Guild Directory" },
       15: { icon: `${imgur}q13YoYu.png`, type: "Guild Forum" }
     };
-    
-    // channel.type might be unknown, cast to number if safe
-    const key = (channel as any).type as number;
+
+    const key = (targetChannel as any).type as number;
     const { icon, type } = channelTypes[key] || { icon: "", type: "Unknown" };
-    
+
     const createdAt = new Date((ch.createdAt as string) || Date.now());
-    const time = i.client.utils.time.formatDistance(createdAt, new Date());
-    
+    const time = ctx.client.utils.time.formatDistance(createdAt, new Date());
+
     const authorFieldName = `${ch.name}${ch.name.endsWith("s") ? "'" : "'s"} Information`;
-    const field = i.client.utils.string.keyValueField({
+    const field = ctx.client.utils.string.keyValueField({
       "Position": ch.position || "Unknown",
       "Type": type,
       "Created": time,
@@ -64,15 +79,18 @@ export default class Channel extends Subcommand {
       "ID": ch.id,
       "Topic": ch.topic
     }, 30);
-    
-    const embed = new EmbedBuilder()
+
+    const embed = new Embed()
       .setColor(10800862)
       .setAuthor({ name: authorFieldName })
       .setThumbnail(icon)
       .addFields([{ name: "\u2000", value: field }])
-      .setFooter({ text: `Requested by ${i.user.username}`, iconURL: i.user.displayAvatarURL() })
+      .setFooter({
+        text: `Requested by ${ctx.author.username}`,
+        iconUrl: ctx.author.avatarURL()
+      })
       .setTimestamp();
-      
-    await i.editReply({ embeds: [embed] });
+
+    await ctx.editOrReply({ embeds: [embed] });
   }
 }

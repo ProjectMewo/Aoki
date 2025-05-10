@@ -1,62 +1,57 @@
-import AokiError from "@struct/handlers/AokiError";
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  createUserOption, 
+  Declare, 
+  SubCommand, 
+  Options 
+} from "seyfert";
 
-export default class Ship extends Subcommand {
-  constructor() {
-    super({
-      name: 'ship',
-      description: 'ship two users together and see their compatibility.',
-      permissions: [],
-      options: [
-        {
-          type: 'user',
-          name: 'first',
-          description: 'the first user to ship',
-          required: true
-        },
-        {
-          type: 'user',
-          name: 'second',
-          description: 'the second user to ship',
-          required: true
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    // Get the users from the options
-    const first = i.options.getUser("first")!;
-    const second = i.options.getUser("second")!;
-    
+const options = {
+  first: createUserOption({
+    description: 'the first user to ship',
+    required: true
+  }),
+  second: createUserOption({
+    description: 'the second user to ship',
+    required: true
+  })
+}
+
+@Declare({
+  name: 'ship',
+  description: 'ship two users together and see their compatibility.'
+})
+@Options(options)
+export default class Ship extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const { first, second } = ctx.options;
+
     // Check if user is trying to ship with the bot
-    if (first.id === i.client.user!.id || second.id === i.client.user!.id) {
+    if (first.id === ctx.client.me!.id || second.id === ctx.client.me!.id) {
       return AokiError.USER_INPUT({
-        sender: i,
+        sender: ctx.interaction,
         content: "Ew, I'm not a fan of shipping. Choose someone else!"
       });
     }
-    
+
     // Check if user is shipping themselves
     if (first.id === second.id) {
       return AokiError.USER_INPUT({
-        sender: i,
+        sender: ctx.interaction,
         content: "Pfft. No one does that, baka."
       });
     }
 
     // Lucky wheel logic (5% chance)
-    const luckyWheelRate = i.client.utils.array.probability(5);
+    const luckyWheelRate = ctx.client.utils.array.probability(5);
     if (luckyWheelRate) {
-      // 40% chance of getting 100%, otherwise 0%
-      const rollProbability = i.client.utils.array.probability(40);
+      const rollProbability = ctx.client.utils.array.probability(40);
       const result = rollProbability ? "100" : "0";
-      
-      await i.editReply({ content: "Lucky wheel time! Let's see if you two are lucky!" });
+
+      await ctx.write({ content: "Lucky wheel time! Let's see if you two are lucky!" });
       await new Promise(resolve => setTimeout(resolve, 3000));
-      await i.editReply({ 
+      await ctx.editOrReply({ 
         content: result === "100" ? 
           "Hey, good couple! You rolled **100%**!" : 
           "Baka, you two lost. **0%** rate." 
@@ -67,7 +62,7 @@ export default class Ship extends Subcommand {
     // Normal ship rate logic
     const normalRate = Math.floor(Math.random() * 100);
     let finalShipResponse;
-    
+
     if (normalRate === 0) {
       finalShipResponse = "Woah, that's impressive. I've never seen this happen before.\n\n||That's a **0%** ship rate, consider you two lucky.||";
     } else if (normalRate <= 30) {
@@ -82,6 +77,6 @@ export default class Ship extends Subcommand {
       finalShipResponse = "Holy cow. Perfect couple right here duh? **100%** ship rate!";
     }
 
-    await i.editReply({ content: finalShipResponse });
+    await ctx.write({ content: finalShipResponse });
   }
 }

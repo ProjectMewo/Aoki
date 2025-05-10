@@ -1,34 +1,15 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { 
-  ChatInputCommandInteraction, 
-  EmbedBuilder, 
-  version as DiscordVersion 
-} from "discord.js";
-import * as os from "os";
-import pkg from "../../../package.json";
-
-export default class Stats extends Subcommand {
-  constructor() {
-    super({
-      name: 'stats',
-      description: 'get the bot\'s statistics',
-      permissions: [],
-      options: []
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    // Check cache first
-    const cacheEntry = i.client.statsCache.get(i.user.id);
-    const cacheTTL = 10 * 60 * 1000; // 10 minutes
-    
-    if (cacheEntry && (Date.now() - cacheEntry.timestamp < cacheTTL)) {
-      await i.reply({ embeds: [cacheEntry.embed] });
-      return;
-    }
-    
+import { CommandContext, Declare, Embed, SubCommand } from "seyfert";
+import os from 'os';
+import * as pkg from "../../../package.json";
+ 
+@Declare({
+  name: "stats",
+  description: "the nerdy statistics of how I'm working."
+})
+export default class Stats extends SubCommand {
+  async run(ctx: CommandContext) {
     // Defer reply since gathering stats might take time
-    await i.deferReply();
+    await ctx.deferReply();
     
     // Gather system stats
     const totalMem: number = os.totalmem();
@@ -40,7 +21,7 @@ export default class Stats extends Subcommand {
     const processMemUsage: string = (process.memoryUsage().rss / 1024 / 1024).toFixed(2) + 'MB';
     
     // Create formatted fields
-    const techField = i.client.utils.string.keyValueField({
+    const techField = ctx.client.utils.string.keyValueField({
       'RAM': `${(totalMem / 1024 / 1024).toFixed(2)}MB`,
       'Free': `${(freeMem / 1024 / 1024).toFixed(2)}MB`,
       'Used Total': memUsage,
@@ -48,40 +29,48 @@ export default class Stats extends Subcommand {
       'CPU Load': `${cpuLoad}%`,
       'System Uptime': uptime
     }, 25);
-    
-    const botField = i.client.utils.string.keyValueField({
-      'Client Version': pkg.version,
-      'My Uptime': i.client.utils.time.msToTimeString(i.client.uptime),
-      'Server Count': i.client.utils.string.commatize(i.client.guilds.cache.size),
-      'Channel Count': i.client.utils.string.commatize(i.client.channels.cache.size),
-      'Unique Users': i.client.utils.string.commatize(i.client.users.cache.size),
-      'Emoji Count': i.client.utils.string.commatize(i.client.emojis.cache.size)
+
+    const guilds = await ctx.client.guilds.list();
+    let userCount = 0;
+
+    for (const guild of guilds) {
+      const fetchedGuild = await guild.fetch();
+      const members = fetchedGuild.memberCount;
+      userCount += members || 0;
+    }
+
+    const clientUptime = `${ctx.client.utils.time.msToTimeString(Date.now() - ctx.client.startTime)}`;
+
+    const appField = ctx.client.utils.string.keyValueField({
+      'Client Version': `${pkg.version}`,
+      'Client Uptime': `${clientUptime}`,
+      'Commands': `${ctx.client.commands.values.length}`,
+      'Servers': `${guilds.length}`,
+      'Users': `${userCount}`,
+      'Avg. User/Server': `${(userCount / guilds.length).toFixed(0)}`
     }, 25);
     
     // Description with system info
     const description: string = [
       `- **Linux Kernel** v${os.release()}`,
       `- **Node** ${process.version}`,
-      `- **Discord.js** v${DiscordVersion}`,
-      `- **CPU**: ${os.cpus()[0].model} \`[ ${os.cpus()[0].speed / 1000} GHz ]\``
+      `- **Seyfert** v${pkg.dependencies.seyfert.replace("^", "")}`,
+      `- **CPU**: ${os.cpus()[0].model} \`[${os.cpus()[0].speed / 1000 || "Unknown"} GHz]\``
     ].join("\n");
     
     // Create embed
-    const embed = new EmbedBuilder()
+    const embed = new Embed()
       .setColor(10800862)
-      .setAuthor({ name: "Raw Statistics", iconURL: i.client.user!.displayAvatarURL() })
+      .setAuthor({ name: "Raw Statistics", iconUrl: ctx.client.me!.avatarURL() })
       .setDescription(description)
       .setFooter({ text: "Probably a moron" })
       .addFields([
         { name: 'System', value: techField, inline: true },
-        { name: 'Client', value: botField, inline: true }
+        { name: 'App', value: appField, inline: true }
       ])
       .setTimestamp();
-
-    // Store in cache
-    i.client.statsCache.set(i.user.id, { embed, timestamp: Date.now() });
     
     // Send response
-    await i.editReply({ embeds: [embed] });
+    await ctx.editOrReply({ embeds: [embed] });
   }
 }

@@ -1,4 +1,4 @@
-import Command from "@struct/handlers/Command";
+import { Declare, Command, Options } from "seyfert";
 import Eightball from "./8ball";
 import Advice from "./advice";
 import Affirmation from "./affirmation";
@@ -10,24 +10,9 @@ import Today from "./today";
 import Truth from "./truth";
 import Owo from "./owo";
 
-export default class Fun extends Command {
-  constructor() {
-    super({
-      name: 'fun',
-      description: 'some commands for funny stuff',
-      cooldown: 0,
-      subcommands: [
-        new Eightball,
-        new Advice,
-        new Affirmation,
-        new Fact,
-        new Fortune,
-        new Generator,
-        new Ship,
-        new Today,
-        new Truth,
-        new Owo
-      ],
-    })
-  };
-}
+@Declare({
+  name: 'fun',
+  description: 'some commands for funny stuff'
+})
+@Options([Eightball, Advice, Affirmation, Fact, Fortune, Generator, Ship, Today, Truth, Owo])
+export default class Fun extends Command {};

@@ -1,4 +1,4 @@
-import { User } from 'discord.js';
+import { User } from 'seyfert';
 import AokiClient from '../Client';
 import { UserSettings, ScheduleData } from '@local-types/settings';
 import defSchemaSettings from '../../assets/schema';
@@ -16,12 +16,11 @@ const settings = function(this: User & { client: AokiClient }): UserSettings {
 };
 
 /**
- * Check if this user is the bot owner
+ * Check if this user is the developer
  */
-const owner = function(this: User & { client: AokiClient }): boolean {
-  return Array.isArray(this.client.config.owners) 
-    ? this.client.config.owners.includes(this.id)
-    : this.id === this.client.config.owners;
+const dev = function(this: User & { client: AokiClient }): boolean {
+  const devArray = process.env.DEV_ID!.split(",");
+  return devArray.includes(this.id);
 };
 
 /**
@@ -29,7 +28,7 @@ const owner = function(this: User & { client: AokiClient }): boolean {
  */
 const voted = async function(this: User & { client: AokiClient }): Promise<boolean> {
   const userId = this.id;
-  return fetch(`https://top.gg/api/bots/${this.client.user.id}/check`, {
+  return fetch(`https://top.gg/api/bots/${this.client.me!.id}/check`, {
     headers: { 
       Authorization: process.env.DBL_TOKEN as string,
       'Content-Type': 'application/json'
@@ -62,10 +61,10 @@ const update = function(this: User & { client: AokiClient }, data: Partial<UserS
 };
 
 // Module augmentation for discord.js to extend User
-declare module "discord.js" {
+declare module "seyfert" {
   interface User {
     settings: UserSettings;
-    owner(): boolean;
+    dev(): boolean;
     update(data: Partial<UserSettings>): Promise<UserSettings>;
     voted(): Promise<boolean>;
     getSchedule(): Promise<ScheduleData | null>;
@@ -75,7 +74,7 @@ declare module "discord.js" {
 
 export {
   settings,
-  owner,
+  dev,
   update,
   voted, 
   getSchedule,

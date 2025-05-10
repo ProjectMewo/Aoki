@@ -1,27 +1,15 @@
-import Command from "@struct/handlers/Command";
+import { Declare, Command, Options } from "seyfert";
+import Fault from "./fault";
+import Info from "./info";
+import Invite from "./invite";
 import Ping from "./ping";
 import Rights from "./rights";
-import Vote from "./vote";
-import Info from "./info";
-import Fault from "./fault";
 import Stats from "./stats";
-import Invite from "./invite";
+import Vote from "./vote";
 
-export default class My extends Command {
-  constructor() {
-    super({
-      name: 'my',
-      description: 'user-specific commands and settings',
-      cooldown: 0,
-      subcommands: [
-        new Ping,
-        new Rights,
-        new Vote,
-        new Info,
-        new Fault,
-        new Stats,
-        new Invite
-      ],
-    })
-  };
-}
+@Declare({
+	name: "my",
+	description: "commands related to me or my development.",
+})
+@Options([Fault, Info, Invite, Ping, Rights, Stats, Vote])
+export default class My extends Command {};

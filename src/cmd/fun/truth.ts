@@ -1,22 +1,26 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { CommandContext, Declare, SubCommand } from "seyfert";
 
-export default class Truth extends Subcommand {
-  constructor() {
-    super({
-      name: 'truth',
-      description: 'get a random truth question for truth or dare.',
-      permissions: [],
-      options: []
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    // get the truth questions from static data
-    const questions = await i.client.utils.profane.getStatic("truth");
-    // get a random question
-    const question = i.client.utils.array.random(questions);
-    // send the response
-    await i.reply({ content: question });
-  };
+@Declare({
+  name: 'truth',
+  description: 'get a random truth question for truth or dare.'
+})
+export default class Truth extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    try {
+      // Get the truth questions from static data
+      const questions = await ctx.interaction.client.utils.profane.getStatic("truth");
+      
+      // Get a random question
+      const question = ctx.interaction.client.utils.array.random(questions);
+      
+      // Send the response
+      await ctx.write({ content: question });
+    } catch {
+      return AokiError.API_ERROR({
+        sender: ctx.interaction,
+        content: "Failed to fetch a truth question. Try again later."
+      });
+    }
+  }
 }

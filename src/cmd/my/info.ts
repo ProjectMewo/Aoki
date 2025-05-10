@@ -1,17 +1,11 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { CommandContext, Declare, Embed, SubCommand } from "seyfert";
 
-export default class Info extends Subcommand {
-  constructor() {
-    super({
-      name: 'info',
-      description: 'get information about me',
-      permissions: [],
-      options: []
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
+@Declare({
+  name: "info",
+  description: "get information about me"
+})
+export default class Info extends SubCommand {
+  async run(ctx: CommandContext) {
     // construct message parts
     const description: string = [
       "Oh, it's you? Hey, I'm **Aoki**. It only means a mere blue tree, but sensei (`shimeji.rin`, by the way) can't do anything about it, unfortunately.\n",
@@ -34,7 +28,7 @@ export default class Info extends Subcommand {
     ];
     
     // construct embed
-    const embed = new EmbedBuilder()
+    const embed = new Embed()
       .setColor(10800862)
       .setDescription(description)
       .addFields(fields)
@@ -44,6 +38,6 @@ export default class Info extends Subcommand {
       .setTimestamp();
       
     // send
-    await i.reply({ embeds: [embed] });
+    await ctx.editOrReply({ embeds: [embed] });
   }
 }

@@ -1,51 +1,85 @@
-import { Collection, Client, EmbedBuilder } from 'discord.js';
-import { Db } from 'mongodb';
-import Command from '../struct/handlers/Command';
-import Event from '../struct/handlers/Event';
-import Schedule from '../struct/Schedule';
-import Settings from '../struct/Settings';
-import DBL from '../struct/DBL';
-import AnilistUtil from '../struct/utils/AniList';
-import ArrayUtil from '../struct/utils/Array';
-import LogUtil from '../struct/utils/Logger';
-import OsuUtil from '../struct/utils/OsuGame';
-import ProfaneUtil from '../struct/utils/Profane';
-import TextUtil from '../struct/utils/String';
-import TimeUtil from '../struct/utils/Time';
-import MiscUtil from '../struct/utils/Misc';
+import { Client, Logger } from "seyfert";
+import { MongoClient, Db } from 'mongodb'
+import Settings from "@struct/Settings";
+import AniSchedule from "@struct/Schedule";
+// Utils
+import AnilistUtil from "@utils/AniList";
+import ArrayUtil from "@utils/Array";
+import MiscUtil from "@utils/Misc";
+import OsuUtil from "@utils/OsuGame";
+import ProfaneUtil from "@utils/Profane";
+import StringUtil from "@utils/String";
+import TimeUtil from "@utils/Time";
+import DBL from "@utils/DBL";
 
-// Module augmentation for default Discord client
-declare module 'discord.js' {
-  interface Client {
+declare module '@struct/Client' {
+  export default interface AokiClient extends Client {
+    /**
+     * Whether the client is in dev mode or not
+     * @type {boolean}
+     */
     dev: boolean;
-    config: typeof import('../config').default;
-    commands: Collection<string, Command>;
-    events: Collection<string, Event>;
-    schedule: Schedule;
-    statsCache: Collection<string, { embed: EmbedBuilder, timestamp: number }>;
+    /**
+     * The scheduler instance of this client
+     * @type {AniSchedule}
+     */
+    schedule: AniSchedule;
+    /**
+     * The last guild count of this client
+     * @type {number}
+     */
     lastGuildCount: number | null;
-    osuV2Token: {
-      access_token: string | null,
-      expires_at: number | null
-    };
+    /**
+     * The time this client was started
+     * @type {number}
+     */
+    startTime: number;
+    /**
+     * The MongoDB client instance of this client
+     * @type {MongoClient | null}
+     * @private
+     */
+    dbClient: MongoClient | null;
+    /**
+     * The Mongo database instance of this client
+     * @type {Db | null}
+     */
     db: Db | null;
+    /**
+     * The osu! v2 token of this client instance
+     * @type {object}
+     */
+    osuV2Token: {
+      access_token: string | null;
+      expires_at: number;
+    };
+    /**
+     * The settings collection of this client
+     * @type {Object}
+     */
     settings: {
       users: Settings;
       guilds: Settings;
       schedules: Settings;
       verifications: Settings;
     };
+    /**
+     * Utility functions for this client
+     */
     utils: {
       anilist: AnilistUtil;
       array: ArrayUtil;
-      logger: LogUtil;
       osu: OsuUtil;
       profane: ProfaneUtil;
-      string: TextUtil;
+      string: StringUtil;
       time: TimeUtil;
       misc: MiscUtil;
       dbl: DBL;
     };
+    /**
+     * The ready status of this client
+     * @type {boolean}
+     */
     ready: boolean;
   }
 }
