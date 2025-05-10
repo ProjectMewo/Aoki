@@ -23,11 +23,39 @@ From my benchmarkings, Seyfert's resource usage will ***only** matter to you* wh
 
 The pros of this library is that you ditch all the command/event/so on loaders you usually have to write from scratch, and a pretty good base to modularize what you want to add. The cons, well, it's *too barebones* to be able to scale to complexity. That's probably why not a lot of people use it although it's been there since 2022.
 
-Another cons of this library is that it... it does not have a documentation that makes sense. The place they lead you to is a *guide*, not a documentation. The lack of JSDoc comments in their source code and the lack of proper documentation in both their source code and their guide is the reason I will never go back — believe it or not, this is in their source code:
+Another cons of this library is that it... it does not have a documentation that makes sense. The place they lead you to is a *guide*, not a documentation. The lack of JSDoc comments in their source code and the lack of proper documentation in both their source code and their guide is the reason I will never go back — believe it or not, [this is in their source code](https://github.com/tiramisulabs/seyfert/blob/92ab65be7bc75624d41da2e980d7152ff095e0b1/src/commands/handle.ts#L70):
 
-![nice documentation](VvuyzKn.png)
+![nice documentation](https://i.imgur.com/VvuyzKn.png)
 
 Also the guide is very, *very* poor in detail. I've made plenty of TypeScript applications, check that out if you like. I understood half the guide, the vital part? Figure it out yourself because you just need to "let the autocomplete of your editor guide you and discover all the possibilities you have." Helpful, thanks.
+
+Also the fact it stood out and told you Sapphire is stupid (yes, yes it is) and that you might want to try it instead — you can read the entire thing [here](https://github.com/tiramisulabs/seyfert/issues/174) — no, it's... not any better. This is what it tells me on their own modal construction on their Modal [guide](https://www.seyfert.dev/guide/components/modals). I have plenty of these not in this branch for a reason.
+
+![nice sapphire slander](https://i.imgur.com/CMnCkSz.png)
+
+[A TextInputRow on the Modal is of type 4](https://discord.com/developers/docs/components/reference#component-object) if you wonder what that says. I guess the typings of the library did not help them do the right thing because, in their own words, "they aren't components."
+
+```ts
+// This code is ripped from their own guide about Modals.
+import { Modal, TextInput, ActionRow } from 'seyfert';
+import { TextInputStyle } from 'seyfert/lib/types';
+ 
+const nameInput = new TextInput()
+  .setCustomId('name')
+  .setStyle(TextInputStyle.Short)
+  .setLabel('Name');
+
+// Typing of the century
+const row1 = new ActionRow<TextInput>().setComponents([nameInput]);
+...
+ 
+const modal = new Modal()
+  .setCustomId('mymodal')
+  .setTitle('My Modal')
+  .setComponents([row1]);
+```
+
+They *aren't* components.
 
 ### Huge slander. Why did you try then?
 I hate Discord.js.
