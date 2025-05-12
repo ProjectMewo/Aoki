@@ -17,62 +17,11 @@
 > [!NOTE]
 > This branch serves as a **proof-of-concept** of (some parts of) Aoki ported to [Seyfert](https://www.seyfert.dev). It is not stable and will not be so until Seyfert becomes more stable and better structured.
 
-***For you developers***, this branch is a [Seyfert](https://www.seyfert.dev) implementation of Aoki. A part of her, though, because Seyfert's structure is utterly messy to work with when it comes to very complex structuring from Discord.js.
+***For you developers***, this branch is a [Seyfert](https://www.seyfert.dev) implementation of Aoki. It was rewritten once again to support a more modularized method of making commands and lifting the hassle of having to handle that part yourself; and lifting the hassle of handling languages yourself. Seyfert, conveniently, did that.
 
-From my benchmarkings, Seyfert's resource usage will ***only** matter to you* when you hit about **1,000 guilds** and above, which also means you probably have a codebase you wouldn't spend time rewrite all of it with the current state of Seyfert —  a hot mess at version 3. Other than that it makes no difference. Just more complex code.
+However you don't get a lot of useful information on Seyfert, because it doesn't have a proper documentation. You have a [guide](https://docs.seyfert.dev) to work with, which is obviously quite insufficient (it took me a century to figure out how modals work here). This rewrite is just a **proof-of-concept**, it is not a fully cleaned up prototype to use in production.
 
-The pros of this library is that you ditch all the command/event/so on loaders you usually have to write from scratch, and a pretty good base to modularize what you want to add. The cons, well, it's *too barebones* to be able to scale to complexity. That's probably why not a lot of people use it although it's been there since 2022.
-
-Another cons of this library is that it... it does not have a documentation that makes sense. The place they lead you to is a *guide*, not a documentation. The lack of JSDoc comments in their source code and the lack of proper documentation in both their source code and their guide is the reason I will never go back — believe it or not, [this is in their source code](https://github.com/tiramisulabs/seyfert/blob/92ab65be7bc75624d41da2e980d7152ff095e0b1/src/commands/handle.ts#L70):
-
-![nice documentation](https://i.imgur.com/VvuyzKn.png)
-
-Also the guide is very, *very* poor in detail. I've made plenty of TypeScript applications, check that out if you like. I understood half the guide, the vital part? Figure it out yourself because you just need to "let the autocomplete of your editor guide you and discover all the possibilities you have." Helpful, thanks.
-
-Also the fact it stood out and told you Sapphire is stupid (yes, yes it is) and that you might want to try it instead — you can read the entire thing [here](https://github.com/tiramisulabs/seyfert/issues/174) — no, it's... not any better. This is what it tells me on their own modal construction on their Modal [guide](https://www.seyfert.dev/guide/components/modals). I have plenty of these not in this branch for a reason.
-
-![nice sapphire slander](https://i.imgur.com/CMnCkSz.png)
-
-[A TextInputRow on the Modal is of type 4](https://discord.com/developers/docs/components/reference#component-object) if you wonder what that says. I guess the typings of the library did not help them do the right thing because, in their own words, "they aren't components."
-
-```ts
-// This code is ripped from their own guide about Modals.
-import { Modal, TextInput, ActionRow } from 'seyfert';
-import { TextInputStyle } from 'seyfert/lib/types';
- 
-const nameInput = new TextInput()
-  .setCustomId('name')
-  .setStyle(TextInputStyle.Short)
-  .setLabel('Name');
-
-// Typing of the century
-const row1 = new ActionRow<TextInput>().setComponents([nameInput]);
-...
- 
-const modal = new Modal()
-  .setCustomId('mymodal')
-  .setTitle('My Modal')
-  .setComponents([row1]);
-```
-
-They *aren't* components.
-
-By the way, you might be asking about the size and performance, where did I take that info from, when Seyfert have [benchmarked them all](https://www.seyfert.dev/benchmark)? I battle-tested both Seyfert and Discord.js in a not-very-fair competition on my Discord apps, as in:
-
-- Runtime: Bun v1.2.12 (latest).
-- Discord.js: main Aoki client (~350 servers, ~70k members), no sharding, source code in [the `typescript-next` branch](https://github.com/ProjectMewo/Aoki/tree/typescript-next) (which includes more things than this branch)
-- Seyfert A: main Aoki client, source code is this branch. Sharding is done through their internal functions and stuff like that.
-- Seyfert B: a dev bot in a singular server.
-
-Results over a couple of hours (around 3 hours+):
-
-- Discord.js: [around 170MB](https://i.imgur.com/Jry6SOZ.png).
-- Seyfert A: [around 130MB](https://i.imgur.com/JjjZm9o.png).
-- Seyfert B: [around 100MB](https://i.imgur.com/JV0Zvwd.png).
-
-There's virtually no difference. The benchmark they showed you is nothing short of... not-very-ideal test cases for a moderately large app to a very large app to rely on for a complete rewrite.
-
-**tl;dr:** Don't 100% trust the internet.
+All technologies are still the same, except without Discord.js and with Seyfert.
 
 ### Huge slander. Why did you try then?
 I hate Discord.js.
