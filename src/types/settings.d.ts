@@ -1,5 +1,3 @@
-import { ColorResolvable } from "seyfert/lib/common";
-
 /**
  * The possible values for the current round of the tournament.
  */
@@ -11,9 +9,9 @@ export type TournamentRound = "" | "Qualifiers" | "Group Stage" | "Round of 32" 
  */
 export interface GuildSettings {
   /**
-   * The ID of the channel where timestamps are sent.
+   * The ID of the channels where timestamps are sent.
    */
-  timestampChannel: string,
+  timestampChannel: Array<string>,
   /**
    * The verification settings for the guild.
    */
@@ -49,7 +47,7 @@ export interface GuildSettings {
     /**
      * The color of the verification message embed, typically in hexadecimal format.
      */
-    color: ColorResolvable
+    color: string
   }>,
   /**
    * The (osu!) tournament settings for this guild

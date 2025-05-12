@@ -77,6 +77,18 @@ declare module '@struct/Client' {
       dbl: DBL;
     };
     /**
+     * Caching for /my stats
+     */
+    statsCache: {
+      data: {
+        techField: string;
+        appField: string;
+        description: string;
+        embedTimestamp: Date;
+      };
+      lastUpdated: number;
+    };
+    /**
      * The ready status of this client
      * @type {boolean}
      */

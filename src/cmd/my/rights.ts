@@ -13,7 +13,7 @@ const options = {
     required: true,
     choices: [
       { name: 'read & process your messages', value: 'processMessagePermission' },
-      { name: 'save your osu! account details on verification', value: 'saveOsuUserAccount' }
+      { name: 'save your osu! profile details on verification', value: 'saveOsuUserAccount' }
     ]
   }),
   should_be: createBooleanOption({
@@ -44,7 +44,7 @@ export default class Rights extends SubCommand {
     
     const properQuery: { [key: string]: string } = {
       processMessagePermission: "read & process your messages",
-      saveOsuUserAccount: "save your osu! account details on verification"
+      saveOsuUserAccount: "save your osu! profile details on verification"
     };
     
     if (res[query as keyof typeof res] == value) {

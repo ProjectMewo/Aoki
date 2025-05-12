@@ -11,9 +11,6 @@ export default class MiscUtil {
   public async logOnReady(client: UsingClient): Promise<void> {
     const guildCount = client.utils.string.commatize((await client.guilds.list()).length);
     const commandCount = client.commands.values.length;
-    // load the log channel to cache
-    await client.channels.fetch(process.env.LOG_CHANNEL!, true);
-    // after that we send it in there
     await client.messages.write(
       process.env.LOG_CHANNEL!, { 
         content: [

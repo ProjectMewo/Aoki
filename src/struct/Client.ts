@@ -56,6 +56,15 @@ export default class AokiClient extends Client {
       time: new TimeUtil(),
       dbl: new DBL(this)
     };
+    this.statsCache = {
+      data: {
+        techField: "",
+        appField: "",
+        description: "",
+        embedTimestamp: new Date,
+      },
+      lastUpdated: 0
+    }
   }
 
   /**

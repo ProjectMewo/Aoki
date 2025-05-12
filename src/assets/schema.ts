@@ -6,6 +6,7 @@ import {
   UserSettings,
   VerificationSettings
 } from "@local-types/settings";
+import { ColorResolvable } from "seyfert/lib/common";
 
 export default {
   users: {
@@ -21,7 +22,7 @@ export default {
   } as ScheduleData,
 
   guilds: {
-    timestampChannel: "",
+    timestampChannel: [],
     verification: {
       status: false,
       roleId: "",
@@ -30,7 +31,7 @@ export default {
       title: "",
       description: "",
       thumbnail: "",
-      color: ""
+      color: "" as ColorResolvable
     },
     tournament: {
       name: "",

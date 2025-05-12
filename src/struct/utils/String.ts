@@ -184,6 +184,25 @@ export default class StringUtil {
   }
 
   /**
+   * Converts a hex color code to a ColorResolvable-compatible integer
+   * @param hex The hex color code string (with or without leading #)
+   * @returns {number} ColorResolvable value (hex value as integer)
+   */
+  public hexToColorResolvable(hex: string): number {
+    if (typeof hex === 'number') return hex;
+
+    // Ensure the hex string is a valid hex color code
+    if (!/^#?[0-9A-Fa-f]{6}$/.test(hex)) return Number(hex);
+
+    // Remove the '#' if it exists
+    hex = hex.replace("#", "");
+
+    // Parse the hex value as an integer
+    const intValue = parseInt(hex, 16);
+    return intValue;
+  }
+
+  /**
    * Encodes a string to its corresponding HTML entities
    * @param {string} string - The string to be HTML encoded
    * @returns {string} The HTML encoded string
