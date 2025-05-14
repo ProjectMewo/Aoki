@@ -11,21 +11,42 @@ import AokiClient from "./Client";
  * this.client.settings[prop].update({ ... });
  */
 export default class Settings {
+  /**
+   * The client instance of this setting
+   * @type {AokiClient}
+   */
   private client: AokiClient;
+  /**
+   * The cache of this setting
+   * @type {Collection<string, any>}
+   */
   private cache: Collection<string, any>;
-  private table: string;
-  public constructor(client: AokiClient, table: string) {
+  /**
+   * The collection name of this setting
+   * @type {string}
+   */
+  private collection: string;
+  /**
+   * The default values of this setting
+   * @type {object}
+   */
+  private defaults: object;
+  constructor(
+    client: AokiClient, 
+    collection: string, 
+    defaults = {}
+  ) {
     this.client = client;
-    // we try to utilize discordjs's collection for performance
     this.cache = new Collection();
-    this.table = table;
+    this.collection = collection;
+    this.defaults = defaults;
   };
   /**
    * Get an entry by ID from cache.
    * @param {String} id - The ID to lookup the cache.
    * @returns {?Object} The document from the cache if available.
    */
-  public get(id: string): object | null {
+  get(id: string): object | null {
     return this.cache.get(id);
   };
   /**
@@ -38,75 +59,99 @@ export default class Settings {
    * @param {Object} obj - An object with key-value changes to apply.
    * @returns {Object} The updated object from the database.
    */
-  // read the bun v1.2.4 release notes for why we have to go from that particular version.
-  // from bun v1.2.3 backwards, tagged template literals were not enforced on your queries,
-  // therefore you can do things like this.client.db(query, ...params) and accidentally
-  // expose your database to SQL injection attacks.
-  // from bun v1.2.4 onwards, this is patched along with async requests to update a table.
-  public async update(id: string, obj: object): Promise<Object> {
+  async update(id: string, obj: object): Promise<object> {
     if (typeof obj !== "object") throw new Error("Expected an object.");
-    // combine the id with the update object
-    const data = { id, ...obj };
-    const updateKeys = Object.keys(obj);
-    // for each key, generate key = EXCLUDED.key
-    const updateClause = updateKeys
-      .map((key) => `${key} = EXCLUDED.${key}`)
-      .join(", ");
-    // the column names are static so we can safely interpolate them with `Bun.sql#unsafe`
-    if (!this.client.db) return {};
-    const [row] = await this.client.db`
-      INSERT INTO ${this.client.db(this.table)} ${this.client.db(data)}
-      ON CONFLICT (id) DO UPDATE SET ${this.client.db.unsafe(updateClause)}
-      RETURNING *
-    `;
-    this.cache.set(id, row);
-    return row;
+    const value = await this.client.db!.collection(this.collection).findOneAndUpdate({ id }, { $set: obj }, {
+      upsert: true,
+      // https://mongodb.github.io/node-mongodb-native/6.8/interfaces/FindOneAndUpdateOptions.html#returnDocument
+      returnDocument: 'after',
+      projection: { _id: 0 }
+    });
+    if (value) {
+      this.cache.set(id, this.mergeDefault(this.defaults, value));
+    }
+    return value || {};
+  };
+  /**
+   * Syncs the cache with the database.
+   * Use this in case the cache becomes outdated.
+   * @param {String} id - ID of the document to sync.
+   * @returns {Object} The newly fetched data from the database.
+   */
+  async sync(id: string): Promise<object> {
+    const doc = await this.client.db!.collection(this.collection).findOne({ id }, { projection: { _id: 0 } });
+    if (!doc) return {};
+    this.cache.set(id, this.mergeDefault(this.defaults, doc));
+    return doc;
+  };
+  /**
+   * Deletes a document with the given ID.
+   * @param {String} id - ID of the document to delete.
+   */
+  async delete(id: string) {
+    await this.client.db!.collection(this.collection).deleteOne({ id });
+    this.cache.delete(id);
+  };
+  /**
+   * Alias to db.collection(col).find(...)
+   * @param {any[]} args - Arguments to pass to the find method.
+   */
+  find(...args: [any]) {
+    return this.client.db!.collection(this.collection).find(...args);
+  };
+  /**
+   * Alias to db.collection(col).findOne(...)
+   * @param {any[]} args - Arguments to pass to the findOne method
+   */
+  findOne(...args: [any]) {
+    return this.client.db!.collection(this.collection).findOne(...args);
+  };
+  /**
+  * Return cache if available, else return the default values.
+  * @param {String} id - The ID to lookup the cache.
+  * @returns {Object} The document from the cache if available.
+  */
+  getDefaults(id: string) {
+    return this.cache.get(id) || this.defaults;
   }
   /**
-   * A simple helper to fetch one row by column name and value
-   * @param {string} column
-   * @param {any} value
-   * @returns {Promise<object|undefined>}
+   * Initializes this settings by loading the cache.
+   * Call this before the client is logged in.
    */
-  public async findOne(column: string, value: any): Promise<object | undefined> {
-    // First try the cache
-    const found = this.cache.find(doc => doc[column] == value);
-    if (found) return found;
-    // else try the database then cache it
-    if (!this.client.db) return {};
-    const [row] = await this.client.db`
-      SELECT * FROM ${this.client.db(this.table)} WHERE ${this.client.db(column)} = ${value}
-    `;
-    if (row) this.cache.set(row.id, row);
-    return row;
-  }
+  async init() {
+    const docs = await this.client.db!
+      .collection(this.collection)
+      .find({}, { projection: { _id: 0 } })
+      .toArray();
+
+    // set verification collection ttl to 1h
+    if (this.collection == "verifications") await this.client.db!
+      .collection(this.collection)
+      .createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 });
+
+    for (const doc of docs) this.cache.set(doc.id, this.mergeDefault(this.defaults, doc));
+  };
+  
+  // discord.js<=14.0.0
   /**
-   * Initializes this settings by loading the cache
+   * Sets default properties on an object that aren't already specified.
+   * @param {Object} def Default properties
+   * @param {Object} given Object to assign defaults to
+   * @returns {Object}
    */
-  public async init() {
-    // simulate TTL by cleaning up expired records
-    if (!this.client.db) return null;
-    if (this.table === "verifications") {
-      // we create an index on createdat for performance
-      await this.client.db`
-        CREATE INDEX IF NOT EXISTS "verifications_createdat_idx" ON ${this.client.db(this.table)} (createdat)
-      `;
-
-      // then delete rows older than 1 hour
-      await this.client.db`
-        DELETE FROM ${this.client.db(this.table)}
-        WHERE TO_TIMESTAMP(createdat::BIGINT) < NOW() - INTERVAL '1 hour'
-      `;
-    }
-    // retrieve all rows from the table, then populate the cache
-    const docs = await this.client.db`
-      SELECT * FROM ${this.client.db(this.table)}
-    `;
-    for (const doc of docs) {
-      this.cache.set(doc.id, doc);
+  mergeDefault(
+    def: Record<string, any>, 
+    given: Record<string, any>
+  ): Record<string, any> {
+    if (!given) return def;
+    for (const key in def) {
+      if (!Object.hasOwn(given, key) || given[key] === undefined) {
+        given[key] = def[key];
+      } else if (given[key] === Object(given[key])) {
+        given[key] = this.mergeDefault(def[key], given[key]);
+      }
     }
 
-    // reinitialize this function every 1 hour
-    setTimeout(() => this.init(), 1000 * 60 * 60);
-  }
+    return given;
+  };
 };

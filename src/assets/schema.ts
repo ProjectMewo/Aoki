@@ -1,35 +1,74 @@
-/**
- * Initializes the database schema
- * @param {*} sql 
- */
-export default async (sql: typeof Bun.sql) => {
-  await sql`CREATE TABLE IF NOT EXISTS users (
-    id BIGINT PRIMARY KEY NOT NULL,
-    ingamename TEXT,
-    defaultmode TEXT,
-    processmessagepermission BOOLEAN
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS schedules (
-    id BIGINT PRIMARY KEY NOT NULL,
-    anilistid INTEGER NOT NULL,
-    nextep INTEGER NOT NULL
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS guilds (
-    id BIGINT PRIMARY KEY,
-    timestampchannel BIGINT,
-    verificationstatus BOOLEAN,
-    verificationroleid TEXT,
-    verificationchannelid BIGINT,
-    verificationmessageid BIGINT,
-    verificationtitle TEXT,
-    verificationdescription TEXT,
-    verificationthumbnail TEXT,
-    verificationcolor TEXT
-  )`;
-  await sql`CREATE TABLE IF NOT EXISTS verifications (
-    id BIGINT PRIMARY KEY,
-    state TEXT NOT NULL,
-    createdat TEXT NOT NULL,
-    guildId BIGINT NOT NULL
-  )`;
-}
+// Default schema for the database
+// @typedef {Object} Schema
+import { 
+  GuildSettings,
+  ScheduleData,
+  UserSettings,
+  VerificationSettings
+} from "@local-types/settings";
+
+export default {
+  users: {
+    inGameName: "",
+    defaultMode: 0,
+    processMessagePermission: true,
+    saveOsuUserAccount: true
+  } as UserSettings,
+
+  schedules: {
+    anilistId: 0,
+    nextEp: 0
+  } as ScheduleData,
+
+  guilds: {
+    timestampChannel: "",
+    verification: {
+      status: false,
+      roleId: "",
+      channelId: "",
+      messageId: "",
+      title: "",
+      description: "",
+      thumbnail: "",
+      color: ""
+    },
+    tournament: {
+      name: "",
+      abbreviation: "",
+      currentRound: "",
+      mappools: [{
+        round: "",
+        slots: [],
+        maps: [{
+          slot: "",
+          url: "",
+          fullRecognizer: ""
+        }],
+        suggestions: [{
+          slot: "",
+          urls: []
+        }],
+        replays: [{
+          slot: "",
+          replayer: "",
+          messageUrl: ""
+        }],
+        replayChannelId: ""
+      }],
+      roles: {
+        host: [],
+        advisor: [],
+        mappooler: [],
+        customMapper: [],
+        testReplayer: []
+      }
+    }
+  } as GuildSettings,
+
+  verifications: {
+    id: "",
+    state: "",
+    createdAt: "",
+    guildId: ""
+  } as VerificationSettings
+};

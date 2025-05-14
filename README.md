@@ -27,22 +27,16 @@ Previously, Aoki was written in **JavaScript**. To better adapt to modern standa
 On JavaScript releases, only ESM is supported. CommonJS is not.
 
 ### Database
-To better support new infrastructure, Aoki now uses **PostgreSQL** instead, using the new built-in `Bun#sql` module. The feature is **very experimental**, as such please use with caution.
-
-> [!WARNING]
-> Starting from release 4.3, Aoki will stop supporting **any** and **all** Bun releases before **v1.2.4**. For your own database safety, it is recommended that you update using `bun upgrade`.
-> Technical information about this is in the [Settings.ts file](/src/struct/Settings.ts).
+Aoki is built with MongoDB and the `mongodb` library. Other databases are available if you want them instead:
+- PostgreSQL - release 4.2 and 4.3 uses `Bun#sql` under the hood.
+- MongoDB with `mongoose` was a JavaScript implementation in release 4.1.
+- Cloudflare's `D1` database was also a JavaScript implementation for Aoki serverless in release `<=3.0`.
 
 ### Runtime
-Aoki officially supports **Bun v1.2.4+**.
-- It has native `.env` loading support, so loading it won't be an issue.
-- It has built-in `serve()` for web stuff, which is very fast.
-- It has built-in support for PostgreSQL, which is also very fast.
+Aoki officially supports **Bun v1.2.4+**. Any Node version should also work as long as it's above the minimum requirement for `discord.js`.
 
 ### Project size
-Aoki **heavily relies** on APIs and external projects, and most redundant libraries are implemented as a single function in [Utilities.ts](/src/struct/Utilities.ts). This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy.
-
-The libraries? Bun does that. Will anything else appear in the production folder? No. It's in Bun's cache.
+Aoki **heavily relies** on APIs and external projects, and most redundant libraries and bite-sized utilities are implemented inside the [utils](/src/struct/utils/) directory. This is why the project is very small in disk space size and codebase size. After building, the entire codebase is less than a hundred kilobytes heavy. The rest of it is for bundling libraries.
 
 ### Future-proof
 Check the [roadmap](#6) for future planned implementations.
@@ -64,25 +58,22 @@ aoki
 ├── ...
 ├── README.md
 ├── LICENSE
-├── package.tson
+├── package.json
 ├── .env.example   # example secret keys file
 ├── src            # project source code
 │   ├── ...
 │   ├── assets     # static JS files
 │   ├── struct     # code structure files
-│   │   └── extenders   # altering discord.ts core
+│   │   └── extenders   # altering discord.js core
 │   │   └── handlers    # handlers
+│   │   └── utils       # fragmented utilities
 │   ├── types      # type definition for things
-│   ├── events     # Discord.ts events
+│   ├── events     # Discord.js events
 │   ├── web        # web API (barebones)
-│   └── cmd        # main commands files
+│   └── cmd        # main commands directories
 └── 
 ```
-The project follows a class-based approach to commands, events and extenders. 
-- To make a new command, make a class extending [Command.ts](/src/struct/handlers/Command.ts).
-- To handle a new event, make a class extending [Event.ts](/src/struct/handlers/Event.ts).
-
-After that, to load the new files, statically import them in [Client.ts](/src/struct/Client.ts), inside the `loadModules` function.
+To implement new stuff, read [INSTRUCTIONS.md](/INSTRUCTIONS.md).
 
 ## Code License & Contribution
 [GPL-3.0](/LICENSE).

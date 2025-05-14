@@ -1,16 +1,7 @@
 import { User } from 'discord.js';
 import AokiClient from '../Client';
-
-export interface UserSettings {
-  ingamename: string,
-  defaultmode: number,
-  processmessagepermission: boolean
-};
-
-export interface ScheduleData {
-  anilistid: number;
-  nextep: number;
-}
+import { UserSettings, ScheduleData } from '@local-types/settings';
+import defSchemaSettings from '../../assets/schema';
 
 /**
  * Get a global user's settings
@@ -20,11 +11,7 @@ const settings = function(this: User & { client: AokiClient }): UserSettings {
   if (stored && Object.keys(stored).length > 0) {
     return stored as UserSettings;
   }
-  const defaultSettings: UserSettings = {
-    ingamename: "",
-    defaultmode: 0,
-    processmessagepermission: true
-  };
+  const defaultSettings: UserSettings = defSchemaSettings.users;
   return defaultSettings;
 };
 
@@ -32,9 +19,9 @@ const settings = function(this: User & { client: AokiClient }): UserSettings {
  * Check if this user is the bot owner
  */
 const owner = function(this: User & { client: AokiClient }): boolean {
-  return Array.isArray(this.client.util.owners) 
-    ? this.client.util.owners.includes(this.id)
-    : this.id === this.client.util.owners;
+  return Array.isArray(this.client.config.owners) 
+    ? this.client.config.owners.includes(this.id)
+    : this.id === this.client.config.owners;
 };
 
 /**
@@ -56,8 +43,8 @@ const voted = async function(this: User & { client: AokiClient }): Promise<boole
 /**
  * Check whether this user has already set up AniSchedule
  */
-const getSchedule = function(this: User & { client: AokiClient }): object {
-  return this.client.settings.schedules.findOne("id", this.id);
+const getSchedule = function(this: User & { client: AokiClient }): Partial<ScheduleData> {
+  return this.client.settings.schedules.findOne({ id: this.id }) as Partial<ScheduleData>;
 };
 
 /**
