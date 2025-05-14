@@ -3,6 +3,7 @@ import {
   CommandContext,
   createChannelOption,
   Declare,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -11,6 +12,10 @@ import { ChannelType, PermissionFlagsBits } from "seyfert/lib/types";
 const options = {
   channel: createChannelOption({
     description: 'the channel to send beatmap timestamps to',
+    description_localizations: {
+      "en-US": 'the channel to send beatmap timestamps to',
+      "vi": 'kênh để gửi dấu thời gian của beatmap'
+    },
     required: true,
     channel_types: [ChannelType.GuildText]
   })
@@ -20,9 +25,11 @@ const options = {
   name: 'add_timestamp_channel',
   description: 'add a channel for detecting osu! editor timestamps'
 })
+@LocalesT('osu.timestampChannel.name', 'osu.timestampChannel.description')
 @Options(options)
 export default class TimestampChannel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.timestampChannel;
     const channel = ctx.options.channel;
 
     // Check if the user has the required permissions
@@ -31,7 +38,7 @@ export default class TimestampChannel extends SubCommand {
     if (!(await member?.fetchPermissions()).has([PermissionFlagsBits.ManageChannels])) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: "Baka, you don't have the **Manage Channels** permission. You can't edit this setting."
+        content: t.noPermission
       });
     }
 
@@ -40,13 +47,13 @@ export default class TimestampChannel extends SubCommand {
     if (!(await botMember?.fetchPermissions()).has([PermissionFlagsBits.ViewChannel])) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: "Baka, I can't see that channel. Enable **View Channel** in permissions view, please."
+        content: t.botNoViewPermission
       });
     }
     if (!(await botMember?.fetchPermissions()).has([PermissionFlagsBits.SendMessages])) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: "Baka, I can't send messages in there. Enable **Send Messages** in permissions view, please."
+        content: t.botNoSendPermission
       });
     }
 
@@ -56,14 +63,14 @@ export default class TimestampChannel extends SubCommand {
       ctx.client.logger.fatal(`Expected an array for currentChannels on guild ${ctx.guildId}`);
       return AokiError.INTERNAL({
         sender: ctx.interaction,
-        content: "My sensei messed up. They're notified, please do this again tomorrow.\n\nSorry for the inconvenience."
+        content: t.internalError
       });
     }
 
     if (currentChannels.includes(channel.id)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `The channel <#${channel.id}> is already in the list of timestamp channels.`
+        content: t.alreadyExists(channel.id)
       });
     }
 
@@ -71,7 +78,7 @@ export default class TimestampChannel extends SubCommand {
     await guild.update({ timestampChannel: currentChannels });
 
     await ctx.editOrReply({
-      content: `Added <#${channel.id}> to the list of timestamp channels.`
+      content: t.added(channel.id)
     });
   }
 }

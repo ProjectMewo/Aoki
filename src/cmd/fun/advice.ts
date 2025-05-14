@@ -1,12 +1,14 @@
 import AokiError from "@struct/AokiError";
-import { CommandContext, Declare, SubCommand } from "seyfert";
+import { CommandContext, Declare, LocalesT, SubCommand } from "seyfert";
 
 @Declare({
   name: 'advice',
   description: 'get a random piece of advice.'
 })
+@LocalesT('fun.advice.name', 'fun.advice.description')
 export default class Advice extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.advice;
     try {
       // fetch advice from the API
       const response = await fetch("https://api.adviceslip.com/advice");
@@ -20,7 +22,7 @@ export default class Advice extends SubCommand {
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Failed to fetch advice. Try again later."
+        content: t.apiError
       });
     }
   }

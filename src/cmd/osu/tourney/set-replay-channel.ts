@@ -5,30 +5,31 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
-  SubCommand
+  SubCommand,
+  AutocompleteInteraction
 } from "seyfert";
 import { ChannelType } from "seyfert/lib/types";
 
 const options = {
   channel: createChannelOption({
-    description: 'The channel to set for replays',
+    description: 'the channel to set for replays',
+    description_localizations: {
+      "en-US": 'the channel to set for replays',
+      "vi": 'kênh để đặt cho phát lại'
+    },
     required: true,
     channel_types: [ChannelType.GuildText]
   }),
   round: createStringOption({
-    description: 'The round this channel is for',
+    description: 'the round this channel is for',
+    description_localizations: {
+      "en-US": 'the round this channel is for',
+      "vi": 'vòng đấu mà kênh này dành cho'
+    },
     required: true,
-    choices: [
-      { name: 'Qualifiers', value: 'Qualifiers' },
-      { name: 'Group Stage', value: 'Group Stage' },
-      { name: 'Round of 32', value: 'Round of 32' },
-      { name: 'Round of 16', value: 'Round of 16' },
-      { name: 'Quarterfinals', value: 'Quarterfinals' },
-      { name: 'Semifinals', value: 'Semifinals' },
-      { name: 'Finals', value: 'Finals' },
-      { name: 'Grand Finals', value: 'Grand Finals' }
-    ]
+    autocomplete: async (interaction) => await SetReplayChannel.prototype.autocomplete(interaction)
   })
 };
 
@@ -36,10 +37,52 @@ const options = {
   name: 'set-replay-channel',
   description: 'set a channel for replays for a specific round'
 })
+@LocalesT('osu.tourney.setReplayChannel.name', 'osu.tourney.setReplayChannel.description')
 @Group('tourney')
 @Options(options)
 export default class SetReplayChannel extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    const focusedValue = interaction.options.getAutocompleteValue();
+    const language = interaction.user.settings.language;
+
+    const localizedChoices = {
+      "en-US": [
+        { name: 'Qualifiers', value: 'Qualifiers' },
+        { name: 'Group Stage', value: 'Group Stage' },
+        { name: 'Round of 32', value: 'Round of 32' },
+        { name: 'Round of 16', value: 'Round of 16' },
+        { name: 'Quarterfinals', value: 'Quarterfinals' },
+        { name: 'Semifinals', value: 'Semifinals' },
+        { name: 'Finals', value: 'Finals' },
+        { name: 'Grand Finals', value: 'Grand Finals' }
+      ],
+      "vi": [
+        { name: 'Vòng loại', value: 'Qualifiers' },
+        { name: 'Vòng bảng', value: 'Group Stage' },
+        { name: 'Vòng 32 đội', value: 'Round of 32' },
+        { name: 'Vòng 16 đội', value: 'Round of 16' },
+        { name: 'Tứ kết', value: 'Quarterfinals' },
+        { name: 'Bán kết', value: 'Semifinals' },
+        { name: 'Chung kết', value: 'Finals' },
+        { name: 'Chung kết tổng', value: 'Grand Finals' }
+      ]
+    };
+
+    const choices = localizedChoices[language] || localizedChoices["en-US"];
+
+    if (!focusedValue) {
+      return await interaction.respond(choices);
+    }
+
+    const filteredChoices = choices.filter(choice =>
+      choice.name.toLowerCase().includes(focusedValue.toLowerCase())
+    ).slice(0, 2);
+
+    await interaction.respond(filteredChoices);
+  }
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.setReplayChannel;
     const { channel, round } = ctx.options;
 
     await ctx.deferReply();
@@ -50,7 +93,7 @@ export default class SetReplayChannel extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -58,7 +101,7 @@ export default class SetReplayChannel extends SubCommand {
     if (!existingRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `The round "${round}" does not exist in the tournament. Please add it first.`
+        content: t.roundNotFound(round)
       });
     }
 
@@ -72,7 +115,7 @@ export default class SetReplayChannel extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to set the replay channel. Only hosts and advisors can do this.'
+        content: t.noPermission
       });
     }
 
@@ -80,7 +123,7 @@ export default class SetReplayChannel extends SubCommand {
     await guild.update({ tournament: settings });
 
     await ctx.editOrReply({
-      content: `Replays for the **${round}** round will now be sent to <#${channel.id}>.`
+      content: t.success(round, channel.id)
     });
   }
 }

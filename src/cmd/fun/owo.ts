@@ -4,23 +4,30 @@ import {
   createStringOption, 
   Declare, 
   SubCommand, 
-  Options 
+  Options, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
-    description: 'The text to convert to OwO speak',
-    required: true
+    description: 'the text to convert to OwO speak',
+    required: true,
+    description_localizations: {
+      "en-US": 'the text to convert to OwO speak',
+      "vi": 'văn bản để chuyển đổi sang ngôn ngữ OwO'
+    }
   })
 }
 
 @Declare({
   name: 'owo',
-  description: 'Convert your text to OwO speak.'
+  description: 'convert your text to OwO speak.'
 })
+@LocalesT('fun.owo.name', 'fun.owo.description')
 @Options(options)
 export default class Owo extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.owo;
     // get the text from the options
     const text = ctx.options.query;
 
@@ -31,7 +38,7 @@ export default class Owo extends SubCommand {
     if (!res || !res.owo) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Failed to convert text to OwO speak. Please try again later."
+        content: t.apiError
       });
     }
 

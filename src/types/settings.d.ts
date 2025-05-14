@@ -105,6 +105,10 @@ export interface GuildSettings {
  */
 export interface UserSettings {
   /**
+   * The locale this user prefers
+   */
+  language: "en-US" | "vi",
+  /**
    * The user's osu! in-game username.
    */
   inGameName: string,

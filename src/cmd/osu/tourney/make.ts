@@ -5,6 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -13,26 +14,50 @@ import { TournamentRound } from "@local-types/settings";
 const options = {
   name: createStringOption({
     description: 'full name of the tournament',
+    description_localizations: {
+      "en-US": 'full name of the tournament',
+      "vi": 'tên đầy đủ của giải đấu'
+    },
     required: true
   }),
   abbreviation: createStringOption({
     description: 'short form (abbreviation) of the tournament',
+    description_localizations: {
+      "en-US": 'short form (abbreviation) of the tournament',
+      "vi": 'viết tắt của giải đấu'
+    },
     required: true
   }),
   host_role: createRoleOption({
     description: 'the role for tournament hosts/organizers',
+    description_localizations: {
+      "en-US": 'the role for tournament hosts/organizers',
+      "vi": 'vai trò cho người tổ chức giải đấu'
+    },
     required: true
   }),
   advisor_role: createRoleOption({
     description: 'the role for tournament advisors',
+    description_localizations: {
+      "en-US": 'the role for tournament advisors',
+      "vi": 'vai trò cho cố vấn giải đấu'
+    },
     required: false
   }),
   mappooler_role: createRoleOption({
     description: 'the role for tournament mappoolers',
+    description_localizations: {
+      "en-US": 'the role for tournament mappoolers',
+      "vi": 'vai trò cho người làm mappool giải đấu'
+    },
     required: false
   }),
   tester_role: createRoleOption({
     description: 'the role for tournament testplayers/replayers',
+    description_localizations: {
+      "en-US": 'the role for tournament testplayers/replayers',
+      "vi": 'vai trò cho người test/replay giải đấu'
+    },
     required: false
   })
 };
@@ -41,10 +66,12 @@ const options = {
   name: 'make',
   description: 'create a new tournament in this server'
 })
+@LocalesT('osu.tourney.make.name', 'osu.tourney.make.description')
 @Group('tourney')
 @Options(options)
 export default class Make extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.make;
     const { 
       name, 
       abbreviation, 
@@ -62,7 +89,7 @@ export default class Make extends SubCommand {
     if (currentSettings.name) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `A tournament already exists in this server: **${currentSettings.name}** (${currentSettings.abbreviation}). You need to reset it before creating a new one.`
+        content: t.alreadyExists(currentSettings.name, currentSettings.abbreviation)
       });
     }
 
@@ -87,14 +114,15 @@ export default class Make extends SubCommand {
       tournament: tournamentSettings
     });
 
+    const roles = [
+      hostRole, 
+      advisorRole, 
+      mappoolerRole, 
+      testerRole
+    ];
+
     await ctx.editOrReply({
-      content: `Successfully created tournament **${name}** (${abbreviation})!\n\n` +
-        `Assigned roles:\n` +
-        `- Host: <@&${hostRole.id}>\n` +
-        `${advisorRole ? `- Advisor: <@&${advisorRole.id}>\n` : ''}` +
-        `${mappoolerRole ? `- Mappooler: <@&${mappoolerRole.id}>\n` : ''}` +
-        `${testerRole ? `- Tester/Replayer: <@&${testerRole.id}>\n` : ''}` +
-        `\nUse \`/tourney add-round\` to set up rounds and mappools.`
+      content: t.success(name, abbreviation, roles)
     });
   }
 }

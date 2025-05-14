@@ -6,13 +6,18 @@ import {
   Embed,
   SubCommand,
   Options,
-  TextGuildChannel
+  TextGuildChannel,
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
     description: "the term to search for",
-    required: true
+    required: true,
+    description_localizations: {
+      "en-US": "the term to search for",
+      "vi": "thuật ngữ bạn muốn tìm kiếm"
+    }
   })
 };
 
@@ -20,9 +25,11 @@ const options = {
   name: "urban",
   description: "search for a definition on Urban Dictionary"
 })
+@LocalesT('utility.urban.name', 'utility.urban.description')
 @Options(options)
 export default class Urban extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.urban;
     const { query } = ctx.options;
 
     await ctx.deferReply();
@@ -34,8 +41,7 @@ export default class Urban extends SubCommand {
       ) {
         throw AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content:
-            "Your query contains profanity. Please use a NSFW channel or change your query."
+          content: t.profaneQuery
         });
       }
 
@@ -52,8 +58,7 @@ export default class Urban extends SubCommand {
       if (!res?.list?.length) {
         throw AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content:
-            "No definition found for your query on Urban Dictionary. Try another term."
+          content: t.noDefinition
         });
       }
 
@@ -86,7 +91,7 @@ export default class Urban extends SubCommand {
           }
         ])
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -96,7 +101,7 @@ export default class Urban extends SubCommand {
       if (!(error instanceof AokiError)) {
         AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Failed to fetch the definition. Please try again later."
+          content: t.fetchError
         });
       }
     }

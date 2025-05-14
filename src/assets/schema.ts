@@ -10,6 +10,7 @@ import { ColorResolvable } from "seyfert/lib/common";
 
 export default {
   users: {
+    language: "en-US",
     inGameName: "",
     defaultMode: 0,
     processMessagePermission: true,

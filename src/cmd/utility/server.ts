@@ -3,6 +3,7 @@ import {
   CommandContext,
   Declare,
   Embed,
+  LocalesT,
   SubCommand,
   TextGuildChannel
 } from "seyfert";
@@ -11,15 +12,17 @@ import {
   name: 'server',
   description: 'get information about the server'
 })
+@LocalesT('utility.server.name', 'utility.server.description')
 export default class Server extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.server;
     await ctx.deferReply();
 
     const rawGuild = ctx.interaction.guild;
     if (!rawGuild) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Guild not found."
+        content: t.notFound
       });
     }
 
@@ -38,39 +41,39 @@ export default class Server extends SubCommand {
       const news = channelTypeCount(5);
 
       const generalInfoField = ctx.client.utils.string.keyValueField({
-        "Owner": ctx.client.utils.string.textTruncate(owner.username, 20),
-        "Role Count": (await guild.roles.list()).length,
-        "Emoji Count": (await guild.emojis.list()).length,
-        "Created": since,
-        "Boosts": guild.premiumSubscriptionCount,
-        "Main Locale": guild.preferredLocale,
-        "Verification": guild.verificationLevel,
-        "Filter": guild.explicitContentFilter
+        [t.generalInfo.owner]: ctx.client.utils.string.textTruncate(owner.username, 20),
+        [t.generalInfo.roleCount]: (await guild.roles.list()).length,
+        [t.generalInfo.emojiCount]: (await guild.emojis.list()).length,
+        [t.generalInfo.created]: since,
+        [t.generalInfo.boosts]: guild.premiumSubscriptionCount,
+        [t.generalInfo.mainLocale]: guild.preferredLocale,
+        [t.generalInfo.verification]: guild.verificationLevel,
+        [t.generalInfo.filter]: guild.explicitContentFilter
       }, 30);
 
       const afkChannel = await ctx.client.channels.fetch(guild.afkChannelId || "") as TextGuildChannel;
 
       const channelInfoField = ctx.client.utils.string.keyValueField({
-        "Categories": category,
-        "Text Channels": text,
-        "Voice Channels": voice,
-        "News Channels": news,
-        "AFK Channel": afkChannel ? afkChannel.name : "None"
+        [t.channelInfo.categories]: category,
+        [t.channelInfo.textChannels]: text,
+        [t.channelInfo.voiceChannels]: voice,
+        [t.channelInfo.newsChannels]: news,
+        [t.channelInfo.afkChannel]: afkChannel ? afkChannel.name : t.noAfkChannel
       }, 30);
 
-      const description = `*${guild.description == null ? "Server has no description." : guild.description}*\n\n`;
+      const description = `*${guild.description == null ? t.noDescription : guild.description}*\n\n`;
 
       // Create embed
       const embed = new Embed()
         .setColor(10800862)
-        .setAuthor({ name: guild.name, iconUrl: icon })
+        .setAuthor({ name: t.generalInfo.author(guild.name), iconUrl: icon })
         .setDescription(description)
         .addFields([
-          { name: "General Info", value: generalInfoField },
-          { name: "Channels Info", value: channelInfoField }
+          { name: t.general, value: generalInfoField },
+          { name: t.channel, value: channelInfoField }
         ])
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -79,7 +82,7 @@ export default class Server extends SubCommand {
     } catch (error) {
       AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Failed to fetch server information. Please try again later."
+        content: t.fetchError
       });
     }
   }

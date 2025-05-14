@@ -58,10 +58,20 @@ export default class AokiClient extends Client {
     };
     this.statsCache = {
       data: {
-        techField: "",
-        appField: "",
+        totalMem: 0,
+        freeMem: 0,
+        usedMem: 0,
+        processMemUsage: 0,
+        cpuLoad: 0,
+        uptime: 0,
+        clientVersion: "",
+        clientUptime: "",
+        commands: 0,
+        servers: 0,
+        users: 0,
+        avgUsersPerServer: 0,
         description: "",
-        embedTimestamp: new Date,
+        embedTimestamp: new Date(),
       },
       lastUpdated: 0
     }
@@ -82,7 +92,7 @@ export default class AokiClient extends Client {
     });
     this.logger.info("Connected to MongoDB");
     this.db = this.dbClient.db();
-    
+
     await Promise.all(Object.values(this.settings).map(settings => settings.init()));
   };
 
@@ -97,7 +107,7 @@ export default class AokiClient extends Client {
     if (this.osuV2Token && this.osuV2Token.expires_at || 0 > Date.now()) {
       return this.osuV2Token.access_token;
     }
-    
+
     // Otherwise ask for it using our credentials
     const params = new URLSearchParams({
       client_id: this.dev ? process.env.OSU_DEV_ID! : process.env.OSU_ID!,
@@ -105,21 +115,21 @@ export default class AokiClient extends Client {
       grant_type: 'client_credentials',
       scope: 'public'
     });
-    
+
     const res = await fetch("https://osu.ppy.sh/oauth/token", {
       method: 'POST',
       body: params,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
-    
+
     const data = await res.json();
-    
+
     // Then save it for later fetches until the end of the cycle
     this.osuV2Token = {
       access_token: data.access_token,
       expires_at: Date.now() + (data.expires_in - 60) * 1000
     };
-    
+
     return data.access_token;
   };
 
@@ -132,6 +142,8 @@ export default class AokiClient extends Client {
       this.loadDatabase(),
       this.requestV2Token()
     ]);
+    // Load default locale
+    this.setServices({ langs: { default: 'en-US' } });
     this.logger.info("Loaded baseline data");
   }
 

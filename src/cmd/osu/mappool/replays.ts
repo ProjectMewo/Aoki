@@ -4,35 +4,41 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
-  SubCommand
+  SubCommand,
+  AutocompleteInteraction
 } from "seyfert";
 
 const options = {
   round: createStringOption({
-    description: 'The round to view replays for',
+    description: 'the round to view replays for',
+    description_localizations: {
+      "en-US": 'the round to view replays for',
+      "vi": 'vòng đấu mà bạn muốn xem replay'
+    },
     required: false,
-    choices: [
-      { name: 'Qualifiers', value: 'Qualifiers' },
-      { name: 'Group Stage', value: 'Group Stage' },
-      { name: 'Round of 32', value: 'Round of 32' },
-      { name: 'Round of 16', value: 'Round of 16' },
-      { name: 'Quarterfinals', value: 'Quarterfinals' },
-      { name: 'Semifinals', value: 'Semifinals' },
-      { name: 'Finals', value: 'Finals' },
-      { name: 'Grand Finals', value: 'Grand Finals' }
-    ]
+    autocomplete: async (interaction) => await Replays.prototype.autocomplete(interaction)
   })
 };
 
 @Declare({
   name: 'replays',
-  description: 'View saved replays for a specific round or the current mappool'
+  description: 'view saved replays for a specific round or the current mappool'
 })
+@LocalesT('osu.mappool.replays.name', 'osu.mappool.replays.description')
 @Group('mappool')
 @Options(options)
 export default class Replays extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.genericRoundChoices
+    );
+  };
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.mappool.replays;
     const { round } = ctx.options;
 
     await ctx.deferReply();
@@ -44,7 +50,7 @@ export default class Replays extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -60,7 +66,7 @@ export default class Replays extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to view replays. Only tournament organizers, advisors, and test/replayers can access this command.'
+        content: t.noPermission
       });
     }
 
@@ -69,7 +75,7 @@ export default class Replays extends SubCommand {
     if (!selectedRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'No round is currently active, and no round was specified. Remind the organizer to set up the current round by doing `/tourney current`.'
+        content: t.noActiveRound
       });
     }
 
@@ -78,21 +84,18 @@ export default class Replays extends SubCommand {
     if (!mappool) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No mappool found for the round: ${selectedRound}. Remind the organizer to set up the current mappool for this round by doing \`/tourney add-round\`.`
+        content: t.noMappool(selectedRound)
       });
     }
 
     if (!mappool.replays.length) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No replays have been saved for the round: ${selectedRound}.`
+        content: t.noReplays(selectedRound)
       });
     }
 
-    const replyContent = `**Replays for ${selectedRound}:**\n` +
-      mappool.replays
-        .map(replay => `- [Replay for ${replay.slot}](${replay.messageUrl}) by **${replay.replayer}**`)
-        .join('\n');
+    const replyContent = t.response(selectedRound, mappool.replays);
 
     await ctx.editOrReply({ content: replyContent });
   }

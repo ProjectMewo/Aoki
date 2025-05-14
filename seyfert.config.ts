@@ -6,7 +6,8 @@ export default config.bot({
   locations: {
     base: "src",
     commands: "cmd",
-    events: "events"
+    events: "events",
+    langs: "locales"
   },
   intents: [
     "Guilds", 

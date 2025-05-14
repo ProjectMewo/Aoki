@@ -1,12 +1,14 @@
 import AokiError from "@struct/AokiError";
-import { CommandContext, Declare, SubCommand } from "seyfert";
+import { CommandContext, Declare, LocalesT, SubCommand } from "seyfert";
 
 @Declare({
   name: 'today',
   description: 'get a historical event that happened on today\'s date.'
 })
+@LocalesT('fun.today.name', 'fun.today.description')
 export default class Today extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.today;
     try {
       // Get current date
       const [month, day] = new Date().toLocaleDateString().trim().split("/");
@@ -27,7 +29,7 @@ export default class Today extends SubCommand {
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Failed to fetch historical data. Try again later."
+        content: t.apiError
       });
     }
   }

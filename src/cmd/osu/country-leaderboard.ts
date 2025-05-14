@@ -5,7 +5,9 @@ import {
   Declare,
   Embed,
   SubCommand,
-  Options
+  Options,
+  LocalesT,
+  AutocompleteInteraction
 } from "seyfert";
 import AokiError from "@struct/AokiError";
 import AokiClient from "@struct/Client";
@@ -14,14 +16,26 @@ import Pagination from "@struct/Paginator";
 const options = {
   beatmap_id: createNumberOption({
     description: "the beatmap ID to check",
+    description_localizations: {
+      "en-US": "the beatmap ID to check",
+      "vi": "ID của beatmap cần kiểm tra"
+    },
     required: true
   }),
   country_code: createStringOption({
     description: "the country code (2 letters)",
+    description_localizations: {
+      "en-US": "the country code (2 letters)",
+      "vi": "mã quốc gia (2 chữ cái)"
+    },
     required: true
   }),
   mode: createStringOption({
     description: "the game mode to check",
+    description_localizations: {
+      "en-US": "the game mode to check",
+      "vi": "chế độ chơi cần kiểm tra"
+    },
     required: true,
     choices: [
       { name: "osu!standard", value: "osu" },
@@ -32,14 +46,12 @@ const options = {
   }),
   sort: createStringOption({
     description: "how to sort the results",
+    description_localizations: {
+      "en-US": "how to sort the results",
+      "vi": "cách sắp xếp kết quả"
+    },
     required: false,
-    choices: [
-      { name: "Performance (PP)", value: "performance" },
-      { name: "Score V3 (lazer)", value: "lazer_score" },
-      { name: "Score V1 (stable)", value: "stable_score" },
-      { name: "Combo", value: "combo" },
-      { name: "Accuracy", value: "accuracy" }
-    ]
+    autocomplete: async (interaction) => await CountryLeaderboard.prototype.autocompleteSort(interaction)
   })
 };
 
@@ -47,11 +59,21 @@ const options = {
   name: "country-leaderboard",
   description: "get a country leaderboard for a specific beatmap"
 })
+@LocalesT('osu.countryLb.name', 'osu.countryLb.description')
 @Options(options)
 export default class CountryLeaderboard extends SubCommand {
   private readonly api_v1 = "https://osu.ppy.sh/api/";
   private readonly api_v2 = "https://osu.ppy.sh/api/v2";
+
+  async autocompleteSort(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.countryLb.choices.sort
+    )
+  };
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.countryLb;
     await ctx.deferReply();
     const { beatmap_id, country_code, mode, sort } = ctx.options;
 
@@ -68,7 +90,7 @@ export default class CountryLeaderboard extends SubCommand {
     if (country_code.length !== 2) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'Baka, that\'s not a 2-letter country code.'
+        content: t.invalidCountryCode
       });
     }
 
@@ -83,7 +105,7 @@ export default class CountryLeaderboard extends SubCommand {
       if (!rankings.length) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: `Didn't find anyone for country code ${country_code}. Typo?`
+          content: t.noPlayersFound(country_code)
         });
       }
 
@@ -114,7 +136,7 @@ export default class CountryLeaderboard extends SubCommand {
       if (!countryScores.length) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: `No scores found for ${country_code} on this beatmap.`
+          content: t.noScoresFound(country_code)
         });
       }
 
@@ -154,17 +176,17 @@ export default class CountryLeaderboard extends SubCommand {
             `**${pageIndex * scoresPerPage + idx + 1}) ${user.username}**`,
             `▸ ${rankEmote} ▸ **${Number(score.pp).toFixed(2)}pp** ▸ ${(score.accuracy * 100).toFixed(2)}%`,
             `▸ ${displayedScore.toLocaleString()} ▸ x${score.max_combo}/${beatmapDetails.max_combo} ▸ [${statsString}]`,
-            `▸ \`+${score.mods.map((mod: { acronym: string }) => mod.acronym).join("") || 'NM'}\` ▸ Score set ||${ctx.client.utils.time.formatDistance(new Date(score.ended_at), new Date())}||`
+            `▸ \`+${score.mods.map((mod: { acronym: string }) => mod.acronym).join("") || 'NM'}\` ▸ ${t.scoreSet} ||${ctx.client.utils.time.formatDistance(new Date(score.ended_at), new Date())}||`
           ].join('\n');
         }));
 
-        const sortString = ["Performance", "ScoreV3 (lazer)", "ScoreV1 (stable)", "Combo", "Accuracy"][sorting];
+        const sortString = t.sortingOptions[sorting];
         const embed = new Embed()
           .setTitle(beatmapTitle)
           .setURL(`https://osu.ppy.sh/b/${beatmap_id}`)
-          .setAuthor({ name: "Country leaderboard", iconUrl: `https://osu.ppy.sh/images/flags/${country_code}.png` })
-          .setDescription(`:notes: [Song preview](https://b.ppy.sh/preview/${beatmapDetails.beatmapset_id}.mp3) | :frame_photo: [Cover/Background](https://assets.ppy.sh/beatmaps/${beatmapDetails.beatmapset_id}/covers/raw.jpg)\n\n` + scoreLines.join('\n\n'))
-          .setFooter({ text: `Sorted by ${sortString} | Page ${pageIndex + 1} of ${totalPages}` })
+          .setAuthor({ name: t.embed.author, iconUrl: `https://osu.ppy.sh/images/flags/${country_code}.png` })
+          .setDescription(`${t.embed.description(beatmapDetails.beatmapset_id)}\n\n` + scoreLines.join('\n\n'))
+          .setFooter({ text: t.embed.footer(sortString, pageIndex, totalPages) })
           .setTimestamp()
           .setImage(`https://assets.ppy.sh/beatmaps/${beatmapDetails.beatmapset_id}/covers/cover.jpg`)
           .setColor(10800862);
@@ -183,7 +205,7 @@ export default class CountryLeaderboard extends SubCommand {
       console.error('Error fetching country leaderboard:', error);
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: 'O-oh, an error occurred while fetching the country leaderboard. Please try again later.\n\nTell my sensei if it lasted too long.'
+        content: t.apiError
       });
     }
   }

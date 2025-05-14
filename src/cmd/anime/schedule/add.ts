@@ -5,6 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -12,6 +13,10 @@ import {
 const options = {
   anime: createStringOption({
     description: 'the anime to subscribe to',
+    description_localizations: {
+      "en-US": 'the anime to subscribe to',
+      "vi": 'bộ anime mà cậu muốn đăng ký'
+    },
     required: true,
     autocomplete: async (interaction) => await Add.prototype.autocomplete(interaction)
   })
@@ -21,6 +26,7 @@ const options = {
   name: 'add',
   description: 'subscribe to anime episode notifications'
 })
+@LocalesT('anime.scheduleSub.add.name', 'anime.scheduleSub.add.description')
 @Group('schedule')
 @Options(options)
 export default class Add extends SubCommand {
@@ -57,6 +63,7 @@ export default class Add extends SubCommand {
   };
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.scheduleSub.add;
     const animeId = ctx.options.anime;
     const utils = ctx.client.utils;
 
@@ -69,12 +76,12 @@ export default class Add extends SubCommand {
         await ctx.client.users.fetch(ctx.author.id);
         // Then we send them a DM (open a new one)
         await ctx.client.users.write(ctx.author.id, {
-          content: 'Just checking if I can send you messages. Ignore me here.'
+          content: t.checkDm
         });
       } catch {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Baka, I can't send you DMs. Please enable DMs from server members and try again."
+          content: t.cannotDm
         });
       }
 
@@ -83,7 +90,7 @@ export default class Add extends SubCommand {
       if (schedule?.anilistId) {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Baka, you can only have **one schedule** running at a time."
+          content: t.moreThanOne
         });
       }
 
@@ -92,7 +99,7 @@ export default class Add extends SubCommand {
       if (!anilistId) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -108,7 +115,7 @@ export default class Add extends SubCommand {
       if (!watchingData || !watchingData.Page.media[0]) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -118,7 +125,7 @@ export default class Add extends SubCommand {
       if (!["NOT_YET_RELEASED", "RELEASING"].includes(media.status)) {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Baka, that's not airing. It's not an upcoming one, too. Maybe even finished."
+          content: t.notAiring
         });
       }
 
@@ -132,12 +139,12 @@ export default class Add extends SubCommand {
       const title = media.title.romaji;
       const timeUntilAiring = Math.round(media.nextAiringEpisode?.timeUntilAiring! / 3600);
       await ctx.editOrReply({
-        content: `Tracking airing episodes for **${title}**. Next episode is airing in about **${timeUntilAiring} hours**.`
+        content: t.tracking(title, timeUntilAiring)
       });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "There was an error setting up your subscription. Try again later."
+        content: t.apiError
       });
     }
   }

@@ -3,16 +3,19 @@ import {
   CommandContext,
   Declare,
   SubCommand,
-  Group
+  Group,
+  LocalesT
 } from "seyfert";
 
 @Declare({
   name: 'remove',
   description: 'remove your current anime subscription'
 })
+@LocalesT('anime.scheduleSub.remove.name', 'anime.scheduleSub.remove.description')
 @Group('schedule')
 export default class Remove extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.scheduleSub.remove;
     await ctx.deferReply();
 
     try {
@@ -23,7 +26,7 @@ export default class Remove extends SubCommand {
       if (!schedule?.anilistId) {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Baka, you have no anime subscription."
+          content: t.noSub
         });
       }
 
@@ -40,7 +43,7 @@ export default class Remove extends SubCommand {
       if (!watchingData || !watchingData.Page.media[0]) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -52,12 +55,12 @@ export default class Remove extends SubCommand {
 
       // Send response
       await ctx.editOrReply({
-        content: `Stopped tracking airing episodes for **${media.title.romaji}**.`
+        content: t.response(media.title.romaji)
       });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "There was an error removing your subscription. Try again later."
+        content: t.apiError
       });
     }
   }

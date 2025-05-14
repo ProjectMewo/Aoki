@@ -4,6 +4,7 @@ import {
   createStringOption,
   Declare,
   Embed,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -11,10 +12,18 @@ import {
 const options = {
   username: createStringOption({
     description: 'the osu! username to look up (defaults to your configured username)',
+    description_localizations: {
+      "en-US": 'the osu! username to look up (defaults to your configured username)',
+      "vi": 'tên người dùng osu! bạn muốn tra cứu (mặc định là tên đã cấu hình của bạn)'
+    },
     required: false
   }),
   mode: createStringOption({
     description: 'the game mode to look up (defaults to your configured mode)',
+    description_localizations: {
+      "en-US": 'the game mode to look up (defaults to your configured mode)',
+      "vi": 'chế độ chơi bạn muốn tra cứu (mặc định là chế độ đã cấu hình của bạn)'
+    },
     required: false,
     choices: [
       { name: 'osu!standard', value: 'osu' },
@@ -29,6 +38,7 @@ const options = {
   name: 'profile',
   description: 'get osu! profile information'
 })
+@LocalesT('osu.profile.name', 'osu.profile.description')
 @Options(options)
 export default class Profile extends SubCommand {
   private usernameRegex = /^[\[\]a-z0-9_-\s]+$/i;
@@ -36,6 +46,7 @@ export default class Profile extends SubCommand {
   private api_v1 = `${this.baseUrl}/api`;
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.profile;
     await ctx.deferReply();
 
     const settings = ctx.author.settings;
@@ -45,14 +56,14 @@ export default class Profile extends SubCommand {
     if (!user || !mode) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "You didn't configure your in-game info, baka. I don't know you.\n\nConfigure them with `/osu set` so I can store it."
+        content: t.notConfigured
       });
     }
 
     if (!this.usernameRegex.test(user)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Baka, the username is invalid."
+        content: t.invalidUsername
       });
     }
 
@@ -60,7 +71,7 @@ export default class Profile extends SubCommand {
     if (!profile?.username) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "Baka, that user doesn't exist."
+        content: t.userNotFound
       });
     }
 
@@ -109,22 +120,13 @@ export default class Profile extends SubCommand {
     grades.push(`${rankEmotes.A}\`${Number(profile.a)}\``);
 
     const combinedGrades = grades.join('');
-    const playTime = `${profile.playTime} hrs`;
-    const level = `${profile.level[1]}% of level ${profile.level[0]}`;
 
     const author = {
-      name: `osu!${profile.properMode} profile for ${profile.username}`,
+      name: t.embed.author(profile.properMode, profile.username),
       iconUrl: `https://flagsapi.com/${profile.country}/flat/64.png`
     };
 
-    const description = [
-      `**▸ Bancho Rank:** #${profile.rank} (${profile.country}#${profile.countryRank})`,
-      `**▸ Level:** ${level}`,
-      `**▸ PP:** ${profile.pp} **▸ Acc:** ${profile.accuracy}%`,
-      `**▸ Playcount:** ${profile.playCount} (${playTime})`,
-      `**▸ Ranks:** ${combinedGrades}`,
-      `**▸ Profile image:** (from [lemmmy.pw](https://lemmmy.pw))`
-    ].join("\n");
+    const description = t.embed.description(profile, combinedGrades);
 
     const embed = new Embed()
       .setColor(10800862)
@@ -133,7 +135,7 @@ export default class Profile extends SubCommand {
       .setDescription(description)
       .setImage("attachment://profile.png")
       .setFooter({
-        text: "Ooh",
+        text: t.embed.footer,
         iconUrl: ctx.interaction.user.avatarURL()
       })
       .setTimestamp();

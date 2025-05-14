@@ -3,6 +3,7 @@ import {
   CommandContext, 
   Declare, 
   Group, 
+  LocalesT, 
   SubCommand 
 } from "seyfert";
 
@@ -10,9 +11,11 @@ import {
   name: 'current',
   description: 'get information about your currently subscribed anime'
 })
+@LocalesT('anime.scheduleSub.current.name', 'anime.scheduleSub.current.description')
 @Group('schedule')
 export default class Current extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.scheduleSub.current;
     await ctx.deferReply();
 
     try {
@@ -23,7 +26,7 @@ export default class Current extends SubCommand {
       if (!schedule) {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Baka, you have no anime subscription."
+          content: t.noSub
         });
       }
 
@@ -40,7 +43,7 @@ export default class Current extends SubCommand {
       if (!watchingData || !watchingData.Page.media[0]) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -54,12 +57,12 @@ export default class Current extends SubCommand {
 
       // Send response
       await ctx.editOrReply({ 
-        content: `You are currently watching **${title}**. Its next episode is **${nextEpisode}**, airing in about **${timeUntilAiring} hours**.` 
+        content: t.response(title, nextEpisode, timeUntilAiring)
       });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "There was an error retrieving your subscription. Try again later."
+        content: t.apiError
       });
     }
   }

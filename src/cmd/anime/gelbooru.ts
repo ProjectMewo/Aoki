@@ -8,16 +8,25 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  TextGuildChannel 
+  TextGuildChannel, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   tags: createStringOption({
-    description: 'Tags to search for (separate with spaces)',
+    description: 'tags to search for (separate with spaces)',
+    description_localizations: {
+      "en-US": 'tags to search for (separate with spaces)',
+      "vi": 'các thẻ để tìm kiếm (ngăn cách bằng dấu cách)'
+    },
     required: true
   }),
   rating: createStringOption({
-    description: 'Rating of the images. Default safe.',
+    description: 'rating of the images. Default safe.',
+    description_localizations: {
+      "en-US": 'rating of the images. Default safe.',
+      "vi": 'xếp hạng của hình ảnh. Mặc định là an toàn.'
+    },
     required: false,
     choices: [
       { name: 'Safe', value: 'general' },
@@ -30,18 +39,20 @@ const options = {
 
 @Declare({
   name: 'gelbooru',
-  description: 'Search for anime images on Gelbooru'
+  description: 'search for anime images on Gelbooru'
 })
+@LocalesT('anime.gelbooru.name', 'anime.gelbooru.description')
 @Options(options)
 export default class Gelbooru extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.gelbooru;
     const { tags, rating } = ctx.options;
     const channelNSFW = (ctx.interaction.channel as TextGuildChannel).nsfw;
 
     if (!channelNSFW) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "This command can only be used in channels marked as NSFW."
+        content: t.noSfw
       });
     }
 
@@ -56,7 +67,7 @@ export default class Gelbooru extends SubCommand {
       if (!response.ok) {
         return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "There was an error fetching images from Gelbooru. Try again later."
+          content: t.apiError
         });
       }
 
@@ -65,7 +76,7 @@ export default class Gelbooru extends SubCommand {
       if (!data.post || data.post.length === 0) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "No results found for those tags. Try different tags."
+          content: t.notFound
         });
       }
 
@@ -75,16 +86,16 @@ export default class Gelbooru extends SubCommand {
         const titleTags = tags.length > 50 ? tags.slice(0, 50) + '...' : tags;
 
         return new Embed()
-          .setTitle(`Gelbooru Search: ${titleTags}`)
+          .setTitle(`${t.search}: ${titleTags}`)
           .setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
           .setColor(10800862)
           .setImage(post.file_url)
           .addFields(
-            { name: 'Score', value: post.score.toString(), inline: true },
-            { name: 'Rating', value: ctx.client.utils.string.toProperCase(post.rating), inline: true },
-            { name: 'Tags', value: `${tagList}${additionalTags ? `\n${additionalTags}` : ''}` }
+            { name: t.score, value: post.score.toString(), inline: true },
+            { name: t.rating, value: ctx.client.utils.string.toProperCase(post.rating), inline: true },
+            { name: t.tags, value: `${tagList}${additionalTags ? `\n${additionalTags}` : ''}` }
           )
-          .setFooter({ text: `Page ${index + 1}/${data.post.length}` })
+          .setFooter({ text: `${t.page} ${index + 1}/${data.post.length}` })
           .setTimestamp();
       });
 
@@ -98,7 +109,7 @@ export default class Gelbooru extends SubCommand {
       console.error('Gelbooru error:', error);
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "There was an error processing your request. Please try again later."
+        content: t.apiError
       });
     }
   }

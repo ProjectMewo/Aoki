@@ -7,32 +7,39 @@ import {
   Embed,
   SubCommand, 
   Options, 
-  TextGuildChannel
+  TextGuildChannel,
+  LocalesT,
+  AutocompleteInteraction
 } from "seyfert";
 
 const options = {
   day: createStringOption({
-    description: 'Day of the week',
+    description: 'day of the week',
+    description_localizations: {
+      "en-US": 'day of the week',
+      "vi": 'ngày trong tuần'
+    },
     required: true,
-    choices: [
-      { name: 'Sunday', value: 'sunday' },
-      { name: 'Monday', value: 'monday' },
-      { name: 'Tuesday', value: 'tuesday' },
-      { name: 'Wednesday', value: 'wednesday' },
-      { name: 'Thursday', value: 'thursday' },
-      { name: 'Friday', value: 'friday' },
-      { name: 'Saturday', value: 'saturday' }
-    ]
+    autocomplete: async (i) => await Airing.prototype.autocomplete(i)
   })
 };
 
 @Declare({
   name: 'airing',
-  description: 'Get a list of anime airing on a specific day'
+  description: 'get a list of anime airing on a specific day'
 })
+@LocalesT('anime.airing.name', 'anime.airing.description')
 @Options(options)
 export default class Airing extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.anime.airing.choices
+    );
+  };
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.airing;
     const { day } = ctx.options;
     const channelNSFW = (ctx.interaction.channel as TextGuildChannel).nsfw;
 
@@ -43,7 +50,7 @@ export default class Airing extends SubCommand {
       if (!response.ok) {
         return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "The service is probably dead. Wait a little bit, then try again."
+          content: t.apiError
         });
       }
 
@@ -51,7 +58,7 @@ export default class Airing extends SubCommand {
       if (!res.data || res.data.length === 0) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -100,7 +107,7 @@ export default class Airing extends SubCommand {
     } catch (error) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Wow, this kind of error has never been documented. Wait for about 5-10 minutes, if nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`."
+        content: t.undocErr
       });
     }
   }

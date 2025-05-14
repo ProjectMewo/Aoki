@@ -4,7 +4,8 @@ import {
   Declare,
   Group,
   SubCommand,
-  Embed
+  Embed,
+  LocalesT
 } from "seyfert";
 import Pagination from "@struct/Paginator";
 
@@ -12,9 +13,11 @@ import Pagination from "@struct/Paginator";
   name: 'view-suggestions',
   description: 'view all map suggestions for the current round.'
 })
+@LocalesT('osu.mappool.viewSuggestions.name', 'osu.mappool.viewSuggestions.description')
 @Group('mappool')
 export default class ViewSuggestions extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.mappool.viewSuggestions;
     await ctx.deferReply();
 
     // Fetch tournament settings
@@ -22,10 +25,17 @@ export default class ViewSuggestions extends SubCommand {
     const settings = guild.settings.tournament;
     const { currentRound, mappools, roles } = settings;
 
+    if (!settings.name) {
+      return AokiError.NOT_FOUND({
+        sender: ctx.interaction,
+        content: t.noTournament
+      });
+    }
+
     if (!currentRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'There is no active round set for this tournament. Remind an organizer to set the current round first.'
+        content: t.noActiveRound
       });
     }
 
@@ -42,7 +52,7 @@ export default class ViewSuggestions extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to view map suggestions. Only tournament organizers, advisors, poolers and test/replayers can access this command.'
+        content: t.noPermission
       });
     }
 
@@ -51,7 +61,7 @@ export default class ViewSuggestions extends SubCommand {
     if (!mappool) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No mappool found for the current round: ${currentRound}. Remind your organizer to set up the mappool.`
+        content: t.noMappool(currentRound)
       });
     }
 
@@ -59,7 +69,7 @@ export default class ViewSuggestions extends SubCommand {
     if (!mappool.suggestions || mappool.suggestions.length === 0) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No suggestions have been made for the ${currentRound} mappool yet.`
+        content: t.noSuggestions(currentRound)
       });
     }
 
@@ -96,13 +106,13 @@ export default class ViewSuggestions extends SubCommand {
       const beatmaps = await Promise.all(beatmapPromises);
 
       const mapsText = beatmaps.map((beatmap, index) => {
-        if (!beatmap) return `- [Failed to load] ${suggestion.urls[index]}`;
+        if (!beatmap) return t.failedToLoad(suggestion.urls[index]);
         return `- [${beatmap.beatmapset.artist_unicode} - ${beatmap.beatmapset.title} [${beatmap.version}]](${suggestion.urls[index]})`;
       }).join('\n');
 
       const embed = new Embed()
-        .setTitle(`Suggestions - ${currentRound}`)
-        .setDescription(`Slot: **${suggestion.slot}**\nMaps:\n${mapsText}`)
+        .setTitle(t.suggestionTitle(currentRound))
+        .setDescription(t.suggestionDescription(suggestion.slot, mapsText))
         .setColor(10800862)
         .setTimestamp();
 

@@ -1,4 +1,4 @@
-import { Declare, Command, Options, Groups } from "seyfert";
+import { Declare, Command, Options, GroupsT } from "seyfert";
 import Action from "./action";
 import Quote from "./quote";
 import Random from "./random";
@@ -15,8 +15,11 @@ import Remove from './schedule/remove';
   name: 'anime',
   description: 'commands related to anime stuff'
 })
-@Groups({
-  schedule: { defaultDescription: 'notify you when an anime of your choice gets a new schedule.' }
+@GroupsT({
+  schedule: {
+    name: 'anime.scheduleSub.name',
+    defaultDescription: 'anime.scheduleSub.description'
+  }
 })
 @Options([Action, Quote, Random, Profile, Airing, Search, Gelbooru, Add, Current, Remove])
 export default class Anime extends Command {};

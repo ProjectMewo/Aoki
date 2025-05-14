@@ -4,6 +4,7 @@ import {
   CommandContext,
   createStringOption,
   Declare,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -11,6 +12,10 @@ import {
 const options = {
   track: createStringOption({
     description: 'the Spotify track name to search for',
+    description_localizations: {
+      "en-US": 'the Spotify track name to search for',
+      "vi": 'tên bài hát Spotify mà bạn muốn tìm kiếm'
+    },
     required: true,
     autocomplete: async (interaction) => await TrackLicense.prototype.autocomplete(interaction)
   })
@@ -38,6 +43,7 @@ async function getSpotifyToken(): Promise<string | null> {
   name: 'track-license',
   description: 'get licensing information for a Spotify track. Not reliable, use along with /osu verify-artist.'
 })
+@LocalesT('osu.trackLicense.name', 'osu.trackLicense.description')
 @Options(options)
 export default class TrackLicense extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -69,6 +75,7 @@ export default class TrackLicense extends SubCommand {
   }
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.trackLicense;
     const trackId = ctx.options.track;
 
     await ctx.deferReply();
@@ -76,7 +83,7 @@ export default class TrackLicense extends SubCommand {
     try {
       const token = await getSpotifyToken();
       if (!token) {
-        return AokiError.API_ERROR({ sender: ctx.interaction, content: "Failed to fetch Spotify token." });
+        return AokiError.API_ERROR({ sender: ctx.interaction, content: t.apiError });
       }
 
       const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
@@ -86,11 +93,11 @@ export default class TrackLicense extends SubCommand {
       }).then(res => res.json());
 
       if (trackRes.error) {
-        return AokiError.API_ERROR({ sender: ctx.interaction, content: `Error fetching track: ${trackRes.error.message || 'Unknown error'}` });
+        return AokiError.API_ERROR({ sender: ctx.interaction, content: t.trackError(trackRes.error.message) });
       }
 
       if (!trackRes.album?.href) {
-        return AokiError.API_ERROR({ sender: ctx.interaction, content: "Track information is incomplete or malformed." });
+        return AokiError.API_ERROR({ sender: ctx.interaction, content: t.apiError });
       }
 
       const albumRes = await fetch(trackRes.album.href, {
@@ -100,26 +107,26 @@ export default class TrackLicense extends SubCommand {
       }).then(res => res.json());
 
       if (albumRes.error) {
-        return AokiError.API_ERROR({ sender: ctx.interaction, content: `Error fetching album: ${albumRes.error.message || 'Unknown error'}` });
+        return AokiError.API_ERROR({ sender: ctx.interaction, content: t.albumError(albumRes.error.message) });
       }
 
-      const copyright = albumRes.copyrights?.map((c: any) => c.text).join('\n') || "Unknown";
-      const label = albumRes.label || "Unknown";
-      let inferredLicense = "Unknown";
+      const copyright = albumRes.copyrights?.map((c: any) => c.text).join('\n') || t.unknown;
+      const label = albumRes.label || t.unknown;
+      let inferredLicense = t.unknown;
 
-      if (/public domain/i.test(copyright)) inferredLicense = "No rights reserved (Public Domain)";
-      else if (/creative commons/i.test(copyright)) inferredLicense = "Creative Commons (CC)";
-      else if (/all rights reserved/i.test(copyright)) inferredLicense = "All rights reserved";
+      if (/public domain/i.test(copyright)) inferredLicense = t.inferredLicensePublicDomain;
+      else if (/creative commons/i.test(copyright)) inferredLicense = t.inferredLicenseCreativeCommons;
+      else if (/all rights reserved/i.test(copyright)) inferredLicense = t.inferredLicenseAllRightsReserved;
 
       const embed = {
         title: trackRes.name,
         url: trackRes.external_urls.spotify,
         fields: [
-          { name: "Artist", value: trackRes.artists.map((a: any) => a.name).join(', ') },
-          { name: "Album", value: albumRes.name },
-          { name: "Label", value: label },
-          { name: "Copyright", value: copyright },
-          { name: "Inferred License", value: `${inferredLicense}\n*Note: License inference may not be accurate.*` }
+          { name: t.embed.artistField, value: trackRes.artists.map((a: any) => a.name).join(', ') },
+          { name: t.embed.albumField, value: albumRes.name },
+          { name: t.embed.labelField, value: label },
+          { name: t.embed.copyrightField, value: copyright },
+          { name: t.embed.inferredLicenseField, value: `${inferredLicense}\n${t.inferredLicenseNote}` }
         ],
         thumbnail: { url: trackRes.album.images[0]?.url },
         color: 10800862

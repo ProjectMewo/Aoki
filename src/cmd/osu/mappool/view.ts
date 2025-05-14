@@ -4,6 +4,7 @@ import {
   Declare,
   Embed,
   Group,
+  LocalesT,
   SubCommand
 } from "seyfert";
 
@@ -11,9 +12,11 @@ import {
   name: 'view',
   description: 'view the finalized mappool for the current round.'
 })
+@LocalesT('osu.mappool.view.name', 'osu.mappool.view.description')
 @Group('mappool')
 export default class View extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.mappool.view;
     await ctx.deferReply();
 
     // Fetch tournament settings
@@ -23,7 +26,7 @@ export default class View extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -40,7 +43,7 @@ export default class View extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to view the mappool. Only hosts, advisors, mappoolers, and test/replayers can access this command.'
+        content: t.noPermission
       });
     }
 
@@ -49,7 +52,7 @@ export default class View extends SubCommand {
     if (!currentRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'There is no active round set for this tournament. Remind an organizer to set the current round first with `/tourney current`.'
+        content: t.noActiveRound
       });
     }
 
@@ -58,7 +61,7 @@ export default class View extends SubCommand {
     if (!mappool) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No mappool found for the current round: ${currentRound}. Remind your organizer to set up the mappool.`
+        content: t.noMappool(currentRound)
       });
     }
 
@@ -66,7 +69,7 @@ export default class View extends SubCommand {
     if (!mappool.maps || mappool.maps.length === 0) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No maps have been confirmed for the ${currentRound} mappool yet.`
+        content: t.noMaps(currentRound)
       });
     }
 
@@ -100,18 +103,18 @@ export default class View extends SubCommand {
       try {
         const beatmap = await fetchBeatmapInfo(extractDifficultyId(map.url));
         if (beatmap) {
-          mapDetails.push(`**${map.slot}**: [${beatmap.beatmapset.artist_unicode} - ${beatmap.beatmapset.title} [${beatmap.version}]](${beatmap.url})`);
+          mapDetails.push(t.mapDetails(map.slot, beatmap.beatmapset.artist_unicode, beatmap.beatmapset.title, beatmap.version, beatmap.url));
         } else {
-          mapDetails.push(`**${map.slot}**: [Map information unavailable](${map.url})`);
+          mapDetails.push(t.mapUnavailable(map.slot, map.url));
         }
       } catch (error) {
-        mapDetails.push(`**${map.slot}**: [Error fetching map details](${map.url})`);
+        mapDetails.push(t.mapError(map.slot, map.url));
       }
     }
 
     // Create a single embed with all maps
     const embed = new Embed()
-      .setTitle(`Finalized picks for ${currentRound}`)
+      .setTitle(t.embedTitle(currentRound))
       .setDescription(mapDetails.join('\n'))
       .setColor(10800862)
       .setTimestamp();

@@ -5,12 +5,17 @@ import {
   Declare, 
   Embed, 
   SubCommand, 
-  Options 
+  Options, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   type: createStringOption({
     description: 'The type of content to get',
+    description_localizations: {
+      "en-US": 'The type of content to get',
+      "vi": 'Loại nội dung bạn muốn lấy'
+    },
     required: true,
     choices: [
       { name: 'anime', value: 'anime' },
@@ -23,9 +28,11 @@ const options = {
   name: 'random',
   description: 'Get a random anime or manga from MyAnimeList'
 })
+@LocalesT('anime.random.name', 'anime.random.description')
 @Options(options)
 export default class Random extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.random;
     const { type } = ctx.options;
     const jikan_v4 = "https://api.jikan.moe/v4";
 
@@ -36,7 +43,7 @@ export default class Random extends SubCommand {
       if (!response.ok) {
         return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "The service is probably dead. Wait a little bit, then try again."
+          content: t.apiError
         });
       }
 
@@ -44,7 +51,7 @@ export default class Random extends SubCommand {
       if (!res.data) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -101,7 +108,7 @@ export default class Random extends SubCommand {
     } catch (error) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Wow, this kind of error has never been documented. Wait for about 5-10 minutes, if nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`."
+        content: t.undocErr
       });
     }
   }

@@ -6,13 +6,18 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  TextGuildChannel
+  TextGuildChannel,
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
     description: 'the term to search for',
-    required: true
+    required: true,
+    description_localizations: {
+      "en-US": 'the term to search for',
+      "vi": 'thuật ngữ bạn muốn tìm kiếm'
+    }
   })
 };
 
@@ -20,9 +25,11 @@ const options = {
   name: 'wiki',
   description: 'search for information on Wikipedia'
 })
+@LocalesT('utility.wiki.name', 'utility.wiki.description')
 @Options(options)
 export default class Wiki extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.wiki;
     const { query } = ctx.options;
 
     await ctx.deferReply();
@@ -30,7 +37,7 @@ export default class Wiki extends SubCommand {
     if (await ctx.client.utils.profane.isProfane(query) && !(ctx.interaction.channel as TextGuildChannel).nsfw) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Your query contains profanity. Move to an NSFW channel or change the query."
+        content: t.profaneQuery
       });
     }
 
@@ -40,7 +47,7 @@ export default class Wiki extends SubCommand {
       if (!res?.title) {
         return AokiError.USER_INPUT({
           sender: ctx.interaction,
-          content: "Can't find that. Check your query."
+          content: t.notFound
         });
       }
 
@@ -48,8 +55,8 @@ export default class Wiki extends SubCommand {
       const thumbnail = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1122px-Wikipedia-logo-v2.svg.png";
 
       const description = [
-        `***Description:** ${res.description || "None"}*\n\n`,
-        `**Extract:** ${ctx.client.utils.string.textTruncate(res.extract, 1000).split(". ").join(".\n- ")}`
+        `***${t.desc}:** ${res.description || t.none}*\n\n`,
+        `**${t.extract}:** ${ctx.client.utils.string.textTruncate(res.extract, 1000).split(". ").join(".\n- ")}`
       ].join("");
 
       const embed = new Embed()
@@ -60,7 +67,7 @@ export default class Wiki extends SubCommand {
         .setURL(res.content_urls.desktop.page)
         .setDescription(description)
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         });
 
@@ -68,7 +75,7 @@ export default class Wiki extends SubCommand {
     } catch (error) {
       AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Failed to fetch data from Wikipedia. Please try again later."
+        content: t.fetchError
       });
     }
   }

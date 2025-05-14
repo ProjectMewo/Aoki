@@ -5,12 +5,17 @@ import {
   Declare, 
   Embed, 
   SubCommand, 
-  Options 
+  Options, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
     description: 'the URL to take a screenshot of',
+    description_localizations: {
+      "en-US": 'the URL to take a screenshot of',
+      "vi": 'URL để chụp ảnh màn hình'
+    },
     required: true
   })
 };
@@ -19,9 +24,11 @@ const options = {
   name: 'screenshot',
   description: 'take a screenshot of a website'
 })
+@LocalesT('utility.screenshot.name', 'utility.screenshot.description')
 @Options(options)
 export default class Screenshot extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.screenshot;
     const { query } = ctx.options;
 
     await ctx.deferReply();
@@ -29,15 +36,20 @@ export default class Screenshot extends SubCommand {
     const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
     if (!query.match(urlRegex)) {
-      throw new Error("Baka, that's not a valid URL.\n\nMake sure it starts with either `https://` or `http://`.");
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.urlError
+      })
     }
 
     const nsfwPages = await ctx.client.utils.profane.getStatic("nsfw");
 
-    if (nsfwPages.domains.includes(query) && !(ctx.interaction.channel as any).nsfw) {
+    const trimmedQuery = new URL(query).hostname;
+
+    if (nsfwPages.domains.includes(trimmedQuery) && !(ctx.interaction.channel as any).nsfw) {
       return AokiError.GENERIC({
         sender: ctx.interaction,
-        content: "That's a NSFW website, you moron!"
+        content: t.noNsfw
       });
     }
 
@@ -56,9 +68,9 @@ export default class Screenshot extends SubCommand {
 
       const response = await fetch(url);
       if (!response.ok) {
-        return AokiError.GENERIC({
+        return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "Failed to fetch screenshot. Please try again later."
+          content: t.fetchError
         });
       }
 
@@ -73,7 +85,7 @@ export default class Screenshot extends SubCommand {
         .setColor(10800862)
         .setImage("attachment://screenshot.png")
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -85,7 +97,7 @@ export default class Screenshot extends SubCommand {
     } catch {
       return AokiError.GENERIC({
         sender: ctx.interaction,
-        content: "Something's wrong with that URL. Check if you made a typo."
+        content: t.fetchError
       });
     }
   }

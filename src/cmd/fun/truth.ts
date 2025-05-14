@@ -1,12 +1,14 @@
 import AokiError from "@struct/AokiError";
-import { CommandContext, Declare, SubCommand } from "seyfert";
+import { CommandContext, Declare, LocalesT, SubCommand } from "seyfert";
 
 @Declare({
   name: 'truth',
   description: 'get a random truth question for truth or dare.'
 })
+@LocalesT('fun.truth.name', 'fun.truth.description')
 export default class Truth extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.truth;
     try {
       // Get the truth questions from static data
       const questions = await ctx.interaction.client.utils.profane.getStatic("truth");
@@ -19,7 +21,7 @@ export default class Truth extends SubCommand {
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Failed to fetch a truth question. Try again later."
+        content: t.apiError
       });
     }
   }

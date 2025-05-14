@@ -81,8 +81,18 @@ declare module '@struct/Client' {
      */
     statsCache: {
       data: {
-        techField: string;
-        appField: string;
+        totalMem: number;
+        freeMem: number;
+        usedMem: number;
+        processMemUsage: number;
+        cpuLoad: number;
+        uptime: number;
+        clientVersion: string;
+        clientUptime: string;
+        commands: number;
+        servers: number;
+        users: number;
+        avgUsersPerServer: number;
         description: string;
         embedTimestamp: Date;
       };

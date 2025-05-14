@@ -5,39 +5,54 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
 
 const options = {
   slot: createStringOption({
-    description: 'The slot to suggest this map to',
+    description: 'the slot to suggest this map to',
+    description_localizations: {
+      "en-US": 'the slot to suggest this map to',
+      "vi": 'slot mà cậu muốn đề xuất map này'
+    },
     required: true
   }),
   url: createStringOption({
-    description: 'The beatmap URL (must include difficulty ID)',
+    description: 'the beatmap URL (must include difficulty ID)',
+    description_localizations: {
+      "en-US": 'the beatmap URL (must include difficulty ID)',
+      "vi": 'URL của beatmap (phải bao gồm ID độ khó)'
+    },
     required: true
   }),
   confirm: createBooleanOption({
-    description: 'Confirm you know the correct current round is set',
+    description: 'confirm you know the correct current round is set',
+    description_localizations: {
+      "en-US": 'confirm you know the correct current round is set',
+      "vi": 'xác nhận rằng cậu biết vòng hiện tại đã được đặt đúng'
+    },
     required: true
   })
 };
 
 @Declare({
   name: 'suggest',
-  description: 'Suggest a new map for this mappool slot'
+  description: 'suggest a new map for this mappool slot.'
 })
+@LocalesT('osu.mappool.suggest.name', 'osu.mappool.suggest.description')
 @Group('mappool')
 @Options(options)
 export default class Suggest extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.mappool.suggest;
     const { slot, url, confirm } = ctx.options;
 
     if (!confirm) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Nice, good trolling there, you baka.\n\nOr are you genuine? Tell your organizer, or just ask me what is the current set round with `/tourney current`."
+        content: t.confirmPrompt
       });
     }
 
@@ -49,7 +64,7 @@ export default class Suggest extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -65,7 +80,7 @@ export default class Suggest extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to suggest maps for the mappool. Only organizers, advisors, mappoolers, and test/replayers can suggest maps.'
+        content: t.noPermission
       });
     }
 
@@ -74,7 +89,7 @@ export default class Suggest extends SubCommand {
     if (!currentRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'There is no active round set for this tournament. Remind an organizer to set the current round first with `/tourney current`.'
+        content: t.noActiveRound
       });
     }
 
@@ -83,14 +98,14 @@ export default class Suggest extends SubCommand {
     if (!mappool) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No mappool found for the current round: ${currentRound}. Remind your organizer to provide all slots of this mappool!`
+        content: t.noMappool(currentRound)
       });
     }
 
     if (!mappool.slots.includes(slot)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `The slot "${slot}" doesn't exist in the ${currentRound} mappool. Available slots: ${mappool.slots.join(', ')}`
+        content: t.invalidSlot(slot, mappool.slots, currentRound)
       });
     }
 
@@ -100,7 +115,7 @@ export default class Suggest extends SubCommand {
     if (!fullUrlPattern.test(url) && !shortUrlPattern.test(url)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'Invalid beatmap URL. Please provide either a full URL (e.g., <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) or a shortened URL (e.g., <https://osu.ppy.sh/b/5678>).'
+        content: t.invalidUrl
       });
     }
 
@@ -118,11 +133,11 @@ export default class Suggest extends SubCommand {
       });
 
       await ctx.editOrReply({
-        content: `Successfully added your suggestion for slot ${slot} in the ${currentRound} mappool.`
+        content: t.suggestionAdded(slot, currentRound)
       });
     } else {
       await ctx.editOrReply({
-        content: `This map has already been suggested for slot ${slot}.`
+        content: t.alreadySuggested(slot)
       });
     }
   }

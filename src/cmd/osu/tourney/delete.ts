@@ -5,6 +5,7 @@ import {
   CommandContext,
   Declare,
   Group,
+  LocalesT,
   SubCommand
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
@@ -13,9 +14,11 @@ import { ButtonStyle } from "seyfert/lib/types";
   name: 'delete',
   description: 'delete the current tournament in this server'
 })
+@LocalesT('osu.tourney.delete.name', 'osu.tourney.delete.description')
 @Group('tourney')
 export default class Delete extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.delete;
     await ctx.deferReply();
 
     // Get current tournament settings
@@ -25,7 +28,7 @@ export default class Delete extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server to delete.'
+        content: t.noTournament
       });
     }
 
@@ -37,21 +40,21 @@ export default class Delete extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to delete this tournament. Only hosts can do this.'
+        content: t.noPermission
       });
     }
 
     // Create a confirmation button
     const confirmButton = new Button()
       .setCustomId('confirm-delete')
-      .setLabel('Yes, I\'m very sure!')
+      .setLabel(t.verySure)
       .setStyle(ButtonStyle.Danger);
 
     const actionRow = new ActionRow<Button>().addComponents(confirmButton);
 
     // Send a warning message with the confirmation button
     const message = await ctx.editOrReply({
-      content: `Are you sure you want to delete the tournament **${settings.name}** (${settings.abbreviation})? This action cannot be undone!`,
+      content: t.confirmPrompt(settings.name, settings.abbreviation),
       components: [actionRow]
     }, true);
 
@@ -80,7 +83,7 @@ export default class Delete extends SubCommand {
       });
 
       await interaction.editOrReply({
-        content: `Successfully deleted the tournament **${settings.name}** (${settings.abbreviation}).`,
+        content: t.success(settings.name, settings.abbreviation),
         components: []
       });
     });

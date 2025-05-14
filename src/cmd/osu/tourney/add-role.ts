@@ -1,10 +1,12 @@
 import AokiError from "@struct/AokiError";
 import {
+  AutocompleteInteraction,
   CommandContext,
   createRoleOption,
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -12,18 +14,19 @@ import {
 const options = {
   roleset: createStringOption({
     description: 'the roleset to add the role to (e.g., host, advisor, mappooler)',
+    description_localizations: {
+      "en-US": 'the roleset to add the role to (e.g., host, advisor, mappooler)',
+      "vi": 'bộ vai trò để thêm vai trò vào (ví dụ: host, advisor, mappooler)'
+    },
     required: true,
-    choices: [
-      { name: 'Host', value: 'host' },
-      { name: 'Advisor', value: 'advisor' },
-      { name: 'Mappooler', value: 'mappooler' },
-      { name: 'Tester/Replayer', value: 'testReplayer' },
-      { name: 'Custom Mapper', value: 'customMapper' },
-      { name: 'Streamer', value: 'streamer' }
-    ]
+    autocomplete: async i => await AddRole.prototype.autocomplete(i)
   }),
   role: createRoleOption({
     description: 'the role to add to the selected roleset',
+    description_localizations: {
+      "en-US": 'the role to add to the selected roleset',
+      "vi": 'vai trò để thêm vào bộ vai trò đã chọn'
+    },
     required: true
   })
 };
@@ -32,10 +35,19 @@ const options = {
   name: 'add-role',
   description: 'add additional roles to a tournament roleset'
 })
+@LocalesT('osu.tourney.addRole.name', 'osu.tourney.addRole.description')
 @Group('tourney')
 @Options(options)
 export default class AddRole extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.tourney.addRole.choices
+    );
+  };
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.addRole;
     const { roleset, role } = ctx.options;
 
     await ctx.deferReply();
@@ -46,7 +58,7 @@ export default class AddRole extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -58,15 +70,7 @@ export default class AddRole extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to add roles to rolesets. Only hosts can do this.'
-      });
-    }
-
-    // Validate roleset
-    if (!(roleset in settings.roles)) {
-      return AokiError.USER_INPUT({
-        sender: ctx.interaction,
-        content: `Invalid roleset: **${roleset}**. Please choose a valid roleset.`
+        content: t.noPermission
       });
     }
 
@@ -74,7 +78,7 @@ export default class AddRole extends SubCommand {
     if (settings.roles[roleset as keyof typeof settings.roles].includes(role.id)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `The role <@&${role.id}> is already part of the **${roleset}** roleset.`
+        content: t.roleAlreadyAdded(role.id, roleset)
       });
     }
 
@@ -87,7 +91,7 @@ export default class AddRole extends SubCommand {
     });
 
     await ctx.editOrReply({
-      content: `Successfully added role <@&${role.id}> to the **${roleset}** roleset!`
+      content: t.roleAdded(role.id, roleset)
     });
   }
 }

@@ -3,6 +3,7 @@ import {
   CommandContext,
   createStringOption,
   Declare,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -10,10 +11,18 @@ import {
 const options = {
   username: createStringOption({
     description: "your osu! username",
+    description_localizations: {
+      "en-US": "your osu! username",
+      "vi": "tên người dùng osu! của bạn"
+    },
     required: true
   }),
   mode: createStringOption({
     description: "your preferred mode",
+    description_localizations: {
+      "en-US": "your preferred mode",
+      "vi": "chế độ bạn muốn đặt làm mặc định"
+    },
     required: true,
     choices: [
       { name: "osu!standard", value: "osu" },
@@ -28,6 +37,7 @@ const options = {
   name: "set",
   description: "set your osu! username and default mode"
 })
+@LocalesT('osu.set.name', 'osu.set.description')
 @Options(options)
 export default class Set extends SubCommand {
   private usernameRegex = /^[\[\]a-z0-9_-\s]+$/i;
@@ -35,6 +45,7 @@ export default class Set extends SubCommand {
   private api_v1 = `${this.baseUrl}/api`;
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.set;
     const { username, mode } = ctx.options;
     const utils = ctx.client.utils;
 
@@ -48,7 +59,7 @@ export default class Set extends SubCommand {
     if (!this.usernameRegex.test(username)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Baka, the username is invalid."
+        content: t.invalidUsername
       });
     }
 
@@ -56,13 +67,12 @@ export default class Set extends SubCommand {
     if (!profile?.username) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "Baka, that user doesn't exist."
+        content: t.userNotFound
       });
     }
 
     // Utilities
-    const replies = ["Got that.", "Noted.", "I'll write that in.", "Updated for you.", "One second, writing that in.", "Check if this is right."];
-    const reply = `${utils.array.random(replies)} Your current username is \`${profile.username}\`, and your current mode is \`${utils.osu.stringModeFormat(formattedMode)}\`.`;
+    const reply = t.updated(profile.username, utils.osu.stringModeFormat(formattedMode));
 
     // Database check
     if (
@@ -72,7 +82,7 @@ export default class Set extends SubCommand {
     ) {
       // We don't need to get to the database to save it again
       await ctx.editOrReply({ 
-        content: `${reply}\n\nThat's the same thing you did before, though.` 
+        content: `${reply}\n\n${t.sameAsBefore}` 
       });
       return;
     }

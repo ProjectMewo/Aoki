@@ -1,12 +1,14 @@
 import AokiError from "@struct/AokiError";
-import { CommandContext, Declare, SubCommand } from "seyfert";
+import { CommandContext, Declare, LocalesT, SubCommand } from "seyfert";
 
 @Declare({
   name: 'fact',
-  description: 'Get a random fact.'
+  description: 'get a random fact.'
 })
+@LocalesT('fun.fact.name', 'fun.fact.description')
 export default class Fact extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.fact;
     try {
       // Define the URLs for facts
       const urls = ["https://catfact.ninja/fact", "https://uselessfacts.jsph.pl/random.json?language=en"];
@@ -25,7 +27,7 @@ export default class Fact extends SubCommand {
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "Failed to fetch a fact. Try again later."
+        content: t.apiError
       });
     }
   }

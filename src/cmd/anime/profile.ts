@@ -5,13 +5,18 @@ import {
   Declare,
   Embed,
   SubCommand,
-  Options
+  Options,
+  LocalesT
 } from "seyfert";
 import { UserData } from "@local-types/anilist";
 
 const options = {
   platform: createStringOption({
-    description: "The platform to search on",
+    description: "the platform to search on",
+    description_localizations: {
+      "en-US": "the platform to search on",
+      "vi": "nền tảng để tìm kiếm"
+    },
     required: true,
     choices: [
       { name: "MyAnimeList", value: "mal" },
@@ -19,18 +24,24 @@ const options = {
     ]
   }),
   username: createStringOption({
-    description: "The username to search for",
+    description: "the username to search for",
+    description_localizations: {
+      "en-US": "the username to search for",
+      "vi": "tên người dùng để tìm kiếm"
+    },
     required: true
   })
 };
 
 @Declare({
   name: "profile",
-  description: "Get an anime profile from MyAnimeList or AniList"
+  description: "get an anime profile from MyAnimeList or AniList"
 })
+@LocalesT('anime.profile.name', 'anime.profile.description')
 @Options(options)
 export default class Profile extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.profile;
     const { platform, username } = ctx.options;
 
     await ctx.deferReply();
@@ -42,7 +53,7 @@ export default class Profile extends SubCommand {
     if (await utils.profane.isProfane(username)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Stop sneaking in bad content please, you baka."
+        content: t.noNsfw
       });
     }
 
@@ -53,8 +64,7 @@ export default class Profile extends SubCommand {
         if (!response.ok) {
           return AokiError.NOT_FOUND({
             sender: ctx.interaction,
-            content:
-              "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+            content: t.notFound
           });
         }
 
@@ -64,8 +74,7 @@ export default class Profile extends SubCommand {
         if (!result) {
           return AokiError.NOT_FOUND({
             sender: ctx.interaction,
-            content:
-              "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+            content: t.notFound
           });
         }
 
@@ -134,8 +143,7 @@ export default class Profile extends SubCommand {
           } else {
             return AokiError.NOT_FOUND({
               sender: ctx.interaction,
-              content:
-                "Looks like I found nothing in the records.\n\nYou believe that should exist? My sensei probably messed up. Try reporting this with `/my fault`."
+              content: t.notFound
             });
           }
         }
@@ -195,8 +203,7 @@ export default class Profile extends SubCommand {
     } catch (error) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content:
-          "Wow, this kind of error has never been documented. Wait for about 5-10 minutes, if nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`."
+        content: t.undocErr
       });
     }
   }

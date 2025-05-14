@@ -7,16 +7,25 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  Attachment 
+  Attachment, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
     description: 'description of the issue',
+    description_localizations: {
+      "en-US": 'description of the issue',
+      "vi": 'mô tả vấn đề'
+    },
     required: false
   }),
   attachment: createAttachmentOption({
     description: 'an image related to the issue',
+    description_localizations: {
+      "en-US": 'an image related to the issue',
+      "vi": 'một hình ảnh liên quan đến vấn đề'
+    },
     required: false
   })
 };
@@ -25,9 +34,11 @@ const options = {
   name: 'fault',
   description: 'report an issue with the bot'
 })
+@LocalesT('my.fault.name', 'my.fault.description')
 @Options(options)
 export default class Fault extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).my.fault;
     const query = ctx.options.query;
     const attachment = ctx.options.attachment;
 
@@ -37,7 +48,7 @@ export default class Fault extends SubCommand {
     if (!query && !attachment) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Baka, I can't send nothing. At least give me an error message, an image, or something!"
+        content: t.noInput
       });
     }
     
@@ -69,11 +80,11 @@ export default class Fault extends SubCommand {
     };
 
     const sendErrorGibberish = async () => {
-      await ctx.editOrReply({ content: "I see you typing gibberish there, you baka." });
+      await ctx.editOrReply({ content: t.gibberishDetected });
       await delay(3000);
-      await ctx.editOrReply({ content: "You're not sending [these](https://i.imgur.com/C5tvxfp.png) through me, please." });
+      await ctx.editOrReply({ content: t.gibberishWarning1 });
       await delay(3000);
-      await ctx.editOrReply({ content: "I'll like [these](https://i.imgur.com/FRWBFXr.png) better." });
+      await ctx.editOrReply({ content: t.gibberishWarning2 });
     };
 
     const isImageAttachment = (att: Attachment | null) => {
@@ -102,7 +113,7 @@ export default class Fault extends SubCommand {
         await sendErrorGibberish();
         return;
       } else {
-        await ctx.editOrReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
+        await ctx.editOrReply({ content: t.thankYouFeedback });
         await sendToLogs(preset);
         return;
       }
@@ -111,12 +122,12 @@ export default class Fault extends SubCommand {
     // handle image attachment
     if (attachment) {
       if (!isImageAttachment(attachment)) {
-        await ctx.editOrReply({ content: "Appreciate your attachment, but for now we only support images." });
+        await ctx.editOrReply({ content: t.nonImageAttachment });
         return;
       }
       
       preset.setImage(attachment.url);
-      await ctx.editOrReply({ content: "Thank you for your feedback. The note will be resolved after a few working days." });
+      await ctx.editOrReply({ content: t.thankYouFeedback });
       await sendToLogs(preset);
       return;
     }

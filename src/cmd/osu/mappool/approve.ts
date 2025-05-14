@@ -4,6 +4,7 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
   SubCommand
 } from "seyfert";
@@ -11,22 +12,32 @@ import {
 const options = {
   slot: createStringOption({
     description: 'the slot to add this map to',
+    description_localizations: {
+      "en-US": 'the slot to add this map to',
+      "vi": 'vị trí để thêm map này'
+    },
     required: true
   }),
   url: createStringOption({
     description: 'the beatmap URL (must include difficulty ID)',
+    description_localizations: {
+      "en-US": 'the beatmap URL (must include difficulty ID)',
+      "vi": 'URL của map (phải bao gồm ID độ khó)'
+    },
     required: true
   })
 };
 
 @Declare({
   name: 'approve',
-  description: 'approve a map and move it to the current round\'s finalized mappool'
+  description: 'approve a map and move it to the current round\'s finalized mappool.'
 })
+@LocalesT('osu.mappool.approve.name', 'osu.mappool.approve.description')
 @Group('mappool')
 @Options(options)
 export default class Approve extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.mappool.approve;
     const { slot, url } = ctx.options;
 
     await ctx.deferReply();
@@ -37,7 +48,7 @@ export default class Approve extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -53,7 +64,7 @@ export default class Approve extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to add maps to the mappool. Only hosts, advisors and mappoolers can do this.'
+        content: t.noPermission
       });
     }
 
@@ -62,7 +73,7 @@ export default class Approve extends SubCommand {
     if (!currentRound) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'There is no active round set for this tournament. Remind an organizer to set the current round first with `/tourney current`.'
+        content: t.noActiveRound
       });
     }
 
@@ -71,7 +82,7 @@ export default class Approve extends SubCommand {
     if (!mappool) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: `No mappool found for the current round: ${currentRound}. Create it first with \`/tourney add-round\`.`
+        content: t.noMappool(currentRound)
       });
     }
 
@@ -79,7 +90,7 @@ export default class Approve extends SubCommand {
     if (!mappool.slots.includes(slot)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `The slot "${slot}" doesn't exist in the ${currentRound} mappool. Available slots: ${mappool.slots.join(', ')}`
+        content: t.invalidSlot(slot, mappool.slots, currentRound)
       });
     }
 
@@ -90,7 +101,7 @@ export default class Approve extends SubCommand {
     if (!fullUrlPattern.test(url) && !shortUrlPattern.test(url)) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'Invalid beatmap URL. Please provide either a full URL (e.g., <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) or a shortened URL (e.g., <https://osu.ppy.sh/b/5678>).'
+        content: t.invalidUrl
       });
     }
 
@@ -124,7 +135,7 @@ export default class Approve extends SubCommand {
     if (!mapInfo) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: 'Failed to fetch beatmap information. Please try again later.'
+        content: t.fetchError
       });
     }
 
@@ -138,7 +149,7 @@ export default class Approve extends SubCommand {
       });
 
       await ctx.editOrReply({
-        content: `Updated [${mapInfo.beatmapset.title}](${url}) for **${slot}** in the ${currentRound} mappool.`
+        content: t.mapUpdated(mapInfo.beatmapset.title, url, slot, currentRound)
       });
     } else {
       // Add new map
@@ -153,7 +164,7 @@ export default class Approve extends SubCommand {
       });
 
       await ctx.editOrReply({
-        content: `Added [${mapInfo.beatmapset.title}](${url}) for **${slot}** to the ${currentRound} mappool.`
+        content: t.mapAdded(mapInfo.beatmapset.title, url, slot, currentRound)
       });
     }
   }

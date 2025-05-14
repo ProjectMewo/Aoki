@@ -35,7 +35,7 @@ export default class MiscUtil {
     timestampRegex: RegExp
   ): Promise<Message> {
     // replace each timestamp with the linked one
-    let message = "*Click on the timestamp to open in editor.*\n\n";
+    let message = msg.t.miscUtil.clickOnTimestamp;
     for (const timestamp of timestamps) {
       const res = timestampRegex.exec(timestamp);
       timestampRegex.lastIndex = 0;
@@ -66,16 +66,16 @@ export default class MiscUtil {
       const response = await fetch(url);
       if (!response.ok) return AokiError.API_ERROR({
         sender: msg,
-        content: "HTTP error, this is normal. Ask again later."
+        content: msg.t.miscUtil.httpError
       });
       const data = await response.json();
-      const answer = msg.client.utils.string.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || "Can't answer that one.";
+      const answer = msg.client.utils.string.textTruncate(data.queryresult?.pods?.[1]?.subpods?.[0]?.plaintext, 1980).replace(/Wolfram\|Alpha/g, "Aoki") || msg.t.miscUtil.cantAnswer;
       // ???? what did I do here
       await msg.reply({ content: answer });
     } catch (error) {
       return AokiError.INTERNAL({
         sender: msg,
-        content: `Oh, something happened. Give my sensei a yell by doing \`/my fault\`:\n\n\`\`\`fix\n${error}\n\`\`\``
+        content: msg.t.miscUtil.apiError
       });
     }
   }

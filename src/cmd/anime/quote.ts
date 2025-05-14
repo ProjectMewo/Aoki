@@ -2,16 +2,18 @@ import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
   Declare, 
-  Embed, 
+  LocalesT, 
   SubCommand 
 } from "seyfert";
 
 @Declare({
   name: 'quote',
-  description: 'Get a random anime quote.'
+  description: 'get a random anime quote.'
 })
+@LocalesT('anime.quote.name', 'anime.quote.description')
 export default class Quote extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.quote;
     await ctx.deferReply();
 
     try {
@@ -22,27 +24,19 @@ export default class Quote extends SubCommand {
       if (!response.ok) {
         return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "There was an error getting a quote. Try again later, or my sensei probably messed up."
+          content: t.apiError
         });
       }
 
       const data = await response.json();
 
-      const embed = new Embed()
-        .setColor(10800862)
-        .setTitle("Random Anime Quote")
-        .setDescription(`**${data.author}** from **${data.anime}**:\n\n*${data.quote}*`)
-        .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
-          iconUrl: ctx.author.avatarURL()
-        })
-        .setTimestamp(new Date());
-
-      await ctx.editOrReply({ embeds: [embed] });
+      await ctx.editOrReply({ 
+        content: `**${data.author}** from **${data.anime}**:\n\n*${data.quote}*` 
+      });
     } catch (error) {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "There was an error getting a quote. Try again later, or my sensei probably messed up."
+        content: t.apiError
       });
     }
   }

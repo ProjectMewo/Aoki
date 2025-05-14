@@ -5,23 +5,30 @@ import {
   Declare, 
   Embed, 
   SubCommand, 
-  Options 
+  Options, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   query: createStringOption({
-    description: 'the package name to search for',
+    description: 'the library name to search for',
+    description_localizations: {
+      "en-US": 'the library name to search for',
+      "vi": 'tên thư viện bạn muốn tìm kiếm'
+    },
     required: true
   })
 };
 
 @Declare({
   name: 'npm',
-  description: 'search for an npm package'
+  description: 'search for an npm library'
 })
+@LocalesT('utility.npm.name', 'utility.npm.description')
 @Options(options)
 export default class Npm extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.npm;
     const { query } = ctx.options;
 
     await ctx.deferReply();
@@ -35,35 +42,38 @@ export default class Npm extends SubCommand {
       const res = raw.objects?.[0]?.package;
 
       if (!res) {
-        throw new Error("Invalid repository or typo in the package name.");
+        return AokiError.NOT_FOUND({
+          sender: ctx.interaction,
+          content: t.repoNotFound
+        })
       }
 
       const score = raw.objects[0].score;
       const maintainers = res.maintainers.map((maintainer: { username: string }) => `\`${maintainer.username}\``).join(', ');
-      const keywords = res.keywords?.map((keyword: string) => `\`${keyword}\``).join(', ') || "None";
+      const keywords = res.keywords?.map((keyword: string) => `\`${keyword}\``).join(', ') || t.none;
 
       const description = [
         `${ctx.client.utils.string.textTruncate(res.description, 75)}\n\n`,
-        `**Keywords:** ${keywords}\n`,
-        `**Maintainers:** ${maintainers}`
+        `**${t.keyword}:** ${keywords}\n`,
+        `**${t.maintainer}:** ${maintainers}`
       ].join("");
 
       const field = ctx.client.utils.string.keyValueField({
-        "Version": res.version || "Unknown",
-        "Author": res.publisher.username,
-        "Modified": ctx.client.utils.time.formatDate(new Date(res.date), 'dd MMMM yyyy'),
-        "Score": (score.final * 100).toFixed(1)
+        [t.ver]: res.version || t.none,
+        [t.author]: res.publisher.username,
+        [t.modified]: ctx.client.utils.time.formatDate(new Date(res.date), 'dd MMMM yyyy'),
+        [t.score]: (score.final * 100).toFixed(1)
       }, 40);
 
       const embed = new Embed()
         .setColor(10800862)
-        .setAuthor({ name: "npm Registry", iconUrl: 'https://i.imgur.com/24yrZxG.png' })
+        .setAuthor({ name: t.registry, iconUrl: 'https://i.imgur.com/24yrZxG.png' })
         .setTitle(`${res.name}`)
         .setURL(`https://www.npmjs.com/package/${res.name}`)
         .setDescription(description)
         .addFields([{ name: "\u2000", value: field }])
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -72,7 +82,7 @@ export default class Npm extends SubCommand {
     } catch (error) {
       AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Failed to fetch the npm package. Please try again later."
+        content: t.fetchError
       });
     }
   }

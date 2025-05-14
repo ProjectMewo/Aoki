@@ -5,16 +5,25 @@ import {
   Declare, 
   Embed, 
   SubCommand, 
-  Options 
+  Options, 
+  LocalesT
 } from "seyfert";
 
 const options = {
   user: createStringOption({
     description: 'the GitHub username',
+    description_localizations: {
+      "en-US": 'the GitHub username',
+      "vi": 'tên người dùng GitHub'
+    },
     required: true
   }),
   repo: createStringOption({
     description: 'the repository name',
+    description_localizations: {
+      "en-US": 'the repository name',
+      "vi": 'tên repository'
+    },
     required: true
   })
 };
@@ -23,9 +32,11 @@ const options = {
   name: 'github',
   description: 'get information about a GitHub repository'
 })
+@LocalesT('utility.github.name', 'utility.github.description')
 @Options(options)
 export default class Github extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.github;
     const { user, repo } = ctx.options;
 
     await ctx.deferReply();
@@ -38,7 +49,10 @@ export default class Github extends SubCommand {
       const res = await fetch(`https://api.github.com/repos/${user}/${repo}`, { headers }).then(res => res.json());
 
       if (!res?.id) {
-        throw new Error("Baka, that repo doesn't exist.");
+        return AokiError.NOT_FOUND({
+          sender: ctx.interaction,
+          content: t.repoNotFound
+        });
       }
 
       const formatBytes = (bytes: number): string => {
@@ -52,18 +66,7 @@ export default class Github extends SubCommand {
       const size = formatBytes(res.size);
       const license = res.license?.name || "Unknown";
 
-      const field = ctx.client.utils.string.keyValueField({
-        "Language": res.language || "Unknown",
-        "Forks": res.forks_count.toLocaleString(),
-        "License": license,
-        "Open Issues": res.open_issues.toLocaleString(),
-        "Watchers": res.subscribers_count.toLocaleString(),
-        "Stars": res.stargazers_count.toLocaleString(),
-        "Size": size,
-        "Archived?": res.archived ? "Yes" : "No",
-        "Disabled?": res.disabled ? "Yes" : "No",
-        "Forked?": res.fork ? "Yes" : "No"
-      }, 30);
+      const field = t.field(res, license, size, ctx);
 
       const embed = new Embed()
         .setColor(10800862)
@@ -74,7 +77,7 @@ export default class Github extends SubCommand {
         .setDescription(`${res.description}\n\n`)
         .addFields([{ name: "\u2000", value: field }])
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: t.requestedBy(ctx.author.username),
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -83,7 +86,7 @@ export default class Github extends SubCommand {
     } catch (error) {
       AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Failed to fetch repository information. Please try again later."
+        content: t.fetchError
       });
     }
   }

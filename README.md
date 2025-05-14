@@ -15,7 +15,7 @@
 ## Information about this branch
 
 > [!NOTE]
-> This branch serves as a **proof-of-concept** of (some parts of) Aoki ported to [Seyfert](https://www.seyfert.dev). It is not stable and will not be so until Seyfert becomes more stable and better structured.
+> This branch serves as a **proof-of-concept** of Aoki ported to [Seyfert](https://www.seyfert.dev). It is not stable and will not be so until Seyfert becomes more stable and better structured.
 
 ***For you developers***, this branch is a [Seyfert](https://www.seyfert.dev) implementation of Aoki. It was rewritten once again to support a more modularized method of making commands and lifting the hassle of having to handle that part yourself; and lifting the hassle of handling languages yourself. Seyfert, conveniently, did that.
 
@@ -23,17 +23,14 @@ However you don't get a lot of useful information on Seyfert, because it doesn't
 
 All technologies are still the same, except without Discord.js and with Seyfert.
 
-### Huge slander. Why did you try then?
-I hate Discord.js.
-
 ## Local development setup
-Make sure you have Bun v1.2.4+ on your local machine. [Install it here](https://bun.sh). Seyfert also supports Node or whatever it does, check their docs, but I made it work with Bun.
+Make sure you have Bun on your local machine. [Install it here](https://bun.sh). Seyfert also supports Node or whatever it does, check their docs, but I made it work with Bun.
 
 Place all the necessary keys required by first renaming the `.env.example` file to `.env`, and then fill it. **It is recommended that you use only the DEV variant of the keys.**
 
 Start the dev client by running this one-liner (which installs all dependencies and start it):
 ```bash
-bun i && npm run dev
+bun i && bun dev
 ```
 
 ## Code License & Contribution

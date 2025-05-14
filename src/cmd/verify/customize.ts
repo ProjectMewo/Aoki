@@ -15,7 +15,8 @@ import {
   ModalSubmitInteraction,
   Guild,
   TextGuildChannel,
-  SelectMenuInteraction
+  SelectMenuInteraction,
+  LocalesT
 } from "seyfert";
 import { 
   ButtonStyle, 
@@ -26,10 +27,12 @@ import {
 
 @Declare({
   name: "customize",
-  description: "Customize the verification message",
+  description: "customize the verification message",
 })
+@LocalesT('verify.customize.name', 'verify.customize.description')
 export default class Customize extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).verify.customize;
     await ctx.deferReply(true);
 
     const guild = await ctx.client.guilds.fetch(ctx.guildId!);
@@ -39,29 +42,29 @@ export default class Customize extends SubCommand {
     if (!settings?.status) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "The verification system is disabled. Please enable it first.",
+        content: t.errors.verificationDisabled
       });
     }
 
     const customization = {
-      title: settings.title || "Verify your osu! account",
+      title: settings.title || t.embed.defaultTitle,
       thumbnail: settings.thumbnail || guild.iconURL() || "",
       description:
         settings.description ||
-        "Click the button below to verify your osu! account and gain access to the server.",
+        t.embed.defaultDescription,
       roleId: settings.roleId || "",
       channelId: settings.channelId || "",
       color: ctx.client.utils.string.hexToColorResolvable(settings.color || "#FFFFFF"),
     };
 
     const updatePreview = async (): Promise<WebhookMessage> => {
-      const previewEmbed = this.createPreviewEmbed(customization);
-      const actionRow = this.createActionRow();
-      const roleRow = this.createRoleSelectRow();
-      const channelRow = this.createChannelSelectRow();
+      const previewEmbed = this.createPreviewEmbed(customization, t);
+      const actionRow = this.createActionRow(t);
+      const roleRow = this.createRoleSelectRow(t);
+      const channelRow = this.createChannelSelectRow(t);
 
       const message = await ctx.editOrReply({
-        content: "Preview of the verification message:",
+        content: t.preview.content,
         embeds: [previewEmbed],
         components: [actionRow, roleRow, channelRow],
         flags: MessageFlags.Ephemeral
@@ -76,11 +79,11 @@ export default class Customize extends SubCommand {
     });
 
     collector.run("edit_verification", async (interaction: SelectMenuInteraction) => {
-      await this.showEditModal(interaction, customization, updatePreview);
+      await this.showEditModal(interaction, customization, updatePreview, t);
     });
 
     collector.run("save_verification", async () => {
-      await this.saveVerification(ctx, customization, guild);
+      await this.saveVerification(ctx, customization, guild, t);
       collector.stop();
     });
 
@@ -88,20 +91,20 @@ export default class Customize extends SubCommand {
       const role = (await guild.roles.list()).find(r => r.id === interaction.values[0]);
       if (!role) {
         return interaction.editOrReply({
-          content: "Selected role not found. Please try again.",
+          content: t.roleSelection.roleNotFound,
           flags: MessageFlags.Ephemeral
         });
       }
       const botHighestRole = await me.roles.highest();
       if (role.position >= botHighestRole.position) {
         return interaction.editOrReply({
-          content: "Baka, that role is higher than my highest role. I can't assign that to other users.",
+          content: t.roleSelection.roleTooHigh,
           flags: MessageFlags.Ephemeral
         });
       }
       customization.roleId = interaction.values[0];
       await interaction.editOrReply({
-        content: "Verification role updated.",
+        content: t.roleSelection.roleUpdated,
         flags: MessageFlags.Ephemeral
       });
       await updatePreview();
@@ -111,60 +114,60 @@ export default class Customize extends SubCommand {
       const channel = await guild.channels.fetch(interaction.values[0]);
       if (!channel) {
         return interaction.editOrReply({
-          content: "Selected channel not found. Please try again",
+          content: t.channelSelection.channelNotFound,
           flags: MessageFlags.Ephemeral
         });
       }
       if (!(await me.fetchPermissions()).has([PermissionFlagsBits.SendMessages])) {
         return interaction.editOrReply({
-          content: "Baka, I can't send messages in there. Enable **Send Messages** in permissions view, please",
+          content: t.channelSelection.botNoSendPermission,
           flags: MessageFlags.Ephemeral
         });
       }
       customization.channelId = interaction.values[0];
       await interaction.editOrReply({
-        content: "Verification channel updated.",
+        content: t.channelSelection.channelUpdated,
         flags: MessageFlags.Ephemeral
       });
       await updatePreview();
     });
   }
 
-  createRoleSelectRow(): ActionRow<RoleSelectMenu> {
+  createRoleSelectRow(t: any): ActionRow<RoleSelectMenu> {
     return new ActionRow<RoleSelectMenu>().setComponents([
       new RoleSelectMenu()
         .setCustomId("select_role")
-        .setPlaceholder("Select verification role")
+        .setPlaceholder(t.roleSelection.placeholder)
     ]);
   }
 
-  createChannelSelectRow(): ActionRow<ChannelSelectMenu> {
+  createChannelSelectRow(t: any): ActionRow<ChannelSelectMenu> {
     return new ActionRow<ChannelSelectMenu>().setComponents([
       new ChannelSelectMenu()
         .setCustomId("select_channel")
-        .setPlaceholder("Select verification channel")
+        .setPlaceholder(t.channelSelection.placeholder)
     ]);
   }
 
-  createPreviewEmbed(customization: any) {
+  createPreviewEmbed(customization: any, t: any) {
     return {
       title: customization.title,
       thumbnail: { url: customization.thumbnail },
       description: customization.description,
       color: customization.color,
-      footer: { text: `Last updated: ${new Date().toLocaleString()}` },
+      footer: { text: t.preview.lastUpdated(new Date().toLocaleString()) },
     };
   }
 
-  createActionRow(): ActionRow {
+  createActionRow(t: any): ActionRow {
     return new ActionRow().setComponents([
       new Button()
         .setCustomId("edit_verification")
-        .setLabel("Edit")
+        .setLabel(t.buttons.edit)
         .setStyle(ButtonStyle.Primary),
       new Button()
         .setCustomId("save_verification")
-        .setLabel("Save")
+        .setLabel(t.buttons.save)
         .setStyle(ButtonStyle.Success),
     ]);
   }
@@ -172,39 +175,40 @@ export default class Customize extends SubCommand {
   async showEditModal(
     ctx: SelectMenuInteraction,
     customization: any,
-    updatePreview: () => Promise<WebhookMessage>
+    updatePreview: () => Promise<WebhookMessage>,
+    t: any
   ): Promise<void> {
     const titleInput = new TextInput()
       .setCustomId("title")
-      .setLabel("Title")
+      .setLabel(t.editVerification.fields.title)
       .setStyle(TextInputStyle.Short)
       .setValue(customization.title)
       .setRequired(true);
 
     const descriptionInput = new TextInput()
       .setCustomId("description")
-      .setLabel("Description")
+      .setLabel(t.editVerification.fields.description)
       .setStyle(TextInputStyle.Paragraph)
       .setValue(customization.description)
       .setRequired(true);
 
     const thumbnailInput = new TextInput()
       .setCustomId("thumbnail")
-      .setLabel("Thumbnail URL")
+      .setLabel(t.editVerification.fields.thumbnail)
       .setStyle(TextInputStyle.Short)
       .setValue(customization.thumbnail)
       .setRequired(false);
 
     const colorInput = new TextInput()
       .setCustomId("color")
-      .setLabel("Embed Color (Hex Code)")
+      .setLabel(t.editVerification.fields.color)
       .setStyle(TextInputStyle.Short)
       .setValue(customization.color)
       .setRequired(false);
 
     const modal = new Modal()
       .setCustomId("edit_verification_modal")
-      .setTitle("Edit Verification Message")
+      .setTitle(t.editVerification.title)
       .setComponents([
         new ActionRow<TextInput>().setComponents([titleInput]),
         new ActionRow<TextInput>().setComponents([descriptionInput]),
@@ -220,8 +224,7 @@ export default class Customize extends SubCommand {
 
       await updatePreview();
       await modalSubmission.editOrReply({
-        content:
-          "Preview updated. You can make more changes or save the configuration.\n\nPlease note: Due to my sensei's privacy-focused practice, *every* verification message will include this paragraph:\n> *You can opt-out from having your osu! profile information collected by me by doing* \`/my rights [to:save your osu! profile details] [should_be:False]\` ***before** starting to verify.*",
+        content: t.editVerification.fields.previewUpdated,
         flags: MessageFlags.Ephemeral
       });
     });
@@ -229,11 +232,11 @@ export default class Customize extends SubCommand {
     await ctx.modal(modal);
   }
 
-  async saveVerification(ctx: CommandContext, customization: any, guild: Guild): Promise<void> {
+  async saveVerification(ctx: CommandContext, customization: any, guild: Guild, t: any): Promise<void> {
     if (!customization.channelId) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "Please select a channel for the verification message.",
+        content: t.saveVerification.noChannelSelected,
       });
     }
 
@@ -241,18 +244,15 @@ export default class Customize extends SubCommand {
     if (!channel) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: "Selected channel not found. Please try again.",
+        content: t.saveVerification.channelNotFound,
       });
     }
-    
-    customization.description +=
-      `\n\n*You can opt-out from having your osu! profile information collected by me by doing* \`/my rights [to:save your osu! profile details] [should_be:False]\` ***before** starting to verify.*`
 
-    const verificationEmbed = this.createPreviewEmbed(customization);
+    const verificationEmbed = this.createPreviewEmbed(customization, t);
     const verificationRow = new ActionRow().setComponents([
       new Button()
         .setCustomId(`verify_${ctx.guildId}`)
-        .setLabel("Verify")
+        .setLabel(t.buttons.verify)
         .setStyle(ButtonStyle.Primary),
     ]);
 
@@ -290,8 +290,7 @@ export default class Customize extends SubCommand {
     });
 
     await ctx.editOrReply({
-      content:
-        "Verification message saved and posted in the selected channel.\n\nPlease **DO NOT** delete the verification message. You'll have to set it up again.",
+      content: t.saveVerification.messageSaved,
       components: [],
       embeds: []
     });

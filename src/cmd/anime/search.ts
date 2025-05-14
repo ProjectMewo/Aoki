@@ -7,12 +7,17 @@ import {
   SubCommand,
   Options,
   TextGuildChannel,
-  AutocompleteInteraction
+  AutocompleteInteraction,
+  LocalesT
 } from "seyfert";
 
 const options = {
   type: createStringOption({
     description: 'content type to search for',
+    description_localizations: {
+      "en-US": 'content type to search for',
+      "vi": 'loại nội dung bạn muốn tìm kiếm'
+    },
     required: true,
     choices: [
       { name: 'Anime', value: 'anime' },
@@ -23,6 +28,10 @@ const options = {
   }),
   query: createStringOption({
     description: 'search query',
+    description_localizations: {
+      "en-US": 'search query',
+      "vi": 'từ khóa tìm kiếm'
+    },
     required: true,
     autocomplete: async (interaction) => await Search.prototype.autocomplete(interaction)
   })
@@ -30,8 +39,9 @@ const options = {
 
 @Declare({
   name: 'search',
-  description: 'Search for anime, manga, characters, or people on MyAnimeList'
+  description: 'search for anime, manga, characters, or people on MyAnimeList'
 })
+@LocalesT('anime.search.name', 'anime.search.description')
 @Options(options)
 export default class Search extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
@@ -73,6 +83,7 @@ export default class Search extends SubCommand {
   }
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).anime.search;
     const { type, query } = ctx.options;
     const jikan_v4 = "https://api.jikan.moe/v4";
     const utils = ctx.client.utils;
@@ -87,7 +98,7 @@ export default class Search extends SubCommand {
       if (!response.ok) {
         return AokiError.API_ERROR({
           sender: ctx.interaction,
-          content: "The service is probably dead. Wait a little bit, then try again."
+          content: t.apiError
         });
       }
 
@@ -95,7 +106,7 @@ export default class Search extends SubCommand {
       if (!res.data) {
         return AokiError.NOT_FOUND({
           sender: ctx.interaction,
-          content: "Looks like I found nothing in the records. Try reporting this with `/my fault`."
+          content: t.notFound
         });
       }
 
@@ -107,7 +118,7 @@ export default class Search extends SubCommand {
         !channelNSFW) {
         return AokiError.NSFW({
           sender: ctx.interaction,
-          content: "The content is R-17 and cannot be shown in this channel. Please use a NSFW channel."
+          content: t.noNsfw
         });
       }
 
@@ -139,7 +150,7 @@ export default class Search extends SubCommand {
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,
-        content: "An unexpected error occurred. Try reporting this with `/my fault`."
+        content: t.undocErr
       });
     }
   }

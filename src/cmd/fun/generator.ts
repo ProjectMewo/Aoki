@@ -3,6 +3,7 @@ import {
   CommandContext, 
   createStringOption, 
   Declare, 
+  LocalesT,
   Embed,
   SubCommand, 
   Options 
@@ -11,6 +12,10 @@ import {
 const options = {
   template: createStringOption({
     description: 'the template ID to use',
+    description_localizations: {
+      "en-US": 'the template ID to use',
+      "vi": 'ID mẫu bạn muốn sử dụng (không hỗ trợ tiếng Việt)'
+    },
     required: true,
     autocomplete: async (interaction) => {
       const focused = interaction.options.getAutocompleteValue();
@@ -25,10 +30,18 @@ const options = {
   }),
   top: createStringOption({
     description: 'the top text of the meme',
+    description_localizations: {
+      "en-US": 'the top text of the meme',
+      "vi": 'văn bản trên của meme'
+    },
     required: true
   }),
   bottom: createStringOption({
     description: 'the bottom text of the meme',
+    description_localizations: {
+      "en-US": 'the bottom text of the meme',
+      "vi": 'văn bản dưới của meme'
+    },
     required: true
   })
 };
@@ -37,6 +50,7 @@ const options = {
   name: 'generator',
   description: 'generate a meme using a template.'
 })
+@LocalesT('fun.generator.name', 'fun.generator.description')
 @Options(options)
 export default class Generator extends SubCommand {
   public static templates: Array<{ id: string, name: string, lines: number }> = [];
@@ -50,6 +64,7 @@ export default class Generator extends SubCommand {
   }
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.generator;
     const { template, top, bottom } = ctx.options;
 
     await ctx.deferReply();
@@ -68,10 +83,10 @@ export default class Generator extends SubCommand {
 
       const embed = new Embed()
         .setColor(10800862)
-        .setDescription("Here you go. Not like I wanted to waste my time.")
+        .setDescription(t.desc)
         .setImage("attachment://meme.png")
         .setFooter({
-          text: `Requested by ${ctx.interaction.user.username}`,
+          text: `${t.footer(ctx.interaction.user.username)}`,
           iconUrl: ctx.author.avatarURL()
         })
         .setTimestamp(new Date());
@@ -83,7 +98,7 @@ export default class Generator extends SubCommand {
     } catch (error) {
       AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: "Failed to generate the meme. Please try again later."
+        content: t.apiError
       });
     }
   }

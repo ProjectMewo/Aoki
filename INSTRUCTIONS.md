@@ -2,7 +2,17 @@
 
 This is a guide on how to work with the Aoki codebase.
 
-## Error Handling
+It assumes you have basic understanding of how Discord API for bots roughly works, and appropriate TypeScript knowledge.
+
+For more realistic examples, refer to the actual files inside the project.
+
+## Table of Contents
+- [Error handling](#error-handling)
+- [Locales](#locales)
+- [Commands](#commands)
+- [Extending built-in classes](#extending-built-in-classes)
+
+## Error handling
 
 Error handling in Aoki must be routed through the [AokiError.ts handler](/src/struct/handlers/AokiError.ts):
 ```ts
@@ -29,90 +39,174 @@ void error.handle();
 ...
 ```
 
+Otherwise, when an error should be thrown but the `sender` is not a `ChatInputCommandInteraction` or a `Message`, you probably should resort to sending with the proper method instead. Some methods are not available or compatible with the class.
+
+## Locales
+Aoki's locales are handled quite messily as of now on Seyfert. Right now, you can access locales from the `CommandContext` (this is built into Seyfert), the `AutocompleteInteraction`, `ChatInputCommandInteraction` and `Message` (this is extended in the code) with:
+
+```ts
+// Context
+// Used in every command
+ctx.t.get(locale)[keys in locale];
+// AutocompleteInteraction
+// Used to retrieve localized choices
+interaction.t[keys in locale];
+```
+
+These are not all accessed by a `get` function because `CommandContext#t` is a built-in method. You can override it using `Object#defineProperty` (which is described in the section "Extending built-in classes" below), but I would not recommend doing it this way. In the commands, you only shorten this call by a single line, which is not worth it.
+
+---
+Also, at times, you might want to have *choices* inside your options.
+
+Because Discord API does not support localized choices out of the box, we have to use the new Autocomplete feature and handle it accordingly. Inside a command option creation, write a callback function like so:
+
+```ts
+...
+choice_demonstration: createStringOption({
+  description: 'demonstrates localized choices',
+  autocomplete: async (i: AutocompleteInteraction) => {
+    // Get the localized choices
+    const localizedChoices = i.t.command.choices.choice_demonstration;
+    // This SubCommand#respondWithLocalizedChoices 
+    // method is not a built-in function. It is extended 
+    // from the original SubCommand class.
+    await this.respondWithLocalizedChoices(
+      i,
+      localizedChoices
+    );
+  }
+});
+...
+```
+
+The `SubCommand#respondWithLocalizedChoices` method is implemented as a shorthand for both getting the current focused value of the autocomplete field and responding to the input. You can read the implementation in [extenders/SubCommand.ts](/src/struct/extenders/SubCommand.ts).
+
 ## Commands
 
-Aoki's commands follow a very special flow to get to Discord:
-- First, create a folder of a `master command`. A master command is a `SubcommandsOnlySlashCommandBuilder`, as in a command with only slash commands in it.
-- Create an `index.ts` file in that directory, extending [Command.ts](src/struct/handlers/Command.ts). For example, a `/fun` master command:
-```ts
-// src/cmd/fun/index.ts
-import Command from '@struct/handlers/Command';
+Command creation with Seyfert is simple with the use of the TypeScript experimental feature, Decorators. Read more about this [here](https://www.typescriptlang.org/docs/handbook/decorators.html). For localizations, implement the translations of the command name and description in the translation files.
 
-export default class Fun extends Command {
-  constructor() {
-    super({
-      name: 'fun',
-      description: 'some commands for funny stuff',
-      cooldown: 0,
-      subcommands: []
-    })
+Aoki's commands philosophy is to make a master command then branching out with subcommands to properly categorize them, e.g. `/anime action` and `/anime search`, so you might want to make a subcommand. The flow is pretty much simple:
+
+```ts
+// import stuff here...
+
+// make some options
+const options = createStringOption({
+  // type: Record<string, {...props}>
+  //              ^^^^^^   ^^^^^^^^
+  //               name     options
+  default_option: {
+    required: true,
+    description: 'stuff',
+    description_localizations: {
+      'en-US': 'stuff',
+      'vi': 'các thứ'
+    }
   }
-}
-```
-- Then, implement a `subcommand` of the master command in the same folder, extending [Subcommand.ts](src/struct/handlers/Subcommand.ts) this time. For example, a `/fun ping` command:
-```ts
-// src/cmd/fun/ping.ts
-// This file also exports an interface for command options
-import { Subcommand } from '@struct/handlers/Subcommand';
+  // continue...
+})
 
-export default class Ping extends Subcommand {
-  constructor() {
-    super({
-      name: 'ping',
-      description: 'see if I respond.',
-      // Even though there are no permission required
-      // and no options, they are not optional, so
-      // make sure these are all present
-      permissions: [],
-      options: []
-    });
+// declare the default command name and description
+// using the @Declare decorator:
+@Declare({
+  name: 'default-name',
+  description: 'default-description'
+})
+// to provide localizations for the command,
+// use the @LocalesT decorator.
+// this decorator is autocomplete-compatible
+// you can scroll through to find the right key
+@LocalesT('defaut-name.name', 'default-name.description')
+// use the declared options in here...
+@Options(options)
+export default class DefaultName extends SubCommand {
+  // and then provide typings of options as a generic here
+  async run(ctx: CommandComtext<typeof options>) {
+    // then you can use the typed options
+    const { default_option } = ctx.options;
+    // continue...
   };
-}
-```
-- The code snippet above shows how to initialize the subcommand in our `/fun` master command. The actual implementation of the command is in the `execute` method, for example:
-```ts
-// Sub-content of src/cmd/fun/ping.ts
-import { ChatInputCommandInteraction } from 'discord.js';
-
-public async execute(i: ChatInputCommandInteraction): Promise<void> {
-  // Write normal discord.js code
-  await i.reply({ content: "I am watching you!" });
 };
 ```
-- After you've made a new subcommand, it's time to let the master command know its presence. Because this project is statically built with `esbuild`, you can't use `node:fs`:
-```ts
-// src/cmd/fun/index.ts
-import Command from '@struct/handlers/Command';
-import Ping from './ping';
 
-export default class Fun extends Command {
-  constructor() {
-    super({
-      name: 'fun',
-      description: 'some commands for funny stuff',
-      cooldown: 0,
-      subcommands: [new Ping]
-    })
+Then, because Aoki is statically built with Bun (which is an `esbuild`-like bundler) and Seyfert's command structuring, we need to let it know the existence of this subcommand.
+
+Surprisingly this is simple:
+
+```ts
+// it's recommended to name this index.ts
+// and place it in the same folder as the subcommand
+// import the subcommand we just made:
+import DefaultName from './default-name';
+// ...other imports
+
+@Declare({
+  name: 'parent-command',
+  description: 'the parent command'
+})
+// to let it know, we provide the subcommands inside 
+// the @Options decorator:
+@Options([DefaultName])
+// if you have subcommand groups, use the @Groups decorator
+// or if you have localizations, the @GroupsT decorator
+// it is also autocomplete-compatible:
+@GroupsT({
+  'default-group': {
+    name: 'default-name.default-group.name',
+    description: 'default-name.default-group.description'
   }
-}
+})
+// finally declare your command:
+export default class ParentCommand extends Command {} // end
 ```
-- To publish this command to Discord, head over to the [Client.ts](src/struct/Client.ts) file and add your newly made folder to the command loader function:
+
+If you have subcommand groups, then inside of the subcommands of the group, add the `@Group` (without the `s`!) decorator, like this:
+
 ```ts
-// Sub-content of src/struct/Client.ts
-/**
- * Load commands
- * @returns {Promise<void>}
- */
-private async loadCommands(): Promise<void> {
-  ...
-  const commandModules = await Promise.all([
-    ...
-    import('../cmd/fun'), // Statically import the folder
-  ]);
-  ...
-};
+@Group('default-group')
 ```
-- Run the development bot and publish the command with `bun dev:publish`. Make sure you include your own guild ID in your `.env` file!
-- Voilà! Your command is now on Discord, as `/fun ping`.
+
+That way, you keep all the other file contents intact and commands will still be correctly categorized. Feels like *black magic*, yes?
+
+## Extending built-in classes
+
+Sometimes you might have a need of a shorthand function, or a property accessor. Everything like this happens inside the [extenders folder](/src/struct/extenders/).
+
+For instance, if you need to have some string inside the `CommandContext` through some specific property name, go into the file for that class in there (or create a new one if none exists), and add it in:
+
+```ts
+// declare your whatever value/function here
+const specific_property_name = 'Very important string';
+// let the typescript language server know it:
+declare module 'seyfert' {
+  interface CommandContext {
+    specific_property_name: string
+  }
+};
+// finally export that out
+// don't export default! 
+// you might want to add other things later too!
+export { specific_property_name };
+```
+
+When you're done adding it there, you still need to put it inside Seyfert. You have only let the TypeScript server know it is *a valid value with type*, but Seyfert didn't catch up yet. To let it catch up, get into the `index.ts` file and use the ol' reliable `Object#defineProperties`:
+
+```ts
+// --- cut ---
+import * as AokiCommandContext from './CommandContext';
+import { CommandContext } from 'seyfert';
+// in that file, Object#defineProperties is defined as
+// _defProp:
+_defProp(CommandContext.prototype, {
+  specific_property_name: { get: AokiCommandContext.specific_property_name }
+});
+```
+
+That's it! Now you can use it everywhere in your commands.
+
+```ts
+console.log(ctx.specific_propery_name); 
+// logs: 'Very important string'
+```
 
 *This document is work-in-progress. New changes are expected.*

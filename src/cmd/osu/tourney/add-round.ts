@@ -5,32 +5,37 @@ import {
   createStringOption,
   Declare,
   Group,
+  LocalesT,
   Options,
-  SubCommand
+  SubCommand,
+  AutocompleteInteraction
 } from "seyfert";
 import { TournamentRound } from "@local-types/settings";
 
 const options = {
   round: createStringOption({
     description: 'the tournament round to add',
+    description_localizations: {
+      "en-US": 'the tournament round to add',
+      "vi": 'vòng đấu giải đấu cậu muốn thêm'
+    },
     required: true,
-    choices: [
-      { name: 'Qualifiers', value: 'Qualifiers' },
-      { name: 'Group Stage', value: 'Group Stage' },
-      { name: 'Round of 32', value: 'Round of 32' },
-      { name: 'Round of 16', value: 'Round of 16' },
-      { name: 'Quarterfinals', value: 'Quarterfinals' },
-      { name: 'Semifinals', value: 'Semifinals' },
-      { name: 'Finals', value: 'Finals' },
-      { name: 'Grand Finals', value: 'Grand Finals' }
-    ]
+    autocomplete: async (interaction) => await AddRound.prototype.autocomplete(interaction)
   }),
   slots: createStringOption({
-    description: 'mappool slots separated by comma (e.g. NM1,NM2,HD1,HD2,HR1,DT1,FM1,TB1)',
+    description: 'mappool slots separated by comma (e.g. NM1,NM2)',
+    description_localizations: {
+      "en-US": 'mappool slots separated by comma (e.g. NM1,NM2)',
+      "vi": 'các slot mappool được phân tách bằng dấu phẩy (ví dụ: NM1,NM2)'
+    },
     required: true
   }),
   set_current: createBooleanOption({
     description: 'set this as the current active round',
+    description_localizations: {
+      "en-US": 'set this as the current active round',
+      "vi": 'đặt đây là vòng đấu hiện tại'
+    },
     required: false
   })
 };
@@ -39,10 +44,19 @@ const options = {
   name: 'add-round',
   description: 'add a tournament round with mappool slots'
 })
+@LocalesT('osu.tourney.addRound.name', 'osu.tourney.addRound.description')
 @Group('tourney')
 @Options(options)
 export default class AddRound extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.genericRoundChoices
+    );
+  };
+
   async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.addRound;
     const { round, slots: slotsInput, set_current: setCurrent = false } = ctx.options;
 
     await ctx.deferReply();
@@ -53,7 +67,7 @@ export default class AddRound extends SubCommand {
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
-        content: 'No tournament exists in this server. Create one with `/tourney make` first.'
+        content: t.noTournament
       });
     }
 
@@ -69,7 +83,7 @@ export default class AddRound extends SubCommand {
     if (!hasPermittedRole) {
       return AokiError.PERMISSION({
         sender: ctx.interaction,
-        content: 'You do not have permission to add tournament rounds. Only hosts, advisors, and mappoolers can do this.'
+        content: t.noPermission
       });
     }
 
@@ -79,7 +93,7 @@ export default class AddRound extends SubCommand {
     if (slots.length === 0) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: 'You must provide at least one mappool slot.'
+        content: t.noSlots
       });
     }
 
@@ -88,7 +102,7 @@ export default class AddRound extends SubCommand {
     if (existingMappool) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: `A mappool for ${round} already exists. Use \`/mappool add\` to add maps to it.`
+        content: t.roundExists(round)
       });
     }
 
@@ -112,8 +126,7 @@ export default class AddRound extends SubCommand {
     });
 
     await ctx.editOrReply({
-      content: `Successfully added ${round} with ${slots.length} slots: ${slots.join(', ')}.\n` +
-        (setCurrent ? `This is now set as the current active round.` : `Use \`/tourney current ${round}\` to set this as the current round.`)
+      content: t.success(round, slots, setCurrent)
     });
   }
 }
