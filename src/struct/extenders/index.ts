@@ -3,7 +3,8 @@ import {
   SubCommand, 
   AutocompleteInteraction,
   ChatInputCommandInteraction,
-  Message
+  Message,
+  ButtonInteraction
 } from 'seyfert';
 const _defProp = Object.defineProperties;
 
@@ -28,17 +29,22 @@ _defProp(SubCommand.prototype, {
   respondWithLocalizedChoices: { value: AokiSubCommand.respondWithLocalizedChoices }
 });
 
-import * as AokiAutocompleteInteraction from './AutocompleteInteraction';
+import * as AokiAutocomplete from './AutocompleteInteraction';
 _defProp(AutocompleteInteraction.prototype, {
-  t: { get: AokiAutocompleteInteraction.t }
+  t: { get: AokiAutocomplete.t }
 });
 
-import * as AokiChatInputCommandInteraction from './ChatInputCommandInteraction';
+import * as AokiChatInput from './ChatInputCommandInteraction';
 _defProp(ChatInputCommandInteraction.prototype, {
-  t: { get: AokiChatInputCommandInteraction.t }
+  t: { get: AokiChatInput.t }
 });
 
 import * as AokiMessage from './Message';
 _defProp(Message.prototype, {
   t: { get: AokiMessage.t }
+});
+
+import * as AokiButton from './ButtonInteraction';
+_defProp(ButtonInteraction.prototype, {
+  t: { get: AokiButton.t }
 });

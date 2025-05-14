@@ -885,7 +885,7 @@ export default {
   // ################ Events
   interactionCreate: {
     noDm: 'Tớ không thể làm điều đó trong tin nhắn trực tiếp của cậu, đồ ngốc. Nhưng có thể là một ngày nào đó khác. Sensei nói rằng họ sẽ làm điều đó.',
-    startVerif: (baseUrl: string, userId: string, guildId: string) => `Bắt đầu xác minh bằng cách nhấn [vào đây](${baseUrl}/login?id=${userId}&guildId=${guildId}).\n\n*Cậu có thể tắt quyền cho phép lưu trữ thông tin người chơi osu! bằng cách thực hiện lệnh* \`/my quyền [to:lưu thông tin hồ sơ osu! của cậu khi xác minh] [should_be:False]\` ***trước khi** bắt đầu xác minh.*`
+    startVerif: (baseUrl: string, userId: string, guildId: string) => `Bắt đầu xác minh bằng cách nhấn [vào đây](${baseUrl}/login?id=${userId}&guildId=${guildId}).\n\n*Cậu có thể tắt quyền cho phép lưu trữ thông tin người chơi osu! bằng cách thực hiện lệnh* \`/hỏi-tớ-về quyền [to:lưu thông tin hồ sơ osu! của cậu khi xác minh] [should_be:False]\` ***trước khi** bắt đầu xác minh.*`
   },
   // ################### Utilities
   miscUtil: {

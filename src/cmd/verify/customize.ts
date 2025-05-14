@@ -224,7 +224,7 @@ export default class Customize extends SubCommand {
 
       await updatePreview();
       await modalSubmission.editOrReply({
-        content: t.editVerification.fields.previewUpdated,
+        content: t.editVerification.previewUpdated,
         flags: MessageFlags.Ephemeral
       });
     });

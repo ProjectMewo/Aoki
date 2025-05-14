@@ -50,9 +50,10 @@ export default class Rights extends SubCommand {
     const value: boolean = ctx.options.should_be;
     const settings = ctx.author.settings;
     
+    // all discord returned option values are lowercased
     const properQuery: { [key: string]: string } = {
-      processMessagePermission: t.readProcess,
-      saveOsuUserAccount: t.saveOsu
+      processmessagepermission: t.readProcess,
+      saveosuuseraccount: t.saveOsu
     };
 
     if (settings[query as keyof typeof settings] == value) {
