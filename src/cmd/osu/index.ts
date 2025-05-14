@@ -3,8 +3,8 @@ import { Declare, Command, Options, GroupsT } from "seyfert";
 import Beatmap from "./beatmap";
 import CountryLeaderboard from "./country-leaderboard";
 import TimestampChannel from "./timestamp-channel";
-import TrackLicense from "./track-license";
-import VerifyArtist from "./verify-artist";
+import TrackLicense from "./tourney/track-license";
+import VerifyArtist from "./tourney/verify-artist";
 import Profile from "./profile";
 import Set from "./set";
 // Mappool commands

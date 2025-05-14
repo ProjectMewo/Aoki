@@ -26,6 +26,7 @@ const options = {
   name: "verify-artist",
   description: "check this artist's policies before using their songs"
 })
+@Group('tourney')
 @LocalesT('osu.verifyArtist.name', 'osu.verifyArtist.description')
 @Options(options)
 export default class VerifyArtist extends SubCommand {

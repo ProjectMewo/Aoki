@@ -4,6 +4,7 @@ import {
   CommandContext,
   createStringOption,
   Declare,
+  Group,
   LocalesT,
   Options,
   SubCommand
@@ -43,6 +44,7 @@ async function getSpotifyToken(): Promise<string | null> {
   name: 'track-license',
   description: 'get licensing information for a Spotify track. Not reliable, use along with /osu verify-artist.'
 })
+@Group('tourney')
 @LocalesT('osu.trackLicense.name', 'osu.trackLicense.description')
 @Options(options)
 export default class TrackLicense extends SubCommand {
