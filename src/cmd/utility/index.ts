@@ -1,4 +1,4 @@
-import { Declare, Command, Options } from "seyfert";
+import { Declare, Command, Options, LocalesT } from "seyfert";
 import Avatar from "./avatar";
 import Banner from "./banner";
 import Channel from "./channel";
@@ -13,5 +13,6 @@ import Wiki from "./wiki";
   name: 'utility',
   description: 'various utility commands'
 })
+@LocalesT('utility.name', 'utility.description')
 @Options([Avatar, Banner, Channel, Server, Github, Npm, Urban, Screenshot, Wiki])
 export default class Utility extends Command {};

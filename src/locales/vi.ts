@@ -14,26 +14,26 @@ export default {
         checkDm: 'Tớ chỉ đang kiểm tra xem tớ có thể nhắn tin cho cậu không thôi. Đừng quan tâm đến tớ ở đây nha, cảm ơn.',
         cannotDm: 'Đồ ngốc, tớ không thể nhắn tin trực tiếp cho cậu. Bật nó lên đi, vì khi tớ thông báo, tớ sẽ thông báo ở đó.',
         moreThanOne: 'Đồ ngốc, cậu chỉ có thể có **một lịch trình** chạy cùng lúc thôi.\n\nSensei của tớ có thể sẽ bỏ giới hạn này trong tương lai.',
-        notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
+        notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
         notAiring: 'Đồ ngốc, bộ này không phải là bộ đang phát sóng. Nó cũng không phải là bộ sắp công chiếu. Có thể đã kết thúc rồi đấy chứ, mà tớ không kiểm tra đâu.',
         tracking: (title: string, time: number) => `Xong rồi. Đang theo dõi các tập phát sóng của **${title}**. Tập tiếp theo sẽ phát sóng trong khoảng **${time}** giờ.`,
-        apiError: 'O-oh, có gì đó không ổn khi tớ cố lưu nó cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+        apiError: 'O-oh, có gì đó không ổn khi tớ cố lưu nó cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
       },
       current: {
         name: 'hiện-tại',
         description: 'xem lịch trình anime hiện tại',
         noSub: 'Đồ ngốc, cậu không đăng ký theo dõi bộ anime nào cả.',
-        notFound: 'O-oh, bộ này đã biến mất khỏi AniList vì một lý do kỳ lạ nào đó.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
+        notFound: 'O-oh, bộ này đã biến mất khỏi AniList vì một lý do kỳ lạ nào đó.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
         response: (title: string, episode: string, time: number | string) => `Đây. Cậu đang xem **${title}**. Tập tiếp theo (tập **${episode}**) sẽ phát sóng trong khoảng **${time}** giờ.`,
-        apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+        apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
       },
       remove: {
         name: 'xóa',
         description: 'xóa một lịch trình theo dõi anime',
         noSub: 'Đồ ngốc, cậu không đăng ký theo dõi bộ anime nào cả.',
-        notFound: 'O-oh, bộ này đã biến mất khỏi AniList vì một lý do nào đó.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
+        notFound: 'O-oh, bộ này đã biến mất khỏi AniList vì một lý do nào đó.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
         response: (title: string) => `Được rồi. Tớ sẽ ngừng nhắc cậu về **${title}** để cậu ngủ ngon vào ban đêm.`,
-        apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+        apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
       }
     },
     action: {
@@ -54,9 +54,9 @@ export default {
         { name: "nhảy bổ vào", value: "glomp" }, { name: "tát", value: "slap" },
         { name: "đá", value: "kick" }
       ],
-      fail: 'O-oh, có gì đó không ổn. Dịch vụ có thể đang ngừng hoạt động, chờ một chút nhé?\n\nBáo với sensei của tớ nếu nó kéo dài quá lâu bằng lệnh `/my fault`.',
+      fail: 'O-oh, có gì đó không ổn. Dịch vụ có thể đang ngừng hoạt động, chờ một chút nhé?\n\nBáo với sensei của tớ nếu nó kéo dài quá lâu bằng lệnh `/hỏi-tớ-về lỗi-của-tớ`.',
       desc: 'Đây. Không phải tớ muốn tra cứu đâu!',
-      apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'O-oh, có gì đó không ổn khi tớ cố tra cứu cho cậu.\n\nSensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     airing: {
       name: 'phát-sóng',
@@ -70,15 +70,15 @@ export default {
         { name: 'Thứ 6', value: 'friday' },
         { name: 'Thứ 7', value: 'saturday' }
       ],
-      apiError: 'Oh. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nBáo với sensei của tớ nếu nó kéo dài quá lâu bằng lệnh `/my fault`.',
-      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Oh. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nBáo với sensei của tớ nếu nó kéo dài quá lâu bằng lệnh `/hỏi-tớ-về lỗi-của-tớ`.',
+      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     gelbooru: {
       name: 'tìm-gelbooru',
       description: 'tìm kiếm hình ảnh trên gelbooru',
       noSfw: 'Đồ ngốc, cậu biết trang web này có gì mà. Chỉ có thể dùng trong kênh NSFW thôi.',
-      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
+      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
       notFound: 'Không tìm thấy bài đăng nào với các thẻ đó. Thử các thẻ khác, và nhớ tách các thẻ bằng dấu cách.',
       search: 'Kết quả tìm kiếm trên Gelbooru',
       score: 'Điểm',
@@ -90,32 +90,34 @@ export default {
       name: 'hồ-sơ',
       description: 'xem hồ sơ anime của cậu (kết quả bằng tiếng Anh)',
       noNsfw: 'Đừng lén lút tìm nội dung xấu nữa, đồ ngốc. Văn minh lên đi chứ.',
-      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     quote: {
       name: 'trích-dẫn',
       description: 'lấy một trích dẫn từ anime (kết quả bằng tiếng Anh)',
-      apiError: 'Các nhân vật từ chối nói chuyện với tớ mất rồi, buồn ghê. Có lẽ thử lại sau vài phút nha?\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Các nhân vật từ chối nói chuyện với tớ mất rồi, buồn ghê. Có lẽ thử lại sau vài phút nha?\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     random: {
       name: 'ngẫu-nhiên',
       description: 'lấy một anime ngẫu nhiên (kết quả bằng tiếng Anh)',
-      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     search: {
       name: 'tìm-kiếm',
       description: 'tìm kiếm thông tin anime (kết quả bằng tiếng Anh)',
       noNsfw: 'Oh. Những gì tớ tìm thấy là nội dung R-17+, mà tớ không thể hiển thị ở đây. Vào kênh NSFW, rồi quay lại với tớ.',
-      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.',
-      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+      notFound: 'O-oh, hình như tớ không tìm thấy gì trong hồ sơ.\n\nCậu nghĩ nó tồn tại? Sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      apiError: 'O-oh, có gì đó không ổn. Dịch vụ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+      undocErr: 'Trời, lỗi này chưa từng được ghi nhận. Chờ khoảng 5-10 phút nha.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
   },
   fun: {
+    name: 'giải-trí',
+    description: 'vài câu lệnh cho vui',
     "8ball": {
       name: 'bi-số-8',
       description: 'hỏi bi số 8 một câu hỏi',
@@ -124,34 +126,34 @@ export default {
     advice: {
       name: 'lời-khuyên',
       description: 'nhận một lời khuyên ngẫu nhiên',
-      apiError: 'Tớ hơi bận một chút, thử lại sau nha?.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Tớ hơi bận một chút, thử lại sau nha?.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     affirmation: {
       name: 'khẳng-định',
       description: 'nhận một câu khẳng định tích cực',
-      apiError: 'Tớ hơi bận, không tích cực nổi. Thử lại sau một chút nha.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Tớ hơi bận, không tích cực nổi. Thử lại sau một chút nha.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     fact: {
       name: 'sự-thật',
       description: 'nhận một sự thật thú vị',
-      apiError: 'Có một sự thật không thú vị tý nào là bây giờ tớ hơi bận. Thử lại sau một chút nha?\n\nSensei của tớ chắc làm sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Có một sự thật không thú vị tý nào là bây giờ tớ hơi bận. Thử lại sau một chút nha?\n\nSensei của tớ chắc làm sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     fortune: {
       name: 'may-mắn',
       description: 'nhận một dự đoán may mắn',
-      apiError: 'Bánh quy may mắn? Tớ hết rồi, tớ sẽ đi lấy mấy cái sau một lát nữa, tớ hơi bận. Thử lại sau một chút nha.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'Bánh quy may mắn? Tớ hết rồi, tớ sẽ đi lấy mấy cái sau một lát nữa, tớ hơi bận. Thử lại sau một chút nha.\n\nSensei của tớ chắc đã làm gì đó sai nếu tớ từ chối trả lời lần nữa. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     generator: {
       name: 'tạo-meme',
       description: 'tạo một nội dung ngẫu nhiên',
-      apiError: 'Bộ xử lý hình ảnh của tớ đang được sửa chữa, chờ một chút nha.\n\nSensei của tớ chắc làm gì đó sai rồi, tớ không thể tự sửa nó đâu! Thử báo cáo bằng `/my fault` đi.',
+      apiError: 'Bộ xử lý hình ảnh của tớ đang được sửa chữa, chờ một chút nha.\n\nSensei của tớ chắc làm gì đó sai rồi, tớ không thể tự sửa nó đâu! Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
       desc: 'Đây cậu. Không phải tớ muốn dành thời gian làm điều này đâu!',
       footer: (author: string) => `Được yêu cầu bởi ${author}`
     },
     owo: {
       name: 'owo',
       description: 'chuyển đổi văn bản sang phong cách owo',
-      apiError: 'OwO, cái gì đây?! Lỗi phần mềm hoang dã nữa?!\n\nSensei của tớ chắc làm gì đó sai rồi đó, tớ không thể tự xử lý nó đâu! Thử báo cáo bằng `/my fault` đi.'
+      apiError: 'OwO, cái gì đây?! Lỗi phần mềm hoang dã nữa?!\n\nSensei của tớ chắc làm gì đó sai rồi đó, tớ không thể tự xử lý nó đâu! Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     ship: {
       name: 'ghép-đôi',
@@ -182,15 +184,17 @@ export default {
     today: {
       name: 'hôm-nay',
       description: 'xem sự kiện lịch sử xảy ra hôm nay',
-      apiError: 'O-oh, nhà sử học vừa đi nghỉ một chút. Thử lại sau một chút, được không?\n\nNếu ông ấy đi quá lâu, báo với sensei của tớ nha! Thử báo cáo điều đó bằng `/my fault` đi.'
+      apiError: 'O-oh, nhà sử học vừa đi nghỉ một chút. Thử lại sau một chút, được không?\n\nNếu ông ấy đi quá lâu, báo với sensei của tớ nha! Thử báo cáo điều đó bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     truth: {
       name: 'câu-hỏi-sự-thật',
       description: 'nhận một câu hỏi sự thật',
-      apiError: 'Câu hỏi này làm tớ run quá không thể nói ra! Có lẽ thử lại sau lát nữa được không? Sensei của tớ chắc làm gì đó sai rồi.\n\nThử báo cáo điều đó bằng `/my fault` nếu đúng là như vậy!'
+      apiError: 'Câu hỏi này làm tớ run quá không thể nói ra! Có lẽ thử lại sau lát nữa được không? Sensei của tớ chắc làm gì đó sai rồi.\n\nThử báo cáo điều đó bằng `/hỏi-tớ-về lỗi-của-tớ` nếu đúng là như vậy!'
     }
   },
   my: {
+    name: 'hỏi-tớ-về',
+    description: 'mấy câu lệnh về quá trình hoạt động của tớ',
     ping: {
       name: 'ping',
       description: 'thời gian tớ cần để thấy tin nhắn của cậu'
@@ -235,7 +239,7 @@ export default {
       madeWLove: 'Làm bằng ❤'
     },
     invite: {
-      name: "mời",
+      name: "lời-mời",
       description: "mời tớ vào server của cậu",
       desc: [
         "Hey, cậu muốn đưa tớ vào server của cậu à? Tuyệt. Hãy làm cho server của cậu sôi động hơn một chút.\n",
@@ -256,7 +260,7 @@ export default {
       readProcess: 'đọc & xử lý tin nhắn của cậu',
       saveOsu: 'lưu thông tin hồ sơ osu! của cậu khi xác minh',
       set: (value: boolean, key: string) => `Được rồi, tớ **${value ? 'sẽ' : 'sẽ không'}** ${key}.`,
-      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo điều này bằng `/my fault` đi.'
+      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo điều này bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
     },
     stats: {
       name: "thống-kê",
@@ -320,7 +324,7 @@ export default {
         noMappool: (currentRound: string) => `Không tìm thấy mappool nào cho **${currentRound}**. Tạo nó trước bằng \`/tourney add-round\`.`,
         invalidSlot: (slot: string, availableSlots: string[], currentRound: string) => `Đồ ngốc, slot "${slot}" không tồn tại trong mappool của ${currentRound}.\n\nĐây là các slot có sẵn: ${availableSlots.join(', ')}`,
         invalidUrl: 'Đồ ngốc, đó không phải là URL beatmap hợp lệ. Cung cấp URL đầy đủ (vd: <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) hoặc URL rút gọn (vd: <https://osu.ppy.sh/b/5678>).',
-        fetchError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/my fault`.',
+        fetchError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ`.',
         mapUpdated: (title: string, url: string, slot: string, currentRound: string) => `Xong rồi. Đã cập nhật [${title}](${url}) cho **${slot}** trong mappool của ${currentRound}.`,
         mapAdded: (title: string, url: string, slot: string, currentRound: string) => `Xong rồi. Đã thêm [${title}](${url}) cho **${slot}** vào mappool của ${currentRound}.`
       },
@@ -530,7 +534,7 @@ export default {
         osuWebDownload: "Tải xuống từ osu!web",
         osuDirectDownload: "Tải xuống bằng osu!direct"
       },
-      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/my fault`.'
+      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ`.'
     },
     countryLb: {
       name: "bxh-quốc-gia",
@@ -547,7 +551,7 @@ export default {
       },
       noPlayersFound: (countryCode: string) => `Không tìm thấy ai cho mã quốc gia ${countryCode}. Gõ sai à?`,
       noScoresFound: (countryCode: string) => `Không tìm thấy điểm nào cho ${countryCode} trên beatmap này.`,
-      apiError: 'O-oh, có lỗi xảy ra khi lấy bảng xếp hạng quốc gia. Vui lòng thử lại sau.\n\nNói với sensei của tớ bằng `/my fault` nếu nó kéo dài quá lâu.',
+      apiError: 'O-oh, có lỗi xảy ra khi lấy bảng xếp hạng quốc gia. Vui lòng thử lại sau.\n\nNói với sensei của tớ bằng `/hỏi-tớ-về lỗi-của-tớ` nếu nó kéo dài quá lâu.',
       embed: {
         title: (artist: string, title: string, version: string) => `${artist} - ${title} [${version}]`,
         author: 'Bảng xếp hạng quốc gia',
@@ -612,7 +616,7 @@ export default {
     trackLicense: {
       name: "giấy-phép-bài-hát",
       description: "kiểm tra giấy phép của bài hát hoặc album (kết quả bằng tiếng Anh)",
-      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/my fault`.',
+      apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ`.',
       trackError: (message: string) => `Lỗi khi lấy track: ${message || 'Lỗi không xác định'}`,
       albumError: (message: string) => `Lỗi khi lấy album: ${message || 'Lỗi không xác định'}`,
       unknown: "Không rõ",
@@ -665,6 +669,8 @@ export default {
     }
   },
   utility: {
+    name: 'công-cụ',
+    description: 'vài công cụ để tra cứu một số thứ',
     avatar: {
       name: "avatar",
       description: "lấy avatar của người dùng",
@@ -679,14 +685,14 @@ export default {
       quality: "Chất lượng: ",
       noBanner: "Oh. Người dùng này không có Nitro, hoặc ứng dụng chưa được cấu hình banner.",
       author: (username: string) => `Ảnh nền của ${username}`,
-      fetchError: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      fetchError: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`
     },
     channel: {
       name: "thông-tin-kênh",
       description: "lấy thông tin kênh",
-      notFound: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
-      invalidType: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      notFound: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
+      invalidType: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       infoField: (channelName: string) => `Thông tin của ${channelName}${channelName.endsWith("s") ? "'" : "'s"}`,
       types: {
         text: 'Kênh thường',
@@ -717,7 +723,7 @@ export default {
       name: "github",
       description: "lấy thông tin repo từ github (kết quả bằng tiếng Anh)",
       repoNotFound: "Đồ ngốc, repo đó không tồn tại.",
-      fetchError: "GitHub không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      fetchError: "GitHub không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`,
       field: (res: {
         language: string | null;
@@ -745,8 +751,8 @@ export default {
     npm: {
       name: "npm",
       description: "lấy thông tin thư viện trên npm (kết quả bằng tiếng Anh)",
-      repoNotFound: "Tớ không tìm thấy repo đó trong hồ sơ. Kiểm tra xem cậu có gõ sai không nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
-      fetchError: "npm không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      repoNotFound: "Tớ không tìm thấy repo đó trong hồ sơ. Kiểm tra xem cậu có gõ sai không nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
+      fetchError: "npm không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`,
       keyword: 'Từ khóa',
       maintainer: 'Người quản lý',
@@ -763,13 +769,13 @@ export default {
       urlError: "Đồ ngốc, đó không phải là một đường liên kết hợp lệ.\n\nĐảm bảo rằng nó bắt đầu với `https://` hoặc `http://`.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`,
       noNsfw: "Ê, ê! Trang web đó tệ lắm nha. Văn hóa lên đi chứ!\n\nCòn không thì vào kênh NSFW cũng được.",
-      fetchError: "Tớ đang sửa trình duyệt web của mình, chờ chút nhé! Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi."
+      fetchError: "Tớ đang sửa trình duyệt web của mình, chờ chút nhé! Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi."
     },
     server: {
       name: "thông-tin-máy-chủ",
       description: "lấy thông tin của máy chủ",
-      notFound: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
-      fetchError: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      notFound: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
+      fetchError: "Discord không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`,
       general: 'Thông tin chung',
       channel: 'Thông tin kênh',
@@ -797,17 +803,17 @@ export default {
     urban: {
       name: "urban",
       description: "tìm định nghĩa trên urban dictionary (kết quả bằng tiếng Anh)",
-      noDefinition: "Không tìm thấy định nghĩa nào cho truy vấn của cậu trên Urban Dictionary. Cậu có gõ sai không? Thử lại nhé!\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      noDefinition: "Không tìm thấy định nghĩa nào cho truy vấn của cậu trên Urban Dictionary. Cậu có gõ sai không? Thử lại nhé!\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       profaneQuery: "Nếu cậu muốn tớ tìm kiếm mấy từ NSFW, ít nhất hãy làm điều đó trong kênh NSFW, đồ ngốc!",
-      fetchError: "Urban Dictionary không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      fetchError: "Urban Dictionary không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`
     },
     wiki: {
       name: "wiki",
       description: "tìm kiếm trên wikipedia",
       profaneQuery: "Nếu cậu muốn tớ tìm kiếm mấy từ NSFW, ít nhất hãy làm điều đó trong kênh NSFW, đồ ngốc!",
-      notFound: "Không tìm thấy kết quả. Cậu có gõ sai không? Thử lại nhé!\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
-      fetchError: "Wikipedia không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/my fault` đi.",
+      notFound: "Không tìm thấy kết quả. Cậu có gõ sai không? Thử lại nhé!\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
+      fetchError: "Wikipedia không cho phép làm điều đó. Thử lại sau nhé?\n\nNếu vẫn không được, sensei của tớ chắc đang dùng phương pháp cũ. Báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.",
       requestedBy: (username: string) => `Được yêu cầu bởi ${username}`,
       desc: 'Mô tả',
       extract: 'Đoạn trích',
@@ -815,6 +821,8 @@ export default {
     }
   },
   verify: {
+    name: 'xác-thực',
+    description: 'hệ thống xác thực bằng tài khoản osu!',
     customize: {
       name: 'tùy-chỉnh',
       description: 'tùy chỉnh tin nhắn xác minh',
@@ -884,7 +892,7 @@ export default {
     clickOnTimestamp: '*Nhấn vào dấu thời gian để mở trong trình chỉnh sửa osu!*\n\n',
     httpError: 'Tớ đang sửa mạng dial-up của mình! Chờ một chút, điều này là bình thường đó! Hỏi lại sau một chút nha?',
     cantAnswer: 'Không thể trả lời câu đó.',
-    apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/my fault` đi.'
+    apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
   },
   aniSchedule: {
     episodeUp: (episode: number, title: string, siteUrl: string) =>

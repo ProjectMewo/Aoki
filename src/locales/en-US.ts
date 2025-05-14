@@ -115,6 +115,8 @@ export default {
     },
   },
   fun: {
+    name: 'fun',
+    description: 'some commands for funny stuff',
     "8ball": {
       name: '8ball',
       description: 'ask the magic 8-ball a question.',
@@ -191,6 +193,8 @@ export default {
     }
   },
   my: {
+    name: 'my',
+    description: 'commands tied to my development and stuff',
     language: {
       name: 'language',
       description: 'configure the language you want me to speak to you.',
@@ -666,6 +670,8 @@ export default {
     }
   },
   utility: {
+    name: 'utility',
+    description: 'some utilities to search for things',
     avatar: {
       name: 'avatar',
       description: 'get the avatar of a user',
@@ -816,6 +822,8 @@ export default {
     }
   },
   verify: {
+    name: 'verify',
+    description: 'osu! account verification system',
     customize: {
       name: "customize",
       description: "customize the verification message",

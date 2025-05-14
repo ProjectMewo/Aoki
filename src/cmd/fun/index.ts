@@ -1,4 +1,4 @@
-import { Declare, Command, Options } from "seyfert";
+import { Declare, Command, Options, LocalesT } from "seyfert";
 import Eightball from "./8ball";
 import Advice from "./advice";
 import Affirmation from "./affirmation";
@@ -14,5 +14,6 @@ import Owo from "./owo";
   name: 'fun',
   description: 'some commands for funny stuff'
 })
+@LocalesT('fun.name', 'fun.description')
 @Options([Eightball, Advice, Affirmation, Fact, Fortune, Generator, Ship, Today, Truth, Owo])
 export default class Fun extends Command {};

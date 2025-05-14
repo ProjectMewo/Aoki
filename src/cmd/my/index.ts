@@ -1,4 +1,4 @@
-import { Declare, Command, Options } from "seyfert";
+import { Declare, Command, Options, LocalesT } from "seyfert";
 import Fault from "./fault";
 import Info from "./info";
 import Invite from "./invite";
@@ -12,5 +12,6 @@ import Language from "./language";
 	name: "my",
 	description: "commands related to me or my development.",
 })
+@LocalesT('my.name', 'my.description')
 @Options([Fault, Info, Invite, Ping, Rights, Stats, Vote, Language])
 export default class My extends Command {};
