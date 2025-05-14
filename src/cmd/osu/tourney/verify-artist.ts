@@ -5,6 +5,7 @@ import {
   createStringOption,
   Declare,
   Embed,
+  Group,
   LocalesT,
   Options,
   SubCommand

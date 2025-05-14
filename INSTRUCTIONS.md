@@ -121,7 +121,7 @@ const options = createStringOption({
 @Options(options)
 export default class DefaultName extends SubCommand {
   // and then provide typings of options as a generic here
-  async run(ctx: CommandComtext<typeof options>) {
+  async run(ctx: CommandContext<typeof options>) {
     // then you can use the typed options
     const { default_option } = ctx.options;
     // continue...
