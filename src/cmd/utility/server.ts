@@ -18,7 +18,7 @@ export default class Server extends SubCommand {
     const t = ctx.t.get(ctx.interaction.user.settings.language).utility.server;
     await ctx.deferReply();
 
-    const rawGuild = ctx.interaction.guild;
+    const rawGuild = ctx.guildId;
     if (!rawGuild) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
@@ -27,7 +27,7 @@ export default class Server extends SubCommand {
     }
 
     try {
-      const guild = await ctx.client.guilds.fetch(rawGuild.id);
+      const guild = await ctx.client.guilds.fetch(rawGuild);
       const owner = await ctx.client.users.fetch(guild.ownerId);
       const icon = guild.iconURL({ size: 1024 }) || "https://i.imgur.com/AWGDmiu.png";
 
@@ -35,10 +35,10 @@ export default class Server extends SubCommand {
       const since = ctx.client.utils.time.formatDate(new Date(guild.createdAt), 'MMMM yyyy');
       const channelTypeCount = async (type: number): Promise<number> =>
         (await guild.channels.list()).filter((channel: any) => channel.type === type).length;
-      const text = channelTypeCount(0);
-      const voice = channelTypeCount(2);
-      const category = channelTypeCount(4);
-      const news = channelTypeCount(5);
+      const text = await channelTypeCount(0);
+      const voice = await channelTypeCount(2);
+      const category = await channelTypeCount(4);
+      const news = await channelTypeCount(5);
 
       const generalInfoField = ctx.client.utils.string.keyValueField({
         [t.generalInfo.owner]: ctx.client.utils.string.textTruncate(owner.username, 20),
@@ -80,6 +80,7 @@ export default class Server extends SubCommand {
 
       await ctx.editOrReply({ embeds: [embed] });
     } catch (error) {
+      console.log(error);
       AokiError.USER_INPUT({
         sender: ctx.interaction,
         content: t.fetchError

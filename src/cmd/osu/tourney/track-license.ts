@@ -15,7 +15,7 @@ const options = {
     description: 'the Spotify track name to search for',
     description_localizations: {
       "en-US": 'the Spotify track name to search for',
-      "vi": 'tên bài hát Spotify mà bạn muốn tìm kiếm'
+      "vi": 'tên bài hát Spotify mà cậu muốn tìm kiếm'
     },
     required: true,
     autocomplete: async (interaction) => await TrackLicense.prototype.autocomplete(interaction)

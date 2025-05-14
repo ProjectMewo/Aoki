@@ -14,7 +14,7 @@ const options = {
     description: 'the user to get the avatar of',
     description_localizations: {
       "en-US": 'the user to get the avatar of',
-      "vi": 'người dùng mà bạn muốn lấy ảnh đại diện'
+      "vi": 'người dùng mà cậu muốn lấy ảnh đại diện'
     },
     required: false
   })

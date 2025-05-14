@@ -14,7 +14,7 @@ const options = {
     description: 'The type of content to get',
     description_localizations: {
       "en-US": 'The type of content to get',
-      "vi": 'Loại nội dung bạn muốn lấy'
+      "vi": 'Loại nội dung cậu muốn lấy'
     },
     required: true,
     choices: [

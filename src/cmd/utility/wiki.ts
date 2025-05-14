@@ -16,7 +16,7 @@ const options = {
     required: true,
     description_localizations: {
       "en-US": 'the term to search for',
-      "vi": 'thuật ngữ bạn muốn tìm kiếm'
+      "vi": 'thuật ngữ cậu muốn tìm kiếm'
     }
   })
 };

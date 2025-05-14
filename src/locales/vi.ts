@@ -785,16 +785,16 @@ export default {
         roleCount: "Số vai trò",
         emojiCount: "Số biểu tượng",
         created: "Được tạo vào",
-        boosts: "Số lượng nâng cấp",
-        mainLocale: "Ngôn ngữ được thiết lập",
+        boosts: "Ng. nâng cấp",
+        mainLocale: "Ngôn ngữ chính",
         verification: "Mức bảo mật",
         filter: "Bộ lọc"
       },
       channelInfo: {
-        categories: "Số nhóm kênh",
-        textChannels: "Số kênh thường",
-        voiceChannels: "Số kênh thoại",
-        newsChannels: "Số kênh thông tin",
+        categories: "Nhóm kênh",
+        textChannels: "Kênh thường",
+        voiceChannels: "Kênh thoại",
+        newsChannels: "Kênh t.tin",
         afkChannel: "Kênh AFK"
       },
       noAfkChannel: "Không có",

@@ -14,7 +14,7 @@ const options = {
     description: 'the osu! username to look up (defaults to your configured username)',
     description_localizations: {
       "en-US": 'the osu! username to look up (defaults to your configured username)',
-      "vi": 'tên người dùng osu! bạn muốn tra cứu (mặc định là tên đã cấu hình của bạn)'
+      "vi": 'tên người dùng osu! cậu muốn tra cứu (mặc định là tên đã cấu hình của cậu)'
     },
     required: false
   }),
@@ -22,7 +22,7 @@ const options = {
     description: 'the game mode to look up (defaults to your configured mode)',
     description_localizations: {
       "en-US": 'the game mode to look up (defaults to your configured mode)',
-      "vi": 'chế độ chơi bạn muốn tra cứu (mặc định là chế độ đã cấu hình của bạn)'
+      "vi": 'chế độ chơi cậu muốn tra cứu (mặc định là chế độ đã cấu hình của cậu)'
     },
     required: false,
     choices: [

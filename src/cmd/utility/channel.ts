@@ -14,7 +14,7 @@ const options = {
     description: 'the channel to get information about',
     description_localizations: {
       "en-US": 'the channel to get information about',
-      "vi": 'kênh mà bạn muốn lấy thông tin'
+      "vi": 'kênh mà cậu muốn lấy thông tin'
     },
     required: false
   })
@@ -30,7 +30,7 @@ export default class Channel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).utility.channel;
     const { channel } = ctx.options;
-    const targetChannel = channel ?? ctx.channel;
+    const targetChannel = channel ?? ctx.client.channels.fetch(ctx.channelId);
 
     if (!targetChannel) {
       throw AokiError.USER_INPUT({

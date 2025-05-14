@@ -14,7 +14,7 @@ const options = {
     description: 'the template ID to use',
     description_localizations: {
       "en-US": 'the template ID to use',
-      "vi": 'ID mẫu bạn muốn sử dụng (không hỗ trợ tiếng Việt)'
+      "vi": 'ID mẫu cậu muốn sử dụng (không hỗ trợ tiếng Việt)'
     },
     required: true,
     autocomplete: async (interaction) => {

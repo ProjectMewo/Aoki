@@ -13,7 +13,7 @@ const options = {
     description: "your osu! username",
     description_localizations: {
       "en-US": "your osu! username",
-      "vi": "tên người dùng osu! của bạn"
+      "vi": "tên người dùng osu! của cậu"
     },
     required: true
   }),
@@ -21,7 +21,7 @@ const options = {
     description: "your preferred mode",
     description_localizations: {
       "en-US": "your preferred mode",
-      "vi": "chế độ bạn muốn đặt làm mặc định"
+      "vi": "chế độ cậu muốn đặt làm mặc định"
     },
     required: true,
     choices: [

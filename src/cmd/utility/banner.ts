@@ -14,7 +14,7 @@ const options = {
     description: "the user to get the banner of",
     description_localizations: {
       "en-US": "the user to get the banner of",
-      "vi": "người dùng mà bạn muốn lấy biểu ngữ"
+      "vi": "người dùng mà cậu muốn lấy biểu ngữ"
     },
     required: false
   })

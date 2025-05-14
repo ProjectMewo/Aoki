@@ -16,7 +16,7 @@ const options = {
     description: 'content type to search for',
     description_localizations: {
       "en-US": 'content type to search for',
-      "vi": 'loại nội dung bạn muốn tìm kiếm'
+      "vi": 'loại nội dung cậu muốn tìm kiếm'
     },
     required: true,
     choices: [

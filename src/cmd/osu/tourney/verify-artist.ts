@@ -16,7 +16,7 @@ const options = {
     description: "the name of the artist to verify",
     description_localizations: {
       "en-US": "the name of the artist to verify",
-      "vi": "tên của nghệ sĩ bạn muốn kiểm tra"
+      "vi": "tên của nghệ sĩ cậu muốn kiểm tra"
     },
     required: true,
     autocomplete: async (interaction) => await VerifyArtist.prototype.autocomplete(interaction)

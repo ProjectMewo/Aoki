@@ -13,7 +13,7 @@ const options = {
     description: 'the question to ask the 8-ball',
     description_localizations: {
       "en-US": 'the question to ask the 8-ball',
-      "vi": 'câu hỏi bạn muốn hỏi quả cầu số 8'
+      "vi": 'câu hỏi cậu muốn hỏi quả cầu số 8'
     },
     required: true
   })

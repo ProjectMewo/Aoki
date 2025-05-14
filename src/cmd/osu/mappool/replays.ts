@@ -15,7 +15,7 @@ const options = {
     description: 'the round to view replays for',
     description_localizations: {
       "en-US": 'the round to view replays for',
-      "vi": 'vòng đấu mà bạn muốn xem replay'
+      "vi": 'vòng đấu mà cậu muốn xem replay'
     },
     required: false,
     autocomplete: async (interaction) => await Replays.prototype.autocomplete(interaction)

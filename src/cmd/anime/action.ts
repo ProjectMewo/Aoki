@@ -15,7 +15,7 @@ const options = {
     description: "the type of action to get",
     description_localizations: {
       "en-US": "the type of action to get",
-      "vi": "loại hành động bạn muốn lấy"
+      "vi": "loại hành động cậu muốn lấy"
     },
     required: true,
     autocomplete: async (interaction) => await Action.prototype.autocomplete(interaction)

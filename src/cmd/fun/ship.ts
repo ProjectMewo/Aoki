@@ -13,7 +13,7 @@ const options = {
     description: 'the first user to ship',
     description_localizations: {
       "en-US": 'the first user to ship',
-      "vi": 'người đầu tiên bạn muốn ghép đôi'
+      "vi": 'người đầu tiên cậu muốn ghép đôi'
     },
     required: true
   }),
@@ -21,7 +21,7 @@ const options = {
     description: 'the second user to ship',
     description_localizations: {
       "en-US": 'the second user to ship',
-      "vi": 'người thứ hai bạn muốn ghép đôi'
+      "vi": 'người thứ hai cậu muốn ghép đôi'
     },
     required: true
   })

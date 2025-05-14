@@ -14,7 +14,7 @@ const options = {
     description: 'the library name to search for',
     description_localizations: {
       "en-US": 'the library name to search for',
-      "vi": 'tên thư viện bạn muốn tìm kiếm'
+      "vi": 'tên thư viện cậu muốn tìm kiếm'
     },
     required: true
   })
