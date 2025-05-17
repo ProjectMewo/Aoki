@@ -1,29 +1,48 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  createStringOption, 
+  Declare, 
+  SubCommand, 
+  Options, 
+  LocalesT
+} from "seyfert";
 
-export default class Owo extends Subcommand {
-  constructor() {
-    super({
-      name: 'owo',
-      description: 'Convert your text to OwO speak.',
-      permissions: [],
-      options: [{
-        type: 'string',
-        name: 'query',
-        description: 'The text to convert to OwO speak',
-        required: true
-      }]
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
+const options = {
+  query: createStringOption({
+    description: 'the text to convert to OwO speak',
+    required: true,
+    description_localizations: {
+      "en-US": 'the text to convert to OwO speak',
+      "vi": 'văn bản để chuyển đổi sang ngôn ngữ OwO'
+    }
+  })
+}
+
+@Declare({
+  name: 'owo',
+  description: 'convert your text to OwO speak.'
+})
+@LocalesT('fun.owo.name', 'fun.owo.description')
+@Options(options)
+export default class Owo extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.owo;
     // get the text from the options
-    const text = i.options.getString("query")!;
-    
+    const text = ctx.options.query;
+
     // fetch from the nekos.life API to convert text to owo
     const res = await fetch(`https://nekos.life/api/v2/owoify?text=${encodeURIComponent(text)}`).then(res => res.json());
-    
+
+    // check if the API returned a valid response
+    if (!res || !res.owo) {
+      return AokiError.API_ERROR({
+        sender: ctx.interaction,
+        content: t.apiError
+      });
+    }
+
     // send the response
-    await i.reply({ content: res.owo });
-  };
+    await ctx.write({ content: res.owo });
+  }
 }

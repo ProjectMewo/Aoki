@@ -1,6 +1,6 @@
-import { Schedule } from "../assets/graphql";
-import { EmbedBuilder } from "discord.js";
-import AokiClient from "./Client";
+import { Schedule } from "@assets/graphql";
+import { DefaultLocale, Embed, User } from "seyfert";
+import AokiClient from "@struct/Client";
 import AnilistUtil from "@utils/AniList";
 
 interface ScheduleEntry {
@@ -54,6 +54,10 @@ export default class AniSchedule {
     return this.anilistUtil.fetch(query, variables) as Promise<T>;
   }
 
+  private t(user: User): DefaultLocale {
+    return this.client.t(this.client.langs.defaultLang ?? 'en-US').get(user.settings.language || 'en-US');
+  };
+
   private reInit(): void {
     setTimeout(() => this.init(), 90000);
   }
@@ -78,7 +82,7 @@ export default class AniSchedule {
     const data = await this.fetch<{ Page?: { airingSchedules: AiringSchedule[] } }>(this.schedule, { page: 0, watched, episode });
 
     if (!data) {
-      this.client.utils.logger.warn('No data found for schedules.', '[AniSchedule]');
+      this.client.logger.warn('No data found for schedules.');
       return;
     }
 
@@ -89,17 +93,18 @@ export default class AniSchedule {
       if (!entry) continue;
 
       try {
-        const user = await this.client.users.fetch(schedule.id);
-        await user.send({ embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000))] });
+        const user = await this.client.users.fetch(schedule.id, true);
+        const t = this.t(user);
+        await this.client.users.write(schedule.id, { embeds: [this._makeAnnouncementEmbed(entry, new Date(entry.airingAt * 1000), t)] });
         await user.setSchedule({ nextEp: Number(schedule.nextep) + 1 });
       } catch (error: any) {
-        this.client.utils.logger.warn(`Failed to notify user ${schedule.id}: ${error.message}`, '[AniSchedule]');
+        this.client.logger.warn(`Failed to notify user ${schedule.id}: ${error.message}`);
       }
     }
     this.reInit();
   }
 
-  private _makeAnnouncementEmbed(entry: AiringSchedule, date: Date): EmbedBuilder {
+  private _makeAnnouncementEmbed(entry: AiringSchedule, date: Date, t: DefaultLocale): Embed {
     const sites = ['Amazon', 'Animelab', 'AnimeLab', 'Crunchyroll', 'Funimation', 'Hidive', 'Hulu', 'Netflix', 'Viz'];
     const watch = entry.media.externalLinks?.filter(link => sites.includes(link.site))
       .map(link => `[${link.site}](${link.url})`).join(' • ') || null;
@@ -107,26 +112,19 @@ export default class AniSchedule {
       .map(link => `[${link.site}](${link.url})`).join(' • ') || null;
 
     const description = [
-      `You baka, episode **${entry.episode}** of **[${entry.media.title.romaji}](${entry.media.siteUrl})**`,
-      entry.media.episodes === entry.episode ? ' **(it\'s the final episode)** ' : ' ',
-      `is up. ${this.client.utils.array.random([
-        'Not like I wanted to remind you or something.',
-        'Sensei made me DM you. I didn\'t want to do that.',
-        'Alright, me back to my routine.',
-        'Whether you knew this or not is irrelevant. It is my job.',
-        'Also, have you seen my sensei?',
-        'Didn\'t expect to meet me, did you.'
-      ])}${watch ? `\n\nWatch: ${watch}` : '\n\nWatch: *None yet*'}${visit ? `\n\nVisit: ${visit}` : '\n\nVisit: *None yet*'}`,
-      '\n\nIt may take some time to appear on the above service(s).'
+      t.aniSchedule.episodeUp(entry.episode, entry.media.title.romaji, entry.media.siteUrl),
+      entry.media.episodes === entry.episode ? ` **${t.aniSchedule.finalEpisode}**.` : '.',
+      `${this.client.utils.array.random(t.aniSchedule.randomRemarks)}${watch ? `${t.aniSchedule.watch(watch)}` : t.aniSchedule.noWatch}${visit ? `${t.aniSchedule.visit(visit)}` : t.aniSchedule.noVisit}`,
+      t.aniSchedule.delayNotice
     ].join('');
 
     const footerText = [
-      entry.media.format ? `Format: ${this.info.mediaFormat[entry.media.format] || 'Unknown'}` : null,
-      entry.media.duration ? `Duration: ${entry.media.duration} minutes` : null,
-      entry.media.studios.edges.length ? `Studio: ${entry.media.studios.edges[0].node.name}` : null
+      entry.media.format ? `${t.aniSchedule.embed.footer.format}${this.info.mediaFormat[entry.media.format] || t.aniSchedule.embed.footer.unknown}` : null,
+      entry.media.duration ? `${t.aniSchedule.embed.footer.duration(entry.media.duration)}` : null,
+      entry.media.studios.edges.length ? `${t.aniSchedule.embed.footer.studio}${entry.media.studios.edges[0].node.name}` : null
     ].filter(Boolean).join('  •  ');
 
-    return new EmbedBuilder()
+    return new Embed()
       .setColor(10800862)
       .setThumbnail(entry.media.coverImage.large)
       .setTitle('AniSchedule')

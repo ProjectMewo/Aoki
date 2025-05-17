@@ -1,21 +1,23 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import {
+  CommandContext,
+  Declare,
+  LocalesT,
+  SubCommand
+} from "seyfert";
 
-export default class Status extends Subcommand {
-  constructor() {
-    super({
-      name: 'status',
-      description: 'check the verification status for this server',
-      permissions: ['ManageGuild'],
-      options: []
+@Declare({
+  name: "status",
+  description: "check the verification status for this server"
+})
+@LocalesT('verify.status.name', 'verify.status.description')
+export default class Status extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).verify.status;
+    const guild = await ctx.client.guilds.fetch(ctx.guildId!);
+    const enabled = guild.settings.verification.status || false;
+
+    await ctx.write({
+      content: t.current(enabled)
     });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    const { guild } = i;
-    const data = i.client.guilds.cache.get(guild!.id);
-    const enabled = data?.settings.verification.status;
-    
-    await i.reply({ content: `The verification system is currently ${enabled ? "enabled" : "disabled"}.` });
   }
 }
