@@ -6,9 +6,7 @@
   "scripts": {
     "build": "bun src/build.ts",
     "dev": "bun src/main.ts --dev",
-    "dev:publish": "bun src/main.ts --dev --publish-commands",
-    "prod": "bun main.js",
-    "prod:publish": "bun main.js --publish-commands"
+    "prod": "bun main.js"
   },
   "repository": {
     "type": "git",

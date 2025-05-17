@@ -81,6 +81,18 @@ choice_demonstration: createStringOption({
 
 The `SubCommand#respondWithLocalizedChoices` method is implemented as a shorthand for both getting the current focused value of the autocomplete field and responding to the input. You can read the implementation in [extenders/SubCommand.ts](/src/struct/extenders/SubCommand.ts).
 
+## Database & API
+Aoki's database and API stuff from earlier v4.4 has recently been moved to a dedicated API to offload heavy tasks, like image processing with `sharp` and OCR with `tesseract.js`. You are free to move it back in because all logics are the same, just with the API difference.
+
+Note that if you want to host the Seyfert side of things, the API is pretty much locked in there, and you wouldn't want to port it back to Seyfert. It is a pain.
+
+However you can have `pm2` on one server and host both the app and the API there, that's convenient and should be practiced.
+
+## Bundling
+Because Seyfert has code implying a dynamic import style to commands and all the other relevant stuff, you can't bundle this project into a single file and expect it to work as-is. You would need to move the whole thing in there, and work with it.
+
+Luckily, Aoki only needs a single library that's Seyfert itself, so moving out and in should not be a very bothering task.
+
 ## Commands
 
 Command creation with Seyfert is simple with the use of the TypeScript experimental feature, Decorators. Read more about this [here](https://www.typescriptlang.org/docs/handbook/decorators.html). For localizations, implement the translations of the command name and description in the translation files.
