@@ -11,14 +11,15 @@ export default class Advice extends SubCommand {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.advice;
     try {
       // fetch advice from the API
-      const response = await fetch("https://api.adviceslip.com/advice");
-      const data = await response.json();
-      
-      // extract the advice from the response
-      const advice = data.slip.advice;
+      const fetch = await ctx.client.utils.profane.getStatic(
+        "common", 
+        ctx.interaction.user.settings.language
+      );
+
+      const response = ctx.client.utils.array.random(fetch.advice);
       
       // send the response
-      await ctx.write({ content: advice });
+      await ctx.write({ content: response as string });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,

@@ -10,14 +10,16 @@ export default class Truth extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.truth;
     try {
-      // Get the truth questions from static data
-      const questions = await ctx.interaction.client.utils.profane.getStatic("truth");
+      // fetch advice from the API
+      const fetch = await ctx.client.utils.profane.getStatic(
+        "truth", 
+        ctx.interaction.user.settings.language
+      );
+
+      const response = ctx.client.utils.array.random(fetch);
       
-      // Get a random question
-      const question = ctx.interaction.client.utils.array.random(questions);
-      
-      // Send the response
-      await ctx.write({ content: question });
+      // send the response
+      await ctx.write({ content: response as string });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,

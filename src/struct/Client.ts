@@ -3,8 +3,6 @@ import { Client } from "seyfert";
 import { ActivityType, PresenceUpdateStatus } from "seyfert/lib/types";
 import Settings from "./Settings";
 import Schedule from "./Schedule";
-import schema from "src/assets/schema";
-import { MongoClient, ServerApiVersion } from "mongodb";
 // Utility imports
 import AnilistUtil from "@utils/AniList";
 import ArrayUtil from "@utils/Array";
@@ -41,10 +39,10 @@ export default class AokiClient extends Client {
       expires_at: 0
     };
     this.settings = {
-      users: new Settings(this, "users", schema.users),
-      guilds: new Settings(this, "guilds", schema.guilds),
-      schedules: new Settings(this, "schedules", schema.schedules),
-      verifications: new Settings(this, "verifications", schema.verifications)
+      users: new Settings("users"),
+      guilds: new Settings("guilds"),
+      schedules: new Settings("schedules"),
+      verifications: new Settings("verifications")
     };
     this.utils = {
       anilist: new AnilistUtil(this),
@@ -76,25 +74,6 @@ export default class AokiClient extends Client {
       lastUpdated: 0
     }
   }
-
-  /**
-   * Load database
-   * @returns {Promise<void>}
-   */
-  private async loadDatabase(): Promise<void> {
-    const url = process.env.MONGO_URI!;
-    this.dbClient = await MongoClient.connect(url, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      }
-    });
-    this.logger.info("Connected to MongoDB");
-    this.db = this.dbClient.db();
-
-    await Promise.all(Object.values(this.settings).map(settings => settings.init()));
-  };
 
   /**
    * Request an osu! API v2 token, then saves it.
@@ -139,8 +118,8 @@ export default class AokiClient extends Client {
    */
   private async init(): Promise<void> {
     await Promise.all([
-      this.loadDatabase(),
-      this.requestV2Token()
+      this.requestV2Token(),
+      Object.values(this.settings).map(async settings => await settings.init())
     ]);
     // Load default locale
     this.setServices({ langs: { default: 'en-US' } });

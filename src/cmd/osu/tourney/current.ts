@@ -47,6 +47,7 @@ export default class Current extends SubCommand {
     // Get tournament settings
     const guild = await ctx.client.guilds.fetch(ctx.guildId!);
     const settings = guild.settings.tournament;
+    console.log(settings)
     if (!settings.name) {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,

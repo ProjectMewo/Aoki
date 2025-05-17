@@ -249,6 +249,23 @@ export default {
     ping: {
       name: "ping",
       description: "see if I respond.",
+      responses: [
+        "Ugh, again? You always wanna bother me. I responded in {{ms}}ms.",
+        "Baka, I responded in {{ms}}ms.",
+        "Here you go, I responded in {{ms}}ms. Not like I wanted to waste my time.",
+        "Here you go, not that it was worth my time. It only took me {{ms}}ms.",
+        "Is this right? I've responded in {{ms}}ms.",
+        "{{user}}? I've responded in {{ms}}ms.",
+        "{{user}}! You wasted {{ms}}ms of my time, ERGH.",
+        "Did I do it right? I responded in {{ms}}ms.",
+        "{{user}}, yes I'm here, and it took me {{ms}}ms to respond.",
+        "{{user}}, why are you pinging me? You wasted {{ms}}ms of my time.",
+        "Hey {{user}}, it took me {{ms}}ms to send this message",
+        "You've made me {{ms}}ms older - just from asking.",
+        "{{user}}, I've seen your message and it took me {{ms}}ms not to care.",
+        "Do you know how long it took me to read that message? You pretty much wasted {{ms}}ms of my day!",
+        "I responded in {{ms}}ms, you happy now?"
+      ]
     },
     rights: {
       name: 'rights',
@@ -893,7 +910,20 @@ export default {
     clickOnTimestamp: '*Click on the timestamp to open in editor.*\n\n',
     httpError: 'I\'m fixing my dial-up! Hang tight, this is normal. Ask again a little later.',
     cantAnswer: 'Can\'t answer that one.',
-    apiError: 'O-oh, something didn\'t click. My database is probably dead. Wait a little, then try again.\n\nIf nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`.'
+    apiError: 'O-oh, something didn\'t click. My database is probably dead. Wait a little, then try again.\n\nIf nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`.',
+    rr: {
+      noImOrRe: 'Hey. Make sure to include both a result screen image and a replay file (.osr).',
+      noExtract: 'I couldn\'t extract enough info from the result screen. Is the image clear? Make sure to have a replayer name!',
+      yep: 'Yes, that\'s right',
+      nop: 'Nope',
+      closest: (name: string) => `Closest match I found is **${name}**. Is that correct?`,
+      unknown: 'Unknown',
+      matched: (slot: string, round: string, replayer: string) => `Replay matched to **${slot}** of **${round}** by **${replayer}**.`,
+      closestMatched: (closest: string) => `Matched to **${closest}**.`,
+      reject: 'Alright. Make sure to submit a clearer screenshot, or you can manually ask the host to add it.',
+      noRes: 'Didn\'t receive any response. Do it again if you quite needed the time!',
+      err: 'O-oh, something didn\'t click. The service is probably dead. Wait a little, then try again.\n\nIf nothing changes after that, my sensei probably messed up. Try reporting this with `/my fault`.'
+    }
   },
   aniSchedule: {
     episodeUp: (episode: number, title: string, siteUrl: string) =>

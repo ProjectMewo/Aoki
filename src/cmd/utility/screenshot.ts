@@ -42,7 +42,7 @@ export default class Screenshot extends SubCommand {
       })
     }
 
-    const nsfwPages = await ctx.client.utils.profane.getStatic("nsfw");
+    const nsfwPages = await ctx.client.utils.profane.getStatic("profane", "en-US");
 
     const trimmedQuery = new URL(query).hostname;
 

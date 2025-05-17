@@ -197,7 +197,24 @@ export default {
     description: 'mấy câu lệnh về quá trình hoạt động của tớ',
     ping: {
       name: 'ping',
-      description: 'thời gian tớ cần để thấy tin nhắn của cậu'
+      description: 'thời gian tớ cần để thấy tin nhắn của cậu',
+      responses: [
+        "Argh, lại nữa à? Lúc nào cũng muốn làm phiền tớ. Tớ đã trả lời trong **{{ms}}ms**.",
+        "Đồ ngốc, tớ đã trả lời trong **{{ms}}ms**.",
+        "Đây này, tớ đã trả lời trong **{{ms}}ms**. Chẳng phải tớ muốn lãng phí thời gian của mình đâu.",
+        "Đây này, không phải là nó đáng thời gian của tớ. Chỉ mất **{{ms}}ms** thôi.",
+        "Thế này đúng chưa? Tớ đã trả lời trong **{{ms}}ms**.",
+        "**{{user}}**? Tớ đã trả lời trong **{{ms}}ms**.",
+        "**{{user}}**! Cậu đã lãng phí **{{ms}}ms** thời gian của tớ rồi, HỪM.",
+        "Tớ làm đúng chưa? Tớ đã trả lời trong **{{ms}}ms**.",
+        "**{{user}}**, vâng tớ đây, và tớ mất **{{ms}}ms** để trả lời.",
+        "**{{user}}**, sao lại ping tớ? Cậu đã lãng phí **{{ms}}ms** thời gian của tớ rồi.",
+        "Này **{{user}}**, tớ mất **{{ms}}ms** để gửi tin nhắn này",
+        "Cậu đã làm tớ già thêm **{{ms}}ms** - chỉ vì hỏi đấy.",
+        "**{{user}}**, tớ đã thấy tin nhắn của cậu và tớ mất **{{ms}}ms** để không thèm quan tâm.",
+        "Cậu có biết tớ mất bao lâu để đọc tin nhắn đó không? Cậu gần như đã lãng phí **{{ms}}ms** trong ngày của tớ rồi đấy!",
+        "Tớ đã trả lời trong **{{ms}}ms**, cậu vui chưa?"
+      ]
     },
     language: {
       name: "ngôn-ngữ",
@@ -324,7 +341,7 @@ export default {
         noMappool: (currentRound: string) => `Không tìm thấy mappool nào cho **${currentRound}**. Tạo nó trước bằng \`/tourney add-round\`.`,
         invalidSlot: (slot: string, availableSlots: string[], currentRound: string) => `Đồ ngốc, slot "${slot}" không tồn tại trong mappool của ${currentRound}.\n\nĐây là các slot có sẵn: ${availableSlots.join(', ')}`,
         invalidUrl: 'Đồ ngốc, đó không phải là URL beatmap hợp lệ. Cung cấp URL đầy đủ (vd: <https://osu.ppy.sh/beatmapsets/1234#osu/5678>) hoặc URL rút gọn (vd: <https://osu.ppy.sh/b/5678>).',
-        fetchError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi, sensei của tớ chắc làm sai. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ`.',
+        fetchError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` nha.',
         mapUpdated: (title: string, url: string, slot: string, currentRound: string) => `Xong rồi. Đã cập nhật [${title}](${url}) cho **${slot}** trong mappool của ${currentRound}.`,
         mapAdded: (title: string, url: string, slot: string, currentRound: string) => `Xong rồi. Đã thêm [${title}](${url}) cho **${slot}** vào mappool của ${currentRound}.`
       },
@@ -583,12 +600,12 @@ export default {
           playCount: string;
           playTime: string;
           grades: string;
-        }) => [
+        }, combinedGrades: string) => [
           `**▸ Hạng Bancho:** #${profile.rank} (${profile.country}#${profile.countryRank})`,
           `**▸ Cấp độ:** ${profile.level[1]}% của cấp ${profile.level[0]}`,
           `**▸ PP:** ${profile.pp} **▸ Độ chính xác:** ${profile.accuracy}%`,
           `**▸ Số lần chơi:** ${profile.playCount} (${profile.playTime} tiếng)`,
-          `**▸ Hạng:** ${profile.grades}`,
+          `**▸ Hạng:** ${combinedGrades}`,
           `**▸ Ảnh hồ sơ:** (từ [lemmmy.pw](https://lemmmy.pw))`
         ].join("\n"),
         footer: "Ooh"
@@ -892,7 +909,20 @@ export default {
     clickOnTimestamp: '*Nhấn vào dấu thời gian để mở trong trình chỉnh sửa osu!*\n\n',
     httpError: 'Tớ đang sửa mạng dial-up của mình! Chờ một chút, điều này là bình thường đó! Hỏi lại sau một chút nha?',
     cantAnswer: 'Không thể trả lời câu đó.',
-    apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.'
+    apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
+    rr: {
+      noImOrRe: 'Nè, chèn cả ảnh replay với file replay chứ. File replay phải có đuôi .osr nha.',
+      noExtract: 'Tớ không trích xuất được đầy đủ dữ liệu từ ảnh replay của cậu. Ảnh có rõ không vậy? Nhớ để tên người replay nha, đừng để trống.',
+      yep: 'Ừ, đúng rồi',
+      nop: 'Không phải',
+      closest: (name: string) => `Kết quả sát nhất tớ tìm được trong mappool là **${name}**. Có phải nó không cậu?`,
+      unknown: 'Không rõ',
+      matched: (slot: string, round: string, replayer: string) => `Được rồi, tớ nhận nhé. Replay này là cho **${slot}** của mappool vòng **${round}**, được chơi bởi **${replayer}**.`,
+      closestMatched: (closest: string) => `Đã so sánh với **${closest}**.`,
+      reject: 'Ừ, được rồi. Cậu chụp bức hình rõ hơn một chút nhé, hoặc là báo với host để nhận thủ công cũng được.',
+      noRes: 'Tớ không nhận được phản hồi nào cả. Thử lại nhé.',
+      err: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại nha?\n\nNếu không có gì thay đổi, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` nha.'
+    }
   },
   aniSchedule: {
     episodeUp: (episode: number, title: string, siteUrl: string) =>

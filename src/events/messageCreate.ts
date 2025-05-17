@@ -29,9 +29,8 @@ export default createEvent({
       }
     }
 
-    // TODO: migrate replayRegistering somewhere else
-    // const replayChannelId = guild.settings.tournament.mappools.find(m => m.replayChannelId === msg.channelId)?.replayChannelId;
-    // if (!replayChannelId) return;
-    // await msg.client.utils.misc.replayRegistering(msg, msg.client as AokiClient);
+    const replayChannelId = guild.settings.tournament.mappools.find(m => m.replayChannelId === msg.channelId)?.replayChannelId;
+    if (!replayChannelId) return;
+    await msg.client.utils.misc.replayRegistering(msg, msg.client);
   }
 })

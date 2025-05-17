@@ -40,7 +40,10 @@ export default class Eightball extends SubCommand {
     }
     
     // get the 8ball responses
-    const eightball = await ctx.client.utils.profane.getStatic("8ball");
+    const eightball = await ctx.client.utils.profane.getStatic(
+      "8ball", 
+      ctx.interaction.user.settings.language
+    );
     
     // send the response
     await ctx.write({ content: ctx.client.utils.array.random(eightball) });

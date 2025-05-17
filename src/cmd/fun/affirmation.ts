@@ -10,14 +10,14 @@ export default class Affirmation extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.affirmation;
     try {
-      // Fetch data from the affirmation API
-      const res = await fetch("https://www.affirmations.dev").then(res => res.json());
-    
-      // Extract the affirmation from the response
-      const affirmation = res.affirmation;
-    
-      // Send the response
-      await ctx.write({ content: affirmation });
+      const fetch = await ctx.client.utils.profane.getStatic(
+        "common", 
+        ctx.interaction.user.settings.language
+      );
+
+      const response = ctx.client.utils.array.random(fetch.affirmation);
+      
+      await ctx.write({ content: response as string });
     } catch {
       return AokiError.API_ERROR({
         sender: ctx.interaction,

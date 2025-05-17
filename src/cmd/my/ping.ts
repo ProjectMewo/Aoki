@@ -9,7 +9,7 @@ export default class Ping extends SubCommand {
 	async run(ctx: CommandContext) {
 		const latency = ctx.client.gateway.latency;
 
-		const replies = await ctx.client.utils.profane.getStatic("ping");
+		const replies = ctx.t.get(ctx.interaction.user.settings.language).my.ping.responses;
 
     const reply = ctx.client.utils.array.random(replies)
       .replace(/{{user}}/g, ctx.author.username)

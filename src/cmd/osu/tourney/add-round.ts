@@ -108,7 +108,7 @@ export default class AddRound extends SubCommand {
 
     // Create new mappool
     const newMappool = {
-      round: "" as TournamentRound,
+      round: round as TournamentRound,
       slots,
       maps: [],
       replays: [],
