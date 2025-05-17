@@ -42,7 +42,7 @@ export default class Wiki extends SubCommand {
     }
 
     try {
-      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`).then(res => res.json());
+      const res = await fetch(`https://${ctx.interaction.user.settings.language == "vi" ? "vi" : "en"}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`).then(res => res.json());
 
       if (!res?.title) {
         return AokiError.USER_INPUT({

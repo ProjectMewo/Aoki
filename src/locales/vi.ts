@@ -273,7 +273,7 @@ export default {
         { name: 'đọc & xử lý tin nhắn của cậu', value: 'processMessagePermission' },
         { name: 'lưu thông tin hồ sơ osu! của cậu khi xác minh', value: 'saveOsuUserAccount' }
       ],
-      isCurrent: (key: string) => `Ừ, tớ không thể ${key} vì cậu đã tắt nó trước đó rồi.`,
+      isCurrent: (bool: boolean, key: string) => `Ừ, tớ ${bool ? "có thể" : "không thể"} ${key} vì cậu đã ${bool ? "bật" : "tắt"} nó trước đó rồi.`,
       readProcess: 'đọc & xử lý tin nhắn của cậu',
       saveOsu: 'lưu thông tin hồ sơ osu! của cậu khi xác minh',
       set: (value: boolean, key: string) => `Được rồi, tớ **${value ? 'sẽ' : 'sẽ không'}** ${key}.`,
@@ -908,7 +908,7 @@ export default {
   miscUtil: {
     clickOnTimestamp: '*Nhấn vào dấu thời gian để mở trong trình chỉnh sửa osu!*\n\n',
     httpError: 'Tớ đang sửa mạng dial-up của mình! Chờ một chút, điều này là bình thường đó! Hỏi lại sau một chút nha?',
-    cantAnswer: 'Không thể trả lời câu đó.',
+    cantAnswer: 'Không thể trả lời câu đó. Cơ mà, tớ không biết nói tiếng Việt đâu. Mấy cái cậu đang đọc là do sensei tớ viết, tớ không tự viết ra được. Xin lỗi nha.',
     apiError: 'O-oh, có gì đó không ổn. Cơ sở dữ liệu của tớ có thể đã chết. Chờ một chút, rồi thử lại.\n\nNếu không có gì thay đổi sau đó, sensei của tớ chắc làm gì đó sai rồi. Thử báo cáo bằng `/hỏi-tớ-về lỗi-của-tớ` đi.',
     rr: {
       noImOrRe: 'Nè, chèn cả ảnh replay với file replay chứ. File replay phải có đuôi .osr nha.',

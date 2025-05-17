@@ -9,6 +9,7 @@ import {
   Options,
   SubCommand
 } from "seyfert";
+import { Watching } from "@assets/graphql";
 
 const options = {
   anime: createStringOption({
@@ -102,9 +103,6 @@ export default class Add extends SubCommand {
           content: t.notFound
         });
       }
-
-      // Import required GraphQL query
-      const { Watching } = await import("@assets/graphql");
 
       // Get media data from AniList
       const watchingData = await utils.anilist.fetch(Watching, {

@@ -6,6 +6,7 @@ import {
   Group,
   LocalesT
 } from "seyfert";
+import { Watching } from "@assets/graphql";
 
 @Declare({
   name: 'remove',
@@ -29,9 +30,6 @@ export default class Remove extends SubCommand {
           content: t.noSub
         });
       }
-
-      // Import required GraphQL query
-      const { Watching } = await import("@assets/graphql");
 
       // Get watching data from AniList
       const watchingData = await ctx.client.utils.anilist.fetch(Watching, {

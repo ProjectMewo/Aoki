@@ -105,6 +105,7 @@ export default class Airing extends SubCommand {
         time: 60000
       });
     } catch (error) {
+      console.log(error);
       return AokiError.API_ERROR({
         sender: ctx.interaction,
         content: t.undocErr

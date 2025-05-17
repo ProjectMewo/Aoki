@@ -274,7 +274,7 @@ export default {
         { name: 'read & process your messages', value: 'processMessagePermission' },
         { name: 'save your osu! profile details on verification', value: 'saveOsuUserAccount' }
       ],
-      isCurrent: (key: string) => `Yeah, I can't ${key} anyway because you already disabled it before.`,
+      isCurrent: (bool: boolean, key: string) => `Yeah, I ${bool ? "can" : "can't"} ${key} anyway because you already ${bool ? "enabled" : "disabled"} it before.`,
       readProcess: 'read & process your messages',
       saveOsu: 'save your osu! profile details on verification',
       set: (value: boolean, key: string) => `Alright, I **${value ? 'will' : 'won\'t'}** ${key}.`,

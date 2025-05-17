@@ -21,6 +21,8 @@
 
 However you don't get a lot of useful information on Seyfert, because it doesn't have a proper documentation. You have a [guide](https://docs.seyfert.dev) to work with, which is obviously quite insufficient (it took me a century to figure out how modals work here). This rewrite is just a **proof-of-concept**, it is not a fully cleaned up prototype to use in production.
 
+Also, you can't bundle your project. Seyfert loads your stuff dynamically, which basically means you can't use a bundler to somehow compile all that into a file.
+
 All technologies are still the same, except without Discord.js and with Seyfert.
 
 ## Local development setup

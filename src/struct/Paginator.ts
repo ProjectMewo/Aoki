@@ -5,7 +5,6 @@ import {
   ActionRow,
   Button,
   ChatInputCommandInteraction,
-  ButtonInteraction,
   Interaction,
   WebhookMessage
 } from 'seyfert';
@@ -22,6 +21,7 @@ export default class Pagination {
   private _array: Array<Embed>;
   private _index: number;
   private _collector: any;
+  // @ts-ignore
   private _message: Message | Interaction | WebhookMessage | null;
 
   constructor(...arr: Embed[]) {
@@ -115,14 +115,9 @@ export default class Pagination {
       components: this.size <= 1 ? [] : components,
     };
 
-    // We distinguish an interaction from a message by
-    // checking if there is a content property in the sender.
-    // Only Message has the content property.
     if ('content' in sender) {
-      // Message based
       message = await (sender as Message).reply(messageOptions);
     } else {
-      // Interaction based
       const interaction = sender as ChatInputCommandInteraction;
       if (interaction.replied) {
         message = await interaction.editOrReply(messageOptions, true);
@@ -133,83 +128,45 @@ export default class Pagination {
 
     this._message = message;
 
-    // Skip collector if only one page
     if (this.size <= 1) return message;
-    // If there's no message throw an error, something is wrong
     if (!message) throw new Error('No message to paginate');
 
-    // Set up filter based on option
-    const userFilter = (interaction: ComponentInteraction<true>) => {
+    const userFilter = (i: ComponentInteraction<true>) => {
       if (filter === 'userOnly') {
-        return interaction.user.id == userId;
+        return i.user.id === userId;
       }
       return true;
     };
 
-    this._collector = this._message.createComponentCollector({
-      filter: userFilter,
+    const collector = message.createComponentCollector({ 
+      filter: userFilter, 
       timeout: time
     });
 
-    // Handle collector events
-    this._collector.on('collect', async (interaction: ButtonInteraction) => {
-      try {
-        await interaction.deferUpdate();
-
-        switch (interaction.customId) {
-          case 'pagination_prev':
-            this.previous();
-            break;
-          case 'pagination_next':
-            this.next();
-            break;
-          case 'pagination_stop':
-            this._collector.stop();
-            break;
-          default:
-            // Handle custom buttons if needed
-            if (interaction.customId.startsWith('pagination_custom_')) {
-              // Add any custom button handling logic here if needed
-            }
-            break;
-        }
-
-        if (['pagination_prev', 'pagination_next'].includes(interaction.customId)) {
-          if ('edit' in this._message!) {
-            await this._message!.edit({
-              embeds: [this.currentPage],
-              components: components
-            });
-          } else if ('editReply' in this._message!) {
-            await this._message!.editOrReply({
-              embeds: [this.currentPage],
-              components: components
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error handling pagination interaction:', error);
-      }
+    // Use .run for each button
+    collector.run('pagination_prev', async (i) => {
+      if (!i.isButton()) return;
+      this.previous();
+      await i.deferUpdate();
+      await message.edit({ embeds: [this.currentPage], components });
     });
 
-    // Remove components when collector ends
-    this._collector.on('end', async () => {
-      try {
-        if ('edit' in this._message!) {
-          await this._message!.edit({
-            embeds: [this.currentPage],
-            components: []
-          });
-        } else if ('editReply' in this._message!) {
-          await this._message!.editOrReply({
-            embeds: [this.currentPage],
-            components: []
-          });
-        }
-      } catch (error) {
-        console.error('Error ending pagination:', error);
-      }
+    collector.run('pagination_next', async (i) => {
+      if (!i.isButton()) return;
+      this.next();
+      await i.deferUpdate();
+      await message.edit({ embeds: [this.currentPage], components });
     });
+
+    collector.run('pagination_stop', async (i) => {
+      if (!i.isButton()) return;
+      await i.deferUpdate();
+      collector.stop();
+      await message.edit({ embeds: [this.currentPage], components: [] });
+    });
+
+    // Optionally handle custom buttons if needed
+    // collector.run('pagination_custom_xxx', async (i) => { ... });
 
     return message;
   }

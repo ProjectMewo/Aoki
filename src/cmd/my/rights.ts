@@ -59,7 +59,7 @@ export default class Rights extends SubCommand {
     if (settings[query as keyof typeof settings] == value) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
-        content: t.isCurrent(properQuery[query])
+        content: t.isCurrent(value, properQuery[query])
       });
     }
 

@@ -6,6 +6,7 @@ import {
   LocalesT, 
   SubCommand 
 } from "seyfert";
+import { Watching } from "@assets/graphql";
 
 @Declare({
   name: 'current',
@@ -29,9 +30,6 @@ export default class Current extends SubCommand {
           content: t.noSub
         });
       }
-
-      // Import required GraphQL query
-      const { Watching } = await import("@assets/graphql");
 
       // Get watching data from AniList
       const watchingData = await ctx.client.utils.anilist.fetch(Watching, {

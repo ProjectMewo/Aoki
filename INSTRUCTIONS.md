@@ -129,7 +129,7 @@ export default class DefaultName extends SubCommand {
 };
 ```
 
-Then, because Aoki is statically built with Bun (which is an `esbuild`-like bundler) and Seyfert's command structuring, we need to let it know the existence of this subcommand.
+Then, because of Seyfert's command structuring, we need to let it know the existence of this subcommand.
 
 Surprisingly this is simple:
 

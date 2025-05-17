@@ -8,6 +8,7 @@ import {
   Options,
   LocalesT
 } from "seyfert";
+import { User } from "@assets/graphql";
 import { UserData } from "@local-types/anilist";
 
 const options = {
@@ -131,7 +132,6 @@ export default class Profile extends SubCommand {
 
         await ctx.editOrReply({ embeds: [embed] });
       } else {
-        const { User } = await import("../../assets/graphql");
         const userData = (await utils.anilist.fetch(User, { search: username })) as UserData;
 
         if (!userData || userData.errors) {
