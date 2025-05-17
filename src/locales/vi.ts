@@ -926,7 +926,7 @@ export default {
   },
   aniSchedule: {
     episodeUp: (episode: number, title: string, siteUrl: string) =>
-      `Này cậu, tập **${episode}** của **[${title}](${siteUrl})** vừa mới ra mắt đó.`,
+      `Này cậu, tập **${episode}** của **[${title}](${siteUrl})** vừa mới ra mắt đó`,
     finalEpisode: " **(đây là tập cuối)** ",
     watch: (links: string) => `\n\nXem: ${links}`,
     noWatch: "\n\nXem: *Chưa có*",

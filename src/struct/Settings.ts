@@ -75,19 +75,37 @@ export default class Settings {
   }
 
   /**
-   * Filter query on the API server.
+   * Filter query on the cache.
    */
   async findOne(filter: object): Promise<object> {
-    const res = await fetch(`${process.env.DB}/${this.collection}/find`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.INTERNAL_KEY}`
-      },
-      body: JSON.stringify(filter)
-    });
+    for (const doc of this.cache.values()) {
+      let match = true;
+      for (const [key, value] of Object.entries(filter)) {
+        if (doc[key] !== value) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return doc;
+    }
+    return {};
+  }
 
-    if (!res.ok) return {};
-    return await res.json();
+  /**
+   * Find everything of matching criteria in cache.
+   */
+  async findAll(filter: object): Promise<object[]> {
+    const results: object[] = [];
+    for (const doc of this.cache.values()) {
+      let match = true;
+      for (const [key, value] of Object.entries(filter)) {
+        if (doc[key] !== value) {
+          match = false;
+          break;
+        }
+      }
+      if (match) results.push(doc);
+    }
+    return results;
   }
 }
