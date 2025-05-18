@@ -128,7 +128,7 @@ const options = createStringOption({
 // use the @LocalesT decorator.
 // this decorator is autocomplete-compatible
 // you can scroll through to find the right key
-@LocalesT('defaut-name.name', 'default-name.description')
+@LocalesT('default-name.name', 'default-name.description')
 // use the declared options in here...
 @Options(options)
 export default class DefaultName extends SubCommand {
