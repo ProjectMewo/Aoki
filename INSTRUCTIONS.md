@@ -217,7 +217,7 @@ _defProp(CommandContext.prototype, {
 That's it! Now you can use it everywhere in your commands.
 
 ```ts
-console.log(ctx.specific_propery_name); 
+console.log(ctx.specific_property_name); 
 // logs: 'Very important string'
 ```
 
