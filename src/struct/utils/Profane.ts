@@ -64,14 +64,18 @@ export default class ProfaneUtil {
     };
     const vi = {
       fortune: "e7568e6e060bbb2aaaa1",
-      "8ball": "e8daec87a72f3d4a1243",
+      "8ball": "6ec1f5b5a8ce975876b6",
       common: "624a35c28d2d171fdec0",
       truth: "53455897a015a6d33463",
       profane: "a8a151087e4973dd4fc4"
     };
     const res = await fetch([
       `https://api.npoint.io/`,
-      `${locale == 'en-US' ? en[name as keyof typeof en] : vi[name as keyof typeof vi]}`
+      `${
+        locale == 'en-US' ? 
+          en[name as keyof typeof en] : 
+          vi[name as keyof typeof vi]
+       }`
     ].join("")).then(async res => await res.json());
     return res;
   }
