@@ -1,5 +1,4 @@
 import { Client, Logger } from "seyfert";
-import { MongoClient, Db } from 'mongodb'
 import Settings from "@struct/Settings";
 import AniSchedule from "@struct/Schedule";
 // Utils
@@ -34,17 +33,6 @@ declare module '@struct/Client' {
      * @type {number}
      */
     startTime: number;
-    /**
-     * The MongoDB client instance of this client
-     * @type {MongoClient | null}
-     * @private
-     */
-    dbClient: MongoClient | null;
-    /**
-     * The Mongo database instance of this client
-     * @type {Db | null}
-     */
-    db: Db | null;
     /**
      * The osu! v2 token of this client instance
      * @type {object}

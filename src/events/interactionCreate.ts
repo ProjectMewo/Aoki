@@ -19,7 +19,7 @@ export default createEvent({
     // handle ButtonInteraction with "verify_" prefix
     if (interaction.isButton() && interaction.customId.startsWith("verify_")) {
       const buttonInteraction = interaction as ButtonInteraction;
-      const baseUrl = client.dev ? "http://localhost:8080/" : "https://aoki.hackers.moe";
+      const baseUrl = client.dev ? "http://localhost:8080/" : "https://aoki.mewo.workers.dev";
 
       await buttonInteraction.editOrReply({
         content: buttonInteraction.t.interactionCreate.startVerif(

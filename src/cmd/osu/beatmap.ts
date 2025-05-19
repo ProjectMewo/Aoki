@@ -239,7 +239,7 @@ export default class Beatmap extends SubCommand {
 
         const directButton = new Button()
           .setLabel(t.buttons.osuDirectDownload)
-          .setURL(`https://aoki.hackers.moe/osu/direct?id=${selectedBeatmap.beatmaps[0].id}`)
+          .setURL(`https://aoki.mewo.workers.dev/osu/direct?id=${selectedBeatmap.beatmaps[0].id}`)
           .setStyle(ButtonStyle.Link);
 
         const buttonRow = new ActionRow<Button>()

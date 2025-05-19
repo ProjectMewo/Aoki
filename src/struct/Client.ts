@@ -31,8 +31,6 @@ export default class AokiClient extends Client {
     this.schedule = new Schedule(this);
     this.lastGuildCount = null;
     this.startTime = Date.now();
-    this.dbClient = null;
-    this.db = null;
     this.ready = false;
     this.osuV2Token = {
       access_token: null,
