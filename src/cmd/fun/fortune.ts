@@ -1,22 +1,38 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
-export default class Fortune extends Subcommand {
-  constructor() {
-    super({
-      name: 'fortune',
-      description: 'Get your daily fortune cookie.',
-      permissions: [],
-      options: []
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    // get the fortune cookie responses
-    const cookies = await i.client.utils.profane.getStatic("fortune");
-    // randomly select a fortune
-    const cookie = i.client.utils.array.random(cookies);
-    // send the response
-    await i.reply({ content: cookie });
-  };
+@Declare({
+  name: 'fortune',
+  description: 'get your daily fortune cookie.'
+})
+@Locales({
+  name: [
+    ['en-US', 'fortune'],
+    ['vi', 'bánh-quy-may-mắn']
+  ],
+  description: [
+    ['en-US', 'get your daily fortune cookie.'],
+    ['vi', 'nhận bánh quy may mắn hàng ngày của cậu.']
+  ]
+})
+export default class Fortune extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.fortune;
+    try {
+      const fetch = await ctx.client.utils.profane.getStatic(
+        "fortune", 
+        ctx.interaction.user.settings.language
+      );
+
+      const response = ctx.client.utils.array.random(fetch);
+      
+      // send the response
+      await ctx.write({ content: response as string });
+    } catch {
+      return AokiError.API_ERROR({
+        sender: ctx.interaction,
+        content: t.apiError
+      });
+    }
+  }
 }

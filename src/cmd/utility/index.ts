@@ -1,4 +1,4 @@
-import Command from "@struct/handlers/Command";
+import { Declare, Command, Options, Locales } from "seyfert";
 import Avatar from "./avatar";
 import Banner from "./banner";
 import Channel from "./channel";
@@ -9,23 +9,19 @@ import Urban from "./urban";
 import Screenshot from "./screenshot";
 import Wiki from "./wiki";
 
-export default class Utility extends Command {
-  constructor() {
-    super({
-      name: 'utility',
-      description: 'various utility commands',
-      cooldown: 0,
-      subcommands: [
-        new Avatar,
-        new Banner,
-        new Channel,
-        new Server,
-        new Github,
-        new Npm,
-        new Urban,
-        new Screenshot,
-        new Wiki
-      ],
-    })
-  };
-}
+@Declare({
+  name: 'utility',
+  description: 'various utility commands'
+})
+@Locales({
+  name: [
+    ['en-US', 'utility'],
+    ['vi', 'tiện-ích']
+  ],
+  description: [
+    ['en-US', 'various utility commands'],
+    ['vi', 'các lệnh tiện ích khác nhau']
+  ]
+})
+@Options([Avatar, Banner, Channel, Server, Github, Npm, Urban, Screenshot, Wiki])
+export default class Utility extends Command {};

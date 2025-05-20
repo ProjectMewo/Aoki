@@ -1,25 +1,29 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
-export default class Ping extends Subcommand {
-  constructor() {
-    super({
-      name: 'ping',
-      description: 'check the latency of the bot',
-      permissions: [],
-      options: []
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.reply({ content: "Pinging..." });
+@Declare({
+	name: "ping",
+	description: "see if I respond."
+})
+@Locales({
+	name: [
+		['en-US', 'ping'],
+		['vi', 'kiểm-tra']
+	],
+	description: [
+		['en-US', 'see if I respond.'],
+		['vi', 'kiểm tra xem tớ có phản hồi không.']
+	]
+})
+export default class Ping extends SubCommand {
+	async run(ctx: CommandContext) {
+		const latency = ctx.client.gateway.latency;
 
-    const replies = await i.client.utils.profane.getStatic("ping");
+		const replies = ctx.t.get(ctx.interaction.user.settings.language).my.ping.responses;
 
-    const reply = i.client.utils.array.random(replies)
-      .replace(/{{user}}/g, i.user.username)
-      .replace(/{{ms}}/g, Math.round(i.client.ws.ping).toString());
+		const reply = ctx.client.utils.array.random(replies)
+			.replace(/{{user}}/g, ctx.author.username)
+			.replace(/{{ms}}/g, Math.round(latency).toString());
 
-    await i.editReply({ content: reply });
-  }
+		await ctx.write({ content: reply });
+	}
 }

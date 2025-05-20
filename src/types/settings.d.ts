@@ -9,9 +9,9 @@ export type TournamentRound = "" | "Qualifiers" | "Group Stage" | "Round of 32" 
  */
 export interface GuildSettings {
   /**
-   * The ID of the channel where timestamps are sent.
+   * The ID of the channels where timestamps are sent.
    */
-  timestampChannel: string,
+  timestampChannel: Array<string>,
   /**
    * The verification settings for the guild.
    */
@@ -104,6 +104,10 @@ export interface GuildSettings {
  * Represents the configuration settings for a user.
  */
 export interface UserSettings {
+  /**
+   * The locale this user prefers
+   */
+  language: "en-US" | "vi",
   /**
    * The user's osu! in-game username.
    */

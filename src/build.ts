@@ -1,28 +1,14 @@
-import { build } from 'esbuild';
-
-const envVariables = [
-  'TOKEN_DEV', 'APPID_DEV', 'TOKEN', 'APPID', 'GUILD', 'MONGO_URI',
-  'OSU_KEY', 'OSU_ID', 'OSU_SECRET', 'OSU_DEV_ID', 'OSU_DEV_SECRET',
-  'DBL_TOKEN', 'IMG_KEY', 'WOLFRAM_KEY', 'SCREENSHOT_KEY', 'RAPID_KEY',
-  'WAIFU_IT', 'PORT', 'GELBOORU_KEY', 'SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'
-];
-
-const define = envVariables.reduce((acc: { [key: string]: string }, key) => {
-  acc[`process.env.${key}`] = JSON.stringify(process.env[key]);
-  return acc;
-}, {});
-
-build({
-  entryPoints: ['src/main.ts'],
-  bundle: true,
+Bun.build({
+  entrypoints: ['src/main.ts'],
   minify: true,
-  sourcemap: false,
-  keepNames: true,
-  format: "esm",
-  platform: 'node',
-  target: 'node18',
-  // install this on the host
-  external: ['sharp'],
-  outfile: 'dist/main.js',
-  define,
-}).catch(() => process.exit(1));
+  target: 'bun',
+  sourcemap: 'none',
+  format: 'esm',
+  outdir: 'dist',
+  // be very careful with the output file
+  // your environment variables are in the built file
+  env: 'inline'
+}).catch((err) => {
+  console.log(err);
+  process.exit(1);
+});

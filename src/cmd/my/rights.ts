@@ -1,59 +1,85 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
-import AokiError from "@struct/handlers/AokiError";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  Declare, 
+  SubCommand, 
+  Options, 
+  createStringOption, 
+  createBooleanOption,
+  Locales,
+  AutocompleteInteraction
+} from "seyfert";
 
-export default class Rights extends Subcommand {
-  constructor() {
-    super({
-      name: 'rights',
-      description: 'configure your personal privacy settings',
-      permissions: [],
-      options: [
-        {
-          type: 'string',
-          name: 'to',
-          description: 'what permission to configure',
-          required: true,
-          choices: [
-            { name: 'read & process your messages', value: 'processMessagePermission' },
-            { name: 'save your osu! account details on verification', value: 'saveOsuUserAccount' }
-          ]
-        },
-        {
-          type: 'boolean',
-          name: 'should_be',
-          description: 'whether I should do it or not',
-          required: true
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    const query: string = i.options.getString("to")!.toLowerCase();
-    const value: boolean = i.options.getBoolean("should_be")!;
-    const settings = i.user.settings;
+const options = {
+  to: createStringOption({
+    description: 'what permission to configure',
+    description_localizations: {
+      "en-US": 'what permission to configure',
+      "vi": 'quyền mà cậu muốn cấu hình'
+    },
+    required: true,
+    autocomplete: async (interaction) => await Rights.prototype.autocomplete(interaction)
+  }),
+  should_be: createBooleanOption({
+    description: 'whether I should do it or not',
+    description_localizations: {
+      "en-US": 'whether I should do it or not',
+      "vi": 'liệu tớ có nên làm điều đó hay không'
+    },
+    required: true
+  })
+};
+
+@Declare({
+  name: 'rights',
+  description: 'configure your personal privacy settings'
+})
+@Locales({
+  name: [
+    ['en-US', 'rights'],
+    ['vi', 'quyền-cá-nhân']
+  ],
+  description: [
+    ['en-US', 'configure your personal privacy settings'],
+    ['vi', 'cấu hình quyền riêng tư cá nhân của cậu']
+  ]
+})
+@Options(options)
+export default class Rights extends SubCommand {
+  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.my.rights.choices
+    );
+  };
+
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).my.rights;
+    const query: string = ctx.options.to.toLowerCase();
+    const value: boolean = ctx.options.should_be;
+    const settings = ctx.author.settings;
     
+    // all discord returned option values are lowercased
+    const properQuery: { [key: string]: string } = {
+      processmessagepermission: t.readProcess,
+      saveosuuseraccount: t.saveOsu
+    };
+
     if (settings[query as keyof typeof settings] == value) {
-      return AokiError.GENERIC({
-        sender: i,
-        content: `Baka, that's your current settings.`
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.isCurrent(value, properQuery[query])
       });
     }
-    
-    const res = await i.user.update({ [query]: value });
-    
-    const properQuery: { [key: string]: string } = {
-      processMessagePermission: "read & process your messages",
-      saveOsuUserAccount: "save your osu! account details on verification"
-    };
-    
+
+    const res = await ctx.author.update({ [query]: value });
+
     if (res[query as keyof typeof res] == value) {
-      await i.reply({ content: `Alright, I ${value ? "will" : "won't"} **${properQuery[query]}**.` });
+      await ctx.write({ content: t.set(value, properQuery[query]) });
     } else {
       return AokiError.DATABASE({
-        sender: i,
-        content: "The database might be having problems. Try executing this again."
+        sender: ctx.interaction, 
+        content: t.apiError
       });
     }
   }
