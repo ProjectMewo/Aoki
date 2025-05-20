@@ -174,6 +174,16 @@ client.events.set([
 ```
 Seyfert also can't know if you have bundled your `seyfert.config` or not, so by default you are forced to include it in with the exposed token (not the `process.env`ed one if you don't include `.env`!)
 
+Finally (holy, not done?!), only after you remove the paths from your `seyfert.config` that you can finally bundle your code. Otherwise, Seyfert will trigger its search to something doesn't exist after bundle.
+```ts
+// only leave this alone
+// other stuff, remove them all
+locations: {
+  base: "src"
+},
+```
+Bundle your code. It should work now.
+
 All this took me 2 days to figure out.
 
 ## Commands
