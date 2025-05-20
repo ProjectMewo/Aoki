@@ -5,7 +5,7 @@ import {
   Declare, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -31,7 +31,16 @@ const options = {
   name: 'ship',
   description: 'ship two users together and see their compatibility.'
 })
-@LocalesT('fun.ship.name', 'fun.ship.description')
+@Locales({
+  name: [
+    ['en-US', 'ship'],
+    ['vi', 'ghép-đôi']
+  ],
+  description: [
+    ['en-US', 'ship two users together and see their compatibility.'],
+    ['vi', 'ghép đôi hai người và xem độ hợp nhau của họ.']
+  ]
+})
 @Options(options)
 export default class Ship extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

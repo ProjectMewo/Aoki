@@ -9,7 +9,7 @@ import {
   SubCommand, 
   Options, 
   TextGuildChannel, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -41,7 +41,16 @@ const options = {
   name: 'gelbooru',
   description: 'search for anime images on Gelbooru'
 })
-@LocalesT('anime.gelbooru.name', 'anime.gelbooru.description')
+@Locales({
+  name: [
+    ['en-US', 'gelbooru'],
+    ['vi', 'tìm-gelbooru']
+  ],
+  description: [
+    ['en-US', 'search for anime images on Gelbooru'],
+    ['vi', 'tìm kiếm hình ảnh anime trên Gelbooru']
+  ]
+})
 @Options(options)
 export default class Gelbooru extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

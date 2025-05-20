@@ -6,7 +6,7 @@ import {
   Embed,
   SubCommand,
   Options,
-  LocalesT
+  Locales
 } from "seyfert";
 import { User } from "@assets/graphql";
 import { UserData } from "@local-types/anilist";
@@ -38,7 +38,16 @@ const options = {
   name: "profile",
   description: "get an anime profile from MyAnimeList or AniList"
 })
-@LocalesT('anime.profile.name', 'anime.profile.description')
+@Locales({
+  name: [
+    ['en-US', 'profile'],
+    ['vi', 'hồ-sơ']
+  ],
+  description: [
+    ['en-US', 'get an anime profile from MyAnimeList or AniList'],
+    ['vi', 'lấy hồ sơ anime từ MyAnimeList hoặc AniList']
+  ]
+})
 @Options(options)
 export default class Profile extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

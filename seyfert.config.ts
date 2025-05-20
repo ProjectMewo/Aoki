@@ -1,13 +1,11 @@
 import { config } from "seyfert";
 const dev = process.argv.includes("--dev");
+const token = dev ? process.env.TOKEN_DEV! : process.env.TOKEN!;
 
 export default config.bot({
-  token: process.env[dev ? "TOKEN_DEV" : "TOKEN"] || "",
+  token: token,
   locations: {
-    base: "src",
-    commands: "cmd",
-    events: "events",
-    langs: "locales"
+    base: "src"
   },
   intents: [
     "Guilds", 

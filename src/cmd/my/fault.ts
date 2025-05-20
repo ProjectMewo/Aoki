@@ -8,7 +8,7 @@ import {
   SubCommand, 
   Options, 
   Attachment, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -34,7 +34,16 @@ const options = {
   name: 'fault',
   description: 'report an issue with the bot'
 })
-@LocalesT('my.fault.name', 'my.fault.description')
+@Locales({
+  name: [
+    ['en-US', 'fault'],
+    ['vi', 'lỗi-của-tớ']
+  ],
+  description: [
+    ['en-US', 'report an issue with the bot'],
+    ['vi', 'báo cáo một vấn đề với tớ']
+  ]
+})
 @Options(options)
 export default class Fault extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

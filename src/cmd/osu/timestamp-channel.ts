@@ -3,7 +3,7 @@ import {
   CommandContext,
   createChannelOption,
   Declare,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -25,7 +25,16 @@ const options = {
   name: 'add_timestamp_channel',
   description: 'add a channel for detecting osu! editor timestamps'
 })
-@LocalesT('osu.timestampChannel.name', 'osu.timestampChannel.description')
+@Locales({
+  name: [
+    ['en-US', 'add-timestamp-channel'],
+    ['vi', 'kênh-dấu-thời-gian']
+  ],
+  description: [
+    ['en-US', 'add a channel for detecting osu! editor timestamps'],
+    ['vi', 'thêm một kênh để phát hiện dấu thời gian của osu! editor']
+  ]
+})
 @Options(options)
 export default class TimestampChannel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

@@ -6,7 +6,7 @@ import {
   Embed,
   SubCommand,
   Options,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 import AokiError from "@struct/AokiError";
@@ -59,7 +59,16 @@ const options = {
   name: "country-leaderboard",
   description: "get a country leaderboard for a specific beatmap"
 })
-@LocalesT('osu.countryLb.name', 'osu.countryLb.description')
+@Locales({
+  name: [
+    ['en-US', 'country-leaderboard'],
+    ['vi', 'bxh-quốc-gia']
+  ],
+  description: [
+    ['en-US', 'get a country leaderboard for a specific beatmap'],
+    ['vi', 'xem bảng xếp hạng quốc gia cho một beatmap cụ thể']
+  ]
+})
 @Options(options)
 export default class CountryLeaderboard extends SubCommand {
   private readonly api_v1 = "https://osu.ppy.sh/api/";

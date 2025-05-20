@@ -7,7 +7,7 @@ import {
   SubCommand, 
   Options, 
   TextGuildChannel,
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -25,7 +25,16 @@ const options = {
   name: 'wiki',
   description: 'search for information on Wikipedia'
 })
-@LocalesT('utility.wiki.name', 'utility.wiki.description')
+@Locales({
+  name: [
+    ['en-US', 'wiki'],
+    ['vi', 'bách-khoa']
+  ],
+  description: [
+    ['en-US', 'search for information on Wikipedia'],
+    ['vi', 'tìm kiếm thông tin trên Wikipedia']
+  ]
+})
 @Options(options)
 export default class Wiki extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

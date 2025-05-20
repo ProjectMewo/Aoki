@@ -3,7 +3,7 @@ import {
   CommandContext,
   createStringOption,
   Declare,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -37,7 +37,16 @@ const options = {
   name: "set",
   description: "set your osu! username and default mode"
 })
-@LocalesT('osu.set.name', 'osu.set.description')
+@Locales({
+  name: [
+    ['en-US', 'set'],
+    ['vi', 'cấu-hình']
+  ],
+  description: [
+    ['en-US', 'set your osu! username and default mode'],
+    ['vi', 'đặt tên người dùng osu! và chế độ mặc định của cậu']
+  ]
+})
 @Options(options)
 export default class Set extends SubCommand {
   private usernameRegex = /^[\[\]a-z0-9_-\s]+$/i;

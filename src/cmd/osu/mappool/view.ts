@@ -4,7 +4,7 @@ import {
   Declare,
   Embed,
   Group,
-  LocalesT,
+  Locales,
   SubCommand
 } from "seyfert";
 
@@ -12,7 +12,16 @@ import {
   name: 'view',
   description: 'view the finalized mappool for the current round.'
 })
-@LocalesT('osu.mappool.view.name', 'osu.mappool.view.description')
+@Locales({
+  name: [
+    ['en-US', 'view'],
+    ['vi', 'xem']
+  ],
+  description: [
+    ['en-US', 'view the finalized mappool for the current round.'],
+    ['vi', 'xem mappool đã chốt cho vòng hiện tại.']
+  ]
+})
 @Group('mappool')
 export default class View extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

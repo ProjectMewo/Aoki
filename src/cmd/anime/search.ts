@@ -8,7 +8,7 @@ import {
   Options,
   TextGuildChannel,
   AutocompleteInteraction,
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -41,7 +41,16 @@ const options = {
   name: 'search',
   description: 'search for anime, manga, characters, or people on MyAnimeList'
 })
-@LocalesT('anime.search.name', 'anime.search.description')
+@Locales({
+  name: [
+    ['en-US', 'search'],
+    ['vi', 'tìm-kiếm']
+  ],
+  description: [
+    ['en-US', 'search for anime, manga, characters, or people on MyAnimeList'],
+    ['vi', 'tìm kiếm anime, manga, nhân vật, hoặc người trên MyAnimeList']
+  ]
+})
 @Options(options)
 export default class Search extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

@@ -1,4 +1,4 @@
-import { Declare, Command, Options, LocalesT } from "seyfert";
+import { Declare, Command, Options, Locales } from "seyfert";
 import Eightball from "./8ball";
 import Advice from "./advice";
 import Affirmation from "./affirmation";
@@ -14,6 +14,15 @@ import Owo from "./owo";
   name: 'fun',
   description: 'some commands for funny stuff'
 })
-@LocalesT('fun.name', 'fun.description')
+@Locales({
+  name: [
+    ['en-US', 'fun'],
+    ['vi', 'vui-nhộn']
+  ],
+  description: [
+    ['en-US', 'some commands for funny stuff'],
+    ['vi', 'một số lệnh cho những điều vui nhộn']
+  ]
+})
 @Options([Eightball, Advice, Affirmation, Fact, Fortune, Generator, Ship, Today, Truth, Owo])
 export default class Fun extends Command {};

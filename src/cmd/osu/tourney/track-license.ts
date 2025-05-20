@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -42,10 +42,19 @@ async function getSpotifyToken(): Promise<string | null> {
 
 @Declare({
   name: 'track-license',
-  description: 'get licensing information for a Spotify track. Not reliable, use along with /osu verify-artist.'
+  description: 'get licensing information for a Spotify track. Not reliable.'
+})
+@Locales({
+  name: [
+    ['en-US', 'track-license'],
+    ['vi', 'giấy-phép-bài-hát']
+  ],
+  description: [
+    ['en-US', 'get licensing information for a Spotify track. Not reliable.'],
+    ['vi', 'lấy thông tin giấy phép cho một bài hát Spotify. Không đảm bảo chính xác.']
+  ]
 })
 @Group('tourney')
-@LocalesT('osu.trackLicense.name', 'osu.trackLicense.description')
 @Options(options)
 export default class TrackLicense extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

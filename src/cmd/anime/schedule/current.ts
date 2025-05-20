@@ -3,7 +3,7 @@ import {
   CommandContext, 
   Declare, 
   Group, 
-  LocalesT, 
+  Locales, 
   SubCommand 
 } from "seyfert";
 import { Watching } from "@assets/graphql";
@@ -12,7 +12,16 @@ import { Watching } from "@assets/graphql";
   name: 'current',
   description: 'get information about your currently subscribed anime'
 })
-@LocalesT('anime.scheduleSub.current.name', 'anime.scheduleSub.current.description')
+@Locales({
+  name: [
+    ['en-US', 'current'],
+    ['vi', 'hiện-tại']
+  ],
+  description: [
+    ['en-US', 'get information about your currently subscribed anime'],
+    ['vi', 'xem thông tin về anime cậu đang theo dõi']
+  ]
+})
 @Group('schedule')
 export default class Current extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

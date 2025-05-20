@@ -6,7 +6,7 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -24,7 +24,16 @@ const options = {
   name: 'npm',
   description: 'search for an npm library'
 })
-@LocalesT('utility.npm.name', 'utility.npm.description')
+@Locales({
+  name: [
+    ['en-US', 'npm'],
+    ['vi', 'npm']
+  ],
+  description: [
+    ['en-US', 'search for an npm library'],
+    ['vi', 'tìm kiếm một thư viện npm']
+  ]
+})
 @Options(options)
 export default class Npm extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

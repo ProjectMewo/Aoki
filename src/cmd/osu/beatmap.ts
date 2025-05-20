@@ -15,7 +15,7 @@ import {
   ActionRow,
   StringSelectMenuInteraction,
   Button,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
@@ -93,7 +93,16 @@ const options = {
   name: "beatmap",
   description: "search for beatmaps by query"
 })
-@LocalesT('osu.beatmap.name', 'osu.beatmap.description')
+@Locales({
+  name: [
+    ['en-US', 'beatmap'],
+    ['vi', 'tìm-map']
+  ],
+  description: [
+    ['en-US', 'search for beatmaps by query'],
+    ['vi', 'tìm kiếm beatmap bằng truy vấn']
+  ]
+})
 @Options(options)
 export default class Beatmap extends SubCommand {
   private readonly api_v2 = "https://osu.ppy.sh/api/v2";

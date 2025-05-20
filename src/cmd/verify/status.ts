@@ -1,7 +1,7 @@
 import {
   CommandContext,
   Declare,
-  LocalesT,
+  Locales,
   SubCommand
 } from "seyfert";
 
@@ -9,7 +9,16 @@ import {
   name: "status",
   description: "check the verification status for this server"
 })
-@LocalesT('verify.status.name', 'verify.status.description')
+@Locales({
+  name: [
+    ['en-US', 'status'],
+    ['vi', 'trạng-thái']
+  ],
+  description: [
+    ['en-US', 'check the verification status for this server'],
+    ['vi', 'kiểm tra trạng thái xác minh cho máy chủ này']
+  ]
+})
 export default class Status extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).verify.status;

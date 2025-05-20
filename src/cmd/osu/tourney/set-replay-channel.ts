@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand,
   AutocompleteInteraction
@@ -37,7 +37,16 @@ const options = {
   name: 'set-replay-channel',
   description: 'set a channel for replays for a specific round'
 })
-@LocalesT('osu.tourney.setReplayChannel.name', 'osu.tourney.setReplayChannel.description')
+@Locales({
+  name: [
+    ['en-US', 'set-replay-channel'],
+    ['vi', 'đặt-kênh-replay']
+  ],
+  description: [
+    ['en-US', 'set a channel for replays for a specific round'],
+    ['vi', 'đặt kênh cho phát lại cho một vòng đấu cụ thể']
+  ]
+})
 @Group('tourney')
 @Options(options)
 export default class SetReplayChannel extends SubCommand {

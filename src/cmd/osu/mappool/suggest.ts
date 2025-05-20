@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -41,7 +41,16 @@ const options = {
   name: 'suggest',
   description: 'suggest a new map for this mappool slot.'
 })
-@LocalesT('osu.mappool.suggest.name', 'osu.mappool.suggest.description')
+@Locales({
+  name: [
+    ['en-US', 'suggest'],
+    ['vi', 'đề-xuất']
+  ],
+  description: [
+    ['en-US', 'suggest a new map for this mappool slot.'],
+    ['vi', 'đề xuất một map mới cho slot mappool này.']
+  ]
+})
 @Group('mappool')
 @Options(options)
 export default class Suggest extends SubCommand {

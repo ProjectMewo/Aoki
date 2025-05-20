@@ -6,7 +6,7 @@ import {
   Options, 
   createStringOption, 
   createBooleanOption,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 
@@ -34,7 +34,16 @@ const options = {
   name: 'rights',
   description: 'configure your personal privacy settings'
 })
-@LocalesT('my.rights.name', 'my.rights.description')
+@Locales({
+  name: [
+    ['en-US', 'rights'],
+    ['vi', 'quyền-cá-nhân']
+  ],
+  description: [
+    ['en-US', 'configure your personal privacy settings'],
+    ['vi', 'cấu hình quyền riêng tư cá nhân của cậu']
+  ]
+})
 @Options(options)
 export default class Rights extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

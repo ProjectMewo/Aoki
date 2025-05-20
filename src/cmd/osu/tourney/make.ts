@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -66,7 +66,16 @@ const options = {
   name: 'make',
   description: 'create a new tournament in this server'
 })
-@LocalesT('osu.tourney.make.name', 'osu.tourney.make.description')
+@Locales({
+  name: [
+    ['en-US', 'make'],
+    ['vi', 'tạo-giải']
+  ],
+  description: [
+    ['en-US', 'create a new tournament in this server'],
+    ['vi', 'tạo một giải đấu mới trong máy chủ này']
+  ]
+})
 @Group('tourney')
 @Options(options)
 export default class Make extends SubCommand {

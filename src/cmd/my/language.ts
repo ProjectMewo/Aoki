@@ -4,7 +4,7 @@ import {
   SubCommand, 
   Options, 
   createStringOption,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 const options = {
@@ -23,7 +23,16 @@ const options = {
   name: 'language',
   description: 'configure the language you want me to speak to you'
 })
-@LocalesT('my.language.name', 'my.language.description')
+@Locales({
+  name: [
+    ['en-US', 'language'],
+    ['vi', 'ngôn-ngữ']
+  ],
+  description: [
+    ['en-US', 'configure the language you want me to speak to you'],
+    ['vi', 'cấu hình ngôn ngữ tớ sẽ dùng để phản hồi']
+  ]
+})
 @Options(options)
 export default class Language extends SubCommand {
   async autocomplete(i: AutocompleteInteraction): Promise<void> {

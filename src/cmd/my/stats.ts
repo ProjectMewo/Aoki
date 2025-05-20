@@ -1,4 +1,4 @@
-import { CommandContext, Declare, Embed, LocalesT, SubCommand } from "seyfert";
+import { CommandContext, Declare, Embed, Locales, SubCommand } from "seyfert";
 import os from 'os';
 import * as pkg from "../../../package.json";
 
@@ -6,7 +6,16 @@ import * as pkg from "../../../package.json";
   name: "stats",
   description: "the nerdy statistics of how I'm working."
 })
-@LocalesT('my.stats.name', 'my.stats.description')
+@Locales({
+  name: [
+    ['en-US', 'stats'],
+    ['vi', 'thống-kê']
+  ],
+  description: [
+    ['en-US', "the nerdy statistics of how I'm working."],
+    ['vi', "thống kê thô về cách tớ đang hoạt động."]
+  ]
+})
 export default class Stats extends SubCommand {
   async run(ctx: CommandContext) {
     const t = ctx.t.get(ctx.interaction.user.settings.language).my.stats;

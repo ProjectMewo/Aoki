@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand,
   AutocompleteInteraction
@@ -44,7 +44,16 @@ const options = {
   name: 'add-round',
   description: 'add a tournament round with mappool slots'
 })
-@LocalesT('osu.tourney.addRound.name', 'osu.tourney.addRound.description')
+@Locales({
+  name: [
+    ['en-US', 'add-round'],
+    ['vi', 'thêm-vòng']
+  ],
+  description: [
+    ['en-US', 'add a tournament round with mappool slots'],
+    ['vi', 'thêm một vòng đấu với các slot mappool']
+  ]
+})
 @Group('tourney')
 @Options(options)
 export default class AddRound extends SubCommand {

@@ -4,7 +4,7 @@ import {
   createUserOption, 
   Declare, 
   Embed, 
-  LocalesT, 
+  Locales, 
   Options, 
   SubCommand 
 } from "seyfert";
@@ -24,7 +24,16 @@ const options = {
   name: 'avatar',
   description: 'get the avatar of a user'
 })
-@LocalesT('utility.avatar.name', 'utility.avatar.description')
+@Locales({
+  name: [
+    ['en-US', 'avatar'],
+    ['vi', 'ảnh-đại-diện']
+  ],
+  description: [
+    ['en-US', 'get the avatar of a user'],
+    ['vi', 'lấy ảnh đại diện của một người dùng']
+  ]
+})
 @Options(options)
 export default class Avatar extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

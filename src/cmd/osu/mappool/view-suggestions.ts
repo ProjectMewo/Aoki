@@ -5,7 +5,7 @@ import {
   Group,
   SubCommand,
   Embed,
-  LocalesT
+  Locales
 } from "seyfert";
 import Pagination from "@struct/Paginator";
 
@@ -13,7 +13,16 @@ import Pagination from "@struct/Paginator";
   name: 'view-suggestions',
   description: 'view all map suggestions for the current round.'
 })
-@LocalesT('osu.mappool.viewSuggestions.name', 'osu.mappool.viewSuggestions.description')
+@Locales({
+  name: [
+    ['en-US', 'view-suggestions'],
+    ['vi', 'xem-đề-xuất']
+  ],
+  description: [
+    ['en-US', 'view all map suggestions for the current round.'],
+    ['vi', 'xem tất cả đề xuất map cho vòng hiện tại.']
+  ]
+})
 @Group('mappool')
 export default class ViewSuggestions extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

@@ -4,7 +4,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand,
   AutocompleteInteraction
@@ -26,7 +26,16 @@ const options = {
   name: 'replays',
   description: 'view saved replays for a specific round or the current mappool'
 })
-@LocalesT('osu.mappool.replays.name', 'osu.mappool.replays.description')
+@Locales({
+  name: [
+    ['en-US', 'replays'],
+    ['vi', 'xem-replay']
+  ],
+  description: [
+    ['en-US', 'view saved replays for a specific round or the current mappool'],
+    ['vi', 'xem lại các replay đã lưu']
+  ]
+})
 @Group('mappool')
 @Options(options)
 export default class Replays extends SubCommand {

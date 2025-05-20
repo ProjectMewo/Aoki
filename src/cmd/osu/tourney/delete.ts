@@ -5,7 +5,7 @@ import {
   CommandContext,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   SubCommand
 } from "seyfert";
 import { ButtonStyle } from "seyfert/lib/types";
@@ -14,7 +14,16 @@ import { ButtonStyle } from "seyfert/lib/types";
   name: 'delete',
   description: 'delete the current tournament in this server'
 })
-@LocalesT('osu.tourney.delete.name', 'osu.tourney.delete.description')
+@Locales({
+  name: [
+    ['en-US', 'delete'],
+    ['vi', 'xóa']
+  ],
+  description: [
+    ['en-US', 'delete the current tournament in this server'],
+    ['vi', 'xóa giải đấu hiện tại trong máy chủ này']
+  ]
+})
 @Group('tourney')
 export default class Delete extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

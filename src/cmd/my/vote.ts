@@ -1,10 +1,19 @@
-import { CommandContext, Declare, LocalesT, SubCommand } from "seyfert";
+import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
 @Declare({
   name: 'vote',
   description: 'get my vote link.'
 })
-@LocalesT('my.vote.name', 'my.vote.description')
+@Locales({
+  name: [
+    ['en-US', 'vote'],
+    ['vi', 'bình-chọn']
+  ],
+  description: [
+    ['en-US', 'get my vote link.'],
+    ['vi', 'lấy liên kết bình chọn của tớ.']
+  ]
+})
 export default class Vote extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).my.vote;

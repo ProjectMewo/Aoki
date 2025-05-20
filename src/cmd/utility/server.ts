@@ -3,7 +3,7 @@ import {
   CommandContext,
   Declare,
   Embed,
-  LocalesT,
+  Locales,
   SubCommand,
   TextGuildChannel
 } from "seyfert";
@@ -12,7 +12,16 @@ import {
   name: 'server',
   description: 'get information about the server'
 })
-@LocalesT('utility.server.name', 'utility.server.description')
+@Locales({
+  name: [
+    ['en-US', 'server'],
+    ['vi', 'máy-chủ']
+  ],
+  description: [
+    ['en-US', 'get information about the server'],
+    ['vi', 'lấy thông tin về máy chủ']
+  ]
+})
 export default class Server extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).utility.server;

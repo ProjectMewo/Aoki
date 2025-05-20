@@ -3,7 +3,7 @@ import {
   CommandContext, 
   createStringOption, 
   Declare, 
-  LocalesT,
+  Locales,
   Embed,
   SubCommand, 
   Options 
@@ -50,7 +50,16 @@ const options = {
   name: 'generator',
   description: 'generate a meme using a template.'
 })
-@LocalesT('fun.generator.name', 'fun.generator.description')
+@Locales({
+  name: [
+    ['en-US', 'generator'],
+    ['vi', 'trình-tạo']
+  ],
+  description: [
+    ['en-US', 'generate a meme using a template.'],
+    ['vi', 'tạo meme bằng mẫu.']
+  ]
+})
 @Options(options)
 export default class Generator extends SubCommand {
   public static templates: Array<{ id: string, name: string, lines: number }> = [];

@@ -4,7 +4,7 @@ import {
   createStringOption,
   Declare,
   Embed,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -38,7 +38,16 @@ const options = {
   name: 'profile',
   description: 'get osu! profile information'
 })
-@LocalesT('osu.profile.name', 'osu.profile.description')
+@Locales({
+  name: [
+    ['en-US', 'profile'],
+    ['vi', 'hồ-sơ']
+  ],
+  description: [
+    ['en-US', 'get osu! profile information'],
+    ['vi', 'lấy thông tin hồ sơ osu!']
+  ]
+})
 @Options(options)
 export default class Profile extends SubCommand {
   private usernameRegex = /^[\[\]a-z0-9_-\s]+$/i;

@@ -6,7 +6,7 @@ import {
   Embed,
   SubCommand,
   Options,
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -24,7 +24,16 @@ const options = {
   name: "banner",
   description: "get the banner of a user"
 })
-@LocalesT('utility.banner.name', 'utility.banner.description')
+@Locales({
+  name: [
+    ['en-US', 'banner'],
+    ['vi', 'biểu-ngữ']
+  ],
+  description: [
+    ['en-US', 'get the banner of a user'],
+    ['vi', 'lấy biểu ngữ của một người dùng']
+  ]
+})
 @Options(options)
 export default class Banner extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

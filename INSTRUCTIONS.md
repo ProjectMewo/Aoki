@@ -9,6 +9,8 @@ For more realistic examples, refer to the actual files inside the project.
 ## Table of Contents
 - [Error handling](#error-handling)
 - [Locales](#locales)
+- [Database & API](#database--api)
+- [Bundling our code](#bundling)
 - [Commands](#commands)
 - [Extending built-in classes](#extending-built-in-classes)
 
@@ -89,9 +91,90 @@ Note that if you want to host the Seyfert side of things, the API is pretty much
 However you can have `pm2` on one server and host both the app and the API there, that's convenient and should be practiced.
 
 ## Bundling
-Because Seyfert has code implying a dynamic import style to commands and all the other relevant stuff, you can't bundle this project into a single file and expect it to work as-is. You would need to move the whole thing in there, and work with it.
+Seyfert makes it pretty difficult to bundle your code. Seriously. But not all hopes is lost, because when we get to their guide about Cloudflare Workers, which is [here](https://www.seyfert.dev/guide/recipes/cloudflare-workers) (very outdated), we can see some glimmer of hope.
 
-Luckily, Aoki only needs a single library that's Seyfert itself, so moving out and in should not be a very bothering task.
+```ts
+// Code snippet stripped from the guide
+// --- cut ---
+// we need to load commands manually
+await client.commands!.set('', client, [Ping]);
+ 
+// load languages
+await client.langs!.set('', [{ name: 'en', file: EnLang}]);
+
+// load components
+await client.components!.set('', client, [ButtonC]);
+```
+
+Workers bundle your code using `esbuild`, which implies you actually *can*, in one way or another, bundle your code into a file and use it. But because that guide's section is so outdated - in fact, none of the method on the code above is usable as-is - it makes it pretty difficult to figure out what the hell you have to do.
+
+This is what you're supposed to do for the commands:
+- If you're using any of these two decorators, `@GroupsT` and `@LocalesT`, remove them and use `@Groups` and `@Locales` instead. They are *dynamically loaded* and will fall back to nothing on build, causing Discord API errors about your command metadata:
+```ts
+@Locales([
+  ['en-US', 'description here'],
+  // add more language...
+])
+@Groups({
+  group: {
+    name: [
+      ['en-US': 'name'],
+      // ...
+    ],
+    description: [
+      ['en-US', 'description'],
+      // ...
+    ],
+    defaultDescription: 'description'
+  },
+  // add more stuff...
+})
+```
+- You are recommended to put these in another file and import it in, use it dynamically.
+- Then you can begin importing the commands manually.
+```ts
+// we expect an index.ts to be present
+import Command from '/path/to/command/directory';
+// for some unknown reason, tss gets angry at this line
+// even though it works perfectly fine
+// @ts-ignore
+client.commands.set([Command]);
+```
+
+And for the languages - this is the most confusing part.
+- Get into the language handler file in the library. In the `LangInstance` declaration, mark `path` optional by adding a `?` behind.
+```ts
+// --- cut ---
+path?: string;
+```
+- This is not breaking, in fact the function used to check our imports was also assuming `path` is not always present:
+```ts
+// --- cut ---
+if ('path' in file) // ...
+```
+- Here comes the difficult to realize part. Because the code of the library assumes our keys are inside a property `default`, which is exactly what `import` does, you need to use top-level await to import the file statically into the handler. The devastating part is that it does not tell you if it couldn't find the file, or you got this wrong and used normal `import` statement instead.
+```ts
+client.langs.set([
+  { language: 'en-US', file: await import('/path/to/en-US.ts') },
+  // ...add more language
+]);
+```
+
+About the events, you need to do this:
+```ts
+import interactionCreate from '/path/to/event.ts';
+
+client.events.set([
+  { 
+    data: { name: 'interactionCreate', once: false }, 
+    run: (i: any) => interactionCreate.run(i, client, 1) 
+  },
+  // ...more events
+]);
+```
+Seyfert also can't know if you have bundled your `seyfert.config` or not, so by default you are forced to include it in with the exposed token (not the `process.env`ed one if you don't include `.env`!)
+
+All this took me 2 days to figure out.
 
 ## Commands
 
@@ -125,11 +208,7 @@ const options = createStringOption({
   description: 'default-description'
 })
 // to provide localizations for the command,
-// use the @LocalesT decorator.
-// this decorator is autocomplete-compatible
-// you can scroll through to find the right key
-@LocalesT('default-name.name', 'default-name.description')
-// use the declared options in here...
+// use the @Locales decorator, mentioned above.
 @Options(options)
 export default class DefaultName extends SubCommand {
   // and then provide typings of options as a generic here
@@ -159,15 +238,8 @@ import DefaultName from './default-name';
 // to let it know, we provide the subcommands inside 
 // the @Options decorator:
 @Options([DefaultName])
-// if you have subcommand groups, use the @Groups decorator
-// or if you have localizations, the @GroupsT decorator
-// it is also autocomplete-compatible:
-@GroupsT({
-  'default-group': {
-    name: 'default-name.default-group.name',
-    description: 'default-name.default-group.description'
-  }
-})
+// if you have subcommand groups and locales, 
+// use the @Groups decorator which was mentioned above too.
 // finally declare your command:
 export default class ParentCommand extends Command {} // end
 ```

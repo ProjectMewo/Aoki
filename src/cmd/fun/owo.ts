@@ -5,7 +5,7 @@ import {
   Declare, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -23,7 +23,16 @@ const options = {
   name: 'owo',
   description: 'convert your text to OwO speak.'
 })
-@LocalesT('fun.owo.name', 'fun.owo.description')
+@Locales({
+  name: [
+    ['en-US', 'owo'],
+    ['vi', 'owo']
+  ],
+  description: [
+    ['en-US', 'convert your text to OwO speak.'],
+    ['vi', 'chuyển văn bản của cậu sang ngôn ngữ OwO.']
+  ]
+})
 @Options(options)
 export default class Owo extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

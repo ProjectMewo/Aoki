@@ -6,7 +6,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -35,7 +35,16 @@ const options = {
   name: 'add-role',
   description: 'add additional roles to a tournament roleset'
 })
-@LocalesT('osu.tourney.addRole.name', 'osu.tourney.addRole.description')
+@Locales({
+  name: [
+    ['en-US', 'add-role'],
+    ['vi', 'thêm-vai-trò']
+  ],
+  description: [
+    ['en-US', 'add additional roles to a tournament roleset'],
+    ['vi', 'thêm vai trò bổ sung vào bộ vai trò của giải đấu']
+  ]
+})
 @Group('tourney')
 @Options(options)
 export default class AddRole extends SubCommand {

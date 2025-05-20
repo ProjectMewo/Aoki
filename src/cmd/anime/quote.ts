@@ -2,7 +2,7 @@ import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
   Declare, 
-  LocalesT, 
+  Locales, 
   SubCommand 
 } from "seyfert";
 
@@ -10,7 +10,16 @@ import {
   name: 'quote',
   description: 'get a random anime quote.'
 })
-@LocalesT('anime.quote.name', 'anime.quote.description')
+@Locales({
+  name: [
+    ['en-US', 'quote'],
+    ['vi', 'trích-dẫn']
+  ],
+  description: [
+    ['en-US', 'get a random anime quote.'],
+    ['vi', 'lấy một câu trích dẫn anime ngẫu nhiên.']
+  ]
+})
 export default class Quote extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).anime.quote;

@@ -6,7 +6,7 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -24,7 +24,16 @@ const options = {
   name: 'channel',
   description: 'get information about a channel'
 })
-@LocalesT('utility.channel.name', 'utility.channel.description')
+@Locales({
+  name: [
+    ['en-US', 'channel'],
+    ['vi', 'kênh']
+  ],
+  description: [
+    ['en-US', 'get information about a channel'],
+    ['vi', 'lấy thông tin về một kênh']
+  ]
+})
 @Options(options)
 export default class Channel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

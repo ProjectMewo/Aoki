@@ -32,6 +32,12 @@ declare module 'seyfert' {
       localizedChoices: { name: string; value: string }[]
     ): Promise<void>
   }
+  interface Command {
+    respondWithLocalizedChoices(
+      interaction: AutocompleteInteraction,
+      localizedChoices: { name: string; value: string }[]
+    ): Promise<void>
+  }
 };
 
 export { respondWithLocalizedChoices };

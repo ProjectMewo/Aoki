@@ -4,7 +4,8 @@ import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   Message,
-  ButtonInteraction
+  ButtonInteraction,
+  Command
 } from 'seyfert';
 const _defProp = Object.defineProperties;
 
@@ -28,6 +29,10 @@ import * as AokiSubCommand from './SubCommand';
 _defProp(SubCommand.prototype, {
   respondWithLocalizedChoices: { value: AokiSubCommand.respondWithLocalizedChoices }
 });
+// unused but needed to satisfy types
+_defProp(Command.prototype, {
+  respondWithLocalizedChoices: { value: AokiSubCommand.respondWithLocalizedChoices }
+})
 
 import * as AokiAutocomplete from './AutocompleteInteraction';
 _defProp(AutocompleteInteraction.prototype, {

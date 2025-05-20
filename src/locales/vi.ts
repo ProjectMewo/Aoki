@@ -650,7 +650,7 @@ export default {
       }
     },
     verifyArtist: {
-      name: "cấp-phép",
+      name: "cấp-phép-nghệ-sĩ",
       description: "kiểm tra chính sách cấp phép của nghệ sĩ (kết quả bằng tiếng Anh)",
       notFound: (name: string) =>
         `Tớ không tìm thấy nghệ sĩ nào có tên **${name}**. Vui lòng kiểm tra chính tả và thử lại. Nếu nghệ sĩ tồn tại và cậu biết trạng thái cấp phép của họ, hãy nói với sensei của tớ. Họ sẽ vui lòng thêm nó!\n\nNếu không, cách tốt nhất của cậu là liên hệ trực tiếp với nghệ sĩ và xin phép ở đó.`,

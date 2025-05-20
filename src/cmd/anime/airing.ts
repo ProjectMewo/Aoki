@@ -8,7 +8,7 @@ import {
   SubCommand, 
   Options, 
   TextGuildChannel,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 
@@ -28,7 +28,16 @@ const options = {
   name: 'airing',
   description: 'get a list of anime airing on a specific day'
 })
-@LocalesT('anime.airing.name', 'anime.airing.description')
+@Locales({
+  name: [
+    ['en-US', 'airing'],
+    ['vi', 'lịch-chiếu']
+  ],
+  description: [
+    ['en-US', 'get a list of anime airing on a specific day'],
+    ['vi', 'xem danh sách anime phát sóng theo ngày']
+  ]
+})
 @Options(options)
 export default class Airing extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

@@ -5,7 +5,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand,
   AutocompleteInteraction
@@ -27,7 +27,16 @@ const options = {
   name: 'current',
   description: 'view or set the current tournament round'
 })
-@LocalesT('osu.tourney.current.name', 'osu.tourney.current.description')
+@Locales({
+  name: [
+    ['en-US', 'current'],
+    ['vi', 'vòng-hiện-tại']
+  ],
+  description: [
+    ['en-US', 'view or set the current tournament round'],
+    ['vi', 'xem hoặc đặt vòng hiện tại của giải đấu']
+  ]
+})
 @Group('tourney')
 @Options(options)
 export default class Current extends SubCommand {

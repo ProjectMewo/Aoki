@@ -7,7 +7,7 @@ import {
   SubCommand,
   Options,
   TextGuildChannel,
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -25,7 +25,16 @@ const options = {
   name: "urban",
   description: "search for a definition on Urban Dictionary"
 })
-@LocalesT('utility.urban.name', 'utility.urban.description')
+@Locales({
+  name: [
+    ['en-US', 'urban'],
+    ['vi', 'từ-điển-đường-phố']
+  ],
+  description: [
+    ['en-US', 'search for a definition on Urban Dictionary'],
+    ['vi', 'tìm kiếm định nghĩa trên Từ điển Đường phố']
+  ]
+})
 @Options(options)
 export default class Urban extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

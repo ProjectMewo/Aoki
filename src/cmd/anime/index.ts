@@ -1,4 +1,4 @@
-import { Declare, Command, Options, GroupsT } from "seyfert";
+import { Declare, Command, Options, Groups } from "seyfert";
 import Action from "./action";
 import Quote from "./quote";
 import Random from "./random";
@@ -15,10 +15,17 @@ import Remove from './schedule/remove';
   name: 'anime',
   description: 'commands related to anime stuff'
 })
-@GroupsT({
+@Groups({
   schedule: {
-    name: 'anime.scheduleSub.name',
-    defaultDescription: 'anime.scheduleSub.description'
+    name: [
+      ['en-US', 'schedule'],
+      ['vi', 'lịch-trình']
+    ],
+    description: [
+      ['en-US', 'manage your anime schedule.'],
+      ['vi', 'quản lý lịch anime của cậu']
+    ],
+    defaultDescription: 'manage your anime schedule.' 
   }
 })
 @Options([Action, Quote, Random, Profile, Airing, Search, Gelbooru, Add, Current, Remove])

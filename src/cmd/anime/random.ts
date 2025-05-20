@@ -6,7 +6,7 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -26,9 +26,18 @@ const options = {
 
 @Declare({
   name: 'random',
-  description: 'Get a random anime or manga from MyAnimeList'
+  description: 'get a random anime or manga from MyAnimeList'
 })
-@LocalesT('anime.random.name', 'anime.random.description')
+@Locales({
+  name: [
+    ['en-US', 'random'],
+    ['vi', 'ngẫu-nhiên']
+  ],
+  description: [
+    ['en-US', 'get a random anime or manga from MyAnimeList'],
+    ['vi', 'lấy một anime hoặc manga ngẫu nhiên từ MyAnimeList']
+  ]
+})
 @Options(options)
 export default class Random extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

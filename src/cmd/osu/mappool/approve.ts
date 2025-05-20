@@ -4,7 +4,7 @@ import {
   createStringOption,
   Declare,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -32,7 +32,16 @@ const options = {
   name: 'approve',
   description: 'approve a map and move it to the current round\'s finalized mappool.'
 })
-@LocalesT('osu.mappool.approve.name', 'osu.mappool.approve.description')
+@Locales({
+  name: [
+    ['en-US', 'approve'],
+    ['vi', 'duyệt']
+  ],
+  description: [
+    ['en-US', 'approve a map and move it to the current round\'s finalized mappool.'],
+    ['vi', 'duyệt một map và chuyển nó vào mappool đã chốt của vòng hiện tại.']
+  ]
+})
 @Group('mappool')
 @Options(options)
 export default class Approve extends SubCommand {

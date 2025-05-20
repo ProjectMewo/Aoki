@@ -6,7 +6,7 @@ import {
   Embed,
   SubCommand,
   Options,
-  LocalesT,
+  Locales,
   AutocompleteInteraction
 } from "seyfert";
 
@@ -26,7 +26,16 @@ const options = {
   name: "action",
   description: "get a random anime action image"
 })
-@LocalesT('anime.action.name', 'anime.action.description')
+@Locales({
+  name: [
+    ['en-US', 'action'],
+    ['vi', 'hành-động']
+  ],
+  description: [
+    ['en-US', 'get a random anime action image'],
+    ['vi', 'lấy một hình ảnh hành động anime ngẫu nhiên']
+  ]
+})
 @Options(options)
 export default class Action extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

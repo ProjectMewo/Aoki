@@ -5,7 +5,7 @@ import {
   Declare, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -13,7 +13,7 @@ const options = {
     description: 'the question to ask the 8-ball',
     description_localizations: {
       "en-US": 'the question to ask the 8-ball',
-      "vi": 'câu hỏi cậu muốn hỏi quả cầu số 8'
+      "vi": 'câu hỏi cậu muốn hỏi bi số 8'
     },
     required: true
   })
@@ -23,7 +23,16 @@ const options = {
   name: '8ball',
   description: 'ask the magic 8-ball a question.'
 })
-@LocalesT('fun.8ball.name', 'fun.8ball.description')
+@Locales({
+  name: [
+    ['en-US', '8ball'],
+    ['vi', '8ball']
+  ],
+  description: [
+    ['en-US', 'ask the magic 8-ball a question.'],
+    ['vi', 'hỏi bi số 8 một câu hỏi.']
+  ]
+})
 @Options(options)
 export default class Eightball extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

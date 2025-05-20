@@ -6,7 +6,7 @@ import {
   Declare,
   Embed,
   Group,
-  LocalesT,
+  Locales,
   Options,
   SubCommand
 } from "seyfert";
@@ -27,8 +27,17 @@ const options = {
   name: "verify-artist",
   description: "check this artist's policies before using their songs"
 })
+@Locales({
+  name: [
+    ['en-US', 'verify-artist'],
+    ['vi', 'kiểm-tra-nghệ-sĩ']
+  ],
+  description: [
+    ['en-US', "check this artist's policies before using their songs"],
+    ['vi', "kiểm tra chính sách của nghệ sĩ này trước khi sử dụng bài hát của họ"]
+  ]
+})
 @Group('tourney')
-@LocalesT('osu.verifyArtist.name', 'osu.verifyArtist.description')
 @Options(options)
 export default class VerifyArtist extends SubCommand {
   private static artists: Artist[] = [];

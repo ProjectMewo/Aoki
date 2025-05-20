@@ -1,4 +1,4 @@
-import { Declare, Command, Options, GroupsT } from "seyfert";
+import { Declare, Command, Options, Groups } from "seyfert";
 // Normal commands
 import Beatmap from "./beatmap";
 import CountryLeaderboard from "./country-leaderboard";
@@ -25,14 +25,24 @@ import SetReplayChannel from "./tourney/set-replay-channel";
   name: 'osu',
   description: 'the bizzare game that you react to everything on the screen'
 })
-@GroupsT({
+@Groups({
   mappool: {
-    name: 'osu.mappool.name',
-    defaultDescription: 'osu.mappool.description'
+    description: [
+      ['en-US', 'tournament mappool management'],
+      ['vi', 'quản lý mappool của giải đấu trong máy chủ này']
+    ],
+    defaultDescription: 'tournament mappool management' 
   },
   tourney: {
-    name: 'osu.tourney.name',
-    defaultDescription: 'osu.tourney.description'
+    name: [
+      ['en-US', 'tourney'],
+      ['vi', 'giải-đấu']
+    ],
+    description: [
+      ['en-US', 'tourney management commands'],
+      ['vi', 'quản lý giải đấu của máy chủ này']
+    ],
+    defaultDescription: 'tourney management commands'
   }
 })
 @Options([

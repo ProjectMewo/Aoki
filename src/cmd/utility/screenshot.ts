@@ -6,7 +6,7 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -24,7 +24,16 @@ const options = {
   name: 'screenshot',
   description: 'take a screenshot of a website'
 })
-@LocalesT('utility.screenshot.name', 'utility.screenshot.description')
+@Locales({
+  name: [
+    ['en-US', 'screenshot'],
+    ['vi', 'chụp-ảnh-màn-hình']
+  ],
+  description: [
+    ['en-US', 'take a screenshot of a website'],
+    ['vi', 'chụp ảnh màn hình của một trang web']
+  ]
+})
 @Options(options)
 export default class Screenshot extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

@@ -6,7 +6,7 @@ import {
   Embed, 
   SubCommand, 
   Options, 
-  LocalesT
+  Locales
 } from "seyfert";
 
 const options = {
@@ -32,7 +32,16 @@ const options = {
   name: 'github',
   description: 'get information about a GitHub repository'
 })
-@LocalesT('utility.github.name', 'utility.github.description')
+@Locales({
+  name: [
+    ['en-US', 'github'],
+    ['vi', 'github']
+  ],
+  description: [
+    ['en-US', 'get information about a GitHub repository'],
+    ['vi', 'lấy thông tin về một repository trên GitHub']
+  ]
+})
 @Options(options)
 export default class Github extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {
