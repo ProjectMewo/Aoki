@@ -21,7 +21,7 @@
 
 However you don't get a lot of useful information on Seyfert, because it doesn't have a proper documentation. You have a [guide](https://docs.seyfert.dev) to work with, which is obviously quite insufficient (it took me a century to figure out how modals work here). This rewrite is just a **proof-of-concept**, it is not a fully cleaned up prototype to use in production.
 
-For very technical and obscure details I learned with Seyfert, head over to [INFO.md](/INFO.md).
+For very technical and obscure details I learned with Seyfert, head over to [INSTRUCTIONS.md](/INSTRUCTIONS.md).
 
 All technologies are still the same, except without Discord.js and with Seyfert.
 
