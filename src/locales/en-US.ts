@@ -465,7 +465,7 @@ export default {
         success: (name: string, abbreviation: string, roles: (GuildRole | undefined)[]) =>
           `Got it. Created tournament **${name}** (${abbreviation})!\n\n` +
           `Assigned roles:\n` +
-          roles.map(role => role?.id ? `- <@${role.id}>` : "").join('\n') +
+          roles.map(role => role?.id ? `- <@&${role.id}>` : "").join('\n') +
           `\nUse \`/tourney add-round\` to set up rounds and mappools.\n\n***Please note:** Due to the scope of the current project, only **osu!taiko** receive regular support.*`
       },
       setReplayChannel: {

@@ -464,7 +464,7 @@ export default {
         success: (name: string, abbreviation: string, roles: (GuildRole | undefined)[]) =>
           `Xong rồi. Đã tạo giải đấu **${name}** (${abbreviation})!\n\n` +
           `Vai trò được gán:\n` +
-          roles.map(role => role?.id ? `- <@${role.id}>` : "").join('\n') +
+          roles.map(role => role?.id ? `- <@&${role.id}>` : "").join('\n') +
           `\nSử dụng \`/tourney add-round\` để thiết lập vòng đấu và mappool.\n\n***Lưu ý:** Do dự án hiện tại chỉ tập trung vào **osu!taiko**, các mode khác có thể sẽ không được hỗ trợ.*`
       },
       setReplayChannel: {
