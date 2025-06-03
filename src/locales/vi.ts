@@ -392,8 +392,8 @@ export default {
         noMaps: (currentRound: string) => `Oh. Chưa có map nào được xác nhận cho mappool của ${currentRound}.`,
         mapUnavailable: (slot: string, url: string) => `**${slot}**: [Thông tin map không khả dụng] (URL map: ${url})`,
         mapError: (slot: string, url: string) => `**${slot}**: [Lỗi khi lấy thông tin map] (URL map: ${url})`,
-        mapDetails: (slot: string, artist: string, title: string, version: string, url: string) =>
-          `**${slot}**: [${artist} - ${title} [${version}]](${url})`,
+        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string, hp: string, star: string) =>
+          `**${slot}**: [${artist} - ${title} [${version}]](${url}) - \`OD: ${od}, HP: ${hp}, SR: ${star}\``,
         embedTitle: (currentRound: string) => `Lựa chọn cuối cùng cho ${currentRound}`
       }
     },
@@ -419,6 +419,7 @@ export default {
         name: 'thêm-vòng',
         description: 'thêm vòng đấu mới cho giải đấu',
         noTournament: 'Đồ ngốc, không có giải đấu nào tồn tại trong máy chủ này. Tạo một cái bằng `/tourney make` trước.',
+        profane: 'Này, đặt tên vòng thì đặt cho thân thiện chứ. Làm vậy không được đâu.',
         noPermission: 'Hey! Cậu không có quyền thêm vòng đấu cho giải đấu đâu, đồ ngốc. Chỉ host, cố vấn và người làm mappool mới được làm điều này.',
         noSlots: 'Đồ ngốc. Cậu phải cung cấp ít nhất một slot mappool.',
         roundExists: (round: string) => `Oh. Một mappool cho ${round} đã tồn tại. Sử dụng \`/mappool add\` để thêm map vào đó.`,
@@ -463,8 +464,8 @@ export default {
         success: (name: string, abbreviation: string, roles: (GuildRole | undefined)[]) =>
           `Xong rồi. Đã tạo giải đấu **${name}** (${abbreviation})!\n\n` +
           `Vai trò được gán:\n` +
-          roles.map(role => role?.id ? `- ${role.id}` : "").join('\n') +
-          `\nSử dụng \`/tourney add-round\` để thiết lập vòng đấu và mappool.`
+          roles.map(role => role?.id ? `- <@${role.id}>` : "").join('\n') +
+          `\nSử dụng \`/tourney add-round\` để thiết lập vòng đấu và mappool.\n\n***Lưu ý:** Do dự án hiện tại chỉ tập trung vào **osu!taiko**, các mode khác có thể sẽ không được hỗ trợ.*`
       },
       setReplayChannel: {
         name: 'đặt-kênh-replay',

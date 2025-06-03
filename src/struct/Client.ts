@@ -12,6 +12,17 @@ import ProfaneUtil from "@utils/Profane";
 import StringUtil from "@utils/String";
 import TimeUtil from "@utils/Time";
 import DBL from "@utils/DBL";
+// Command imports
+import Anime from "../cmd/anime";
+import Fun from "../cmd/fun";
+import My from "../cmd/my";
+import OsuGame from "../cmd/osu";
+import Utility from "../cmd/utility";
+import Verify from "../cmd/verify";
+// Events imports
+import interactionCreate from "../events/interactionCreate";
+import messageCreate from "../events/messageCreate";
+import botReady from "../events/botReady";
 
 export default class AokiClient extends Client {
   constructor() {
@@ -109,6 +120,39 @@ export default class AokiClient extends Client {
 
     return data.access_token;
   };
+
+  public async loadEssentials() {
+    // Load commands, locales and events
+    // @ts-ignore
+    this.commands.set([Anime, Fun, My, OsuGame, Utility, Verify]);
+    this.langs.set([
+      { name: 'en-US', file: await import('../locales/en-US') },
+      { name: 'vi', file: await import('../locales/vi') }
+    ]);
+    this.events.set([
+      { 
+        data: { 
+          name: 'interactionCreate', 
+          once: false 
+        }, 
+        run: (i: any) => interactionCreate.run(i, this, 1) 
+      },
+      { 
+        data: { 
+          name: 'messageCreate', 
+          once: false 
+        }, 
+        run: (i: any) => messageCreate.run(i, this, 1) 
+      },
+      { 
+        data: { 
+          name: 'botReady', 
+          once: true 
+        }, 
+        run: (i: any) => botReady.run(i, this, 1) 
+      }
+    ]);
+  }
 
   /**
    * Load everything

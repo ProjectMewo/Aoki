@@ -393,8 +393,8 @@ export default {
         noMaps: (currentRound: string) => `Oh. No maps have been confirmed for the ${currentRound} mappool yet.`,
         mapUnavailable: (slot: string, url: string) => `**${slot}**: [Map information unavailable] (Map URL: ${url})`,
         mapError: (slot: string, url: string) => `**${slot}**: [Error fetching map details] (Map URL: ${url})`,
-        mapDetails: (slot: string, artist: string, title: string, version: string, url: string) =>
-          `**${slot}**: [${artist} - ${title} [${version}]](${url})`,
+        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string, hp: string, star: string) =>
+          `**${slot}**: [${artist} - ${title} [${version}]](${url})\n\`OD: ${od}, HP: ${hp}, SR: ${star}\``,
         embedTitle: (currentRound: string) => `Finalized picks for ${currentRound}`
       }
     },
@@ -420,6 +420,7 @@ export default {
         name: 'add-round',
         description: 'add a tournament round with mappool slots',
         noTournament: 'Baka, no tournament exists in this server. Create one with `/tourney make` first.',
+        profane: 'Keep your tournament round name friendly, please. I wouldn\'t allow that.',
         noPermission: 'Hey! You do not have permission to add tournament rounds, you baka. Only hosts, advisors, and mappoolers can do this.',
         noSlots: 'Baka. You must provide at least one mappool slot.',
         roundExists: (round: string) => `Oh. A mappool for ${round} already exists. Use \`/mappool add\` to add maps to it.`,
@@ -464,8 +465,8 @@ export default {
         success: (name: string, abbreviation: string, roles: (GuildRole | undefined)[]) =>
           `Got it. Created tournament **${name}** (${abbreviation})!\n\n` +
           `Assigned roles:\n` +
-          roles.map(role => role?.id ? `- ${role.id}` : "").join('\n') +
-          `\nUse \`/tourney add-round\` to set up rounds and mappools.`
+          roles.map(role => role?.id ? `- <@${role.id}>` : "").join('\n') +
+          `\nUse \`/tourney add-round\` to set up rounds and mappools.\n\n***Please note:** Due to the scope of the current project, only **osu!taiko** receive regular support.*`
       },
       setReplayChannel: {
         name: 'set-replay-channel',

@@ -40,9 +40,16 @@ const options = {
 @Options(options)
 export default class Replays extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    // fetch the rounds of this tournament
+    const guild = await interaction.client.guilds.fetch(interaction.guildId!);
+    const rounds = guild.settings.tournament.mappools.map((mappool) => ({
+      name: mappool.round,
+      value: mappool.round
+    }));
+    // serve to user
     await this.respondWithLocalizedChoices(
       interaction,
-      interaction.t.osu.genericRoundChoices
+      rounds
     );
   };
 

@@ -112,7 +112,50 @@ export default class View extends SubCommand {
       try {
         const beatmap = await fetchBeatmapInfo(extractDifficultyId(map.url));
         if (beatmap) {
-          mapDetails.push(t.mapDetails(map.slot, beatmap.beatmapset.artist_unicode, beatmap.beatmapset.title, beatmap.version, beatmap.url));
+          const slot = map.slot;
+          const artist = beatmap.beatmapset.artist_unicode;
+          const title = beatmap.beatmapset.title;
+          const version = beatmap.beatmapset.version;
+          const url = beatmap.url;
+          let od, hp, sr;
+          // taiko specific
+          const diffAttr = async (diffId: string, mods: (number | string)[]) => {
+            try {
+              const response = await fetch(`https://osu.ppy.sh/api/v2/beatmaps/${diffId}/attributes`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${await ctx.client.requestV2Token()}`,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ mods })
+              });
+              return await response.json();
+            } catch (error) {
+              console.error(`Failed to fetch beatmap attributes for ${diffId}:`, error);
+              return null;
+            }
+          };
+          // taiko specific
+          const mods = [];
+          if (map.slot.includes("HR")) mods.push("HR");
+          if (map.slot.includes("DT") || map.slot.includes("NC")) mods.push("DT");
+
+          const attr = mods.length > 0 ? await diffAttr(extractDifficultyId(map.url), mods) : null;
+
+          od = mods.includes("HR")
+            ? Math.min(beatmap.accuracy * 1.4, 10)
+            : mods.includes("DT")
+              ? 50 - ((50 - 3 * beatmap.accuracy) / 1.5)
+              : beatmap.accuracy;
+
+          hp = mods.includes("HR")
+            ? beatmap.drain * 1.4
+            : beatmap.drain;
+
+          sr = attr ? attr.star_rating : beatmap.difficulty_rating;
+          // end taiko specific
+          mapDetails.push(t.mapDetails(slot, artist, title, version, url, od, hp, sr));
         } else {
           mapDetails.push(t.mapUnavailable(map.slot, map.url));
         }

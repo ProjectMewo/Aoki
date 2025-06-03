@@ -1,5 +1,6 @@
 import AokiError from "@struct/AokiError";
 import {
+  AutocompleteInteraction,
   CommandContext,
   createChannelOption,
   createStringOption,
@@ -7,8 +8,7 @@ import {
   Group,
   Locales,
   Options,
-  SubCommand,
-  AutocompleteInteraction
+  SubCommand
 } from "seyfert";
 import { ChannelType } from "seyfert/lib/types";
 
@@ -29,7 +29,7 @@ const options = {
       "vi": 'vòng đấu mà kênh này dành cho'
     },
     required: true,
-    autocomplete: async (interaction) => await SetReplayChannel.prototype.autocomplete(interaction)
+    autocomplete: async (i) => await SetReplayChannel.prototype.autocomplete(i)
   })
 };
 
@@ -51,44 +51,18 @@ const options = {
 @Options(options)
 export default class SetReplayChannel extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-    const focusedValue = interaction.options.getAutocompleteValue();
-    const language = interaction.user.settings.language;
-
-    const localizedChoices = {
-      "en-US": [
-        { name: 'Qualifiers', value: 'Qualifiers' },
-        { name: 'Group Stage', value: 'Group Stage' },
-        { name: 'Round of 32', value: 'Round of 32' },
-        { name: 'Round of 16', value: 'Round of 16' },
-        { name: 'Quarterfinals', value: 'Quarterfinals' },
-        { name: 'Semifinals', value: 'Semifinals' },
-        { name: 'Finals', value: 'Finals' },
-        { name: 'Grand Finals', value: 'Grand Finals' }
-      ],
-      "vi": [
-        { name: 'Vòng loại', value: 'Qualifiers' },
-        { name: 'Vòng bảng', value: 'Group Stage' },
-        { name: 'Vòng 32 đội', value: 'Round of 32' },
-        { name: 'Vòng 16 đội', value: 'Round of 16' },
-        { name: 'Tứ kết', value: 'Quarterfinals' },
-        { name: 'Bán kết', value: 'Semifinals' },
-        { name: 'Chung kết', value: 'Finals' },
-        { name: 'Chung kết tổng', value: 'Grand Finals' }
-      ]
-    };
-
-    const choices = localizedChoices[language] || localizedChoices["en-US"];
-
-    if (!focusedValue) {
-      return await interaction.respond(choices);
-    }
-
-    const filteredChoices = choices.filter(choice =>
-      choice.name.toLowerCase().includes(focusedValue.toLowerCase())
-    ).slice(0, 2);
-
-    await interaction.respond(filteredChoices);
-  }
+    // fetch the rounds of this tournament
+    const guild = await interaction.client.guilds.fetch(interaction.guildId!);
+    const rounds = guild.settings.tournament.mappools.map((mappool) => ({
+      name: mappool.round,
+      value: mappool.round
+    }));
+    // serve to user
+    await this.respondWithLocalizedChoices(
+      interaction,
+      rounds
+    );
+  };
 
   async run(ctx: CommandContext<typeof options>): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.setReplayChannel;

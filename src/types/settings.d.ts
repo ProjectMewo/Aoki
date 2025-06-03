@@ -1,9 +1,4 @@
 /**
- * The possible values for the current round of the tournament.
- */
-export type TournamentRound = "" | "Qualifiers" | "Group Stage" | "Round of 32" | "Round of 16" | "Quarterfinals" | "Semifinals" | "Finals" | "Grand Finals";
-
-/**
  * @interface GuildSettings
  * Represents the configuration settings for a guild.
  */
@@ -64,7 +59,7 @@ export interface GuildSettings {
     /**
      * The current round of the tournament
      */
-    currentRound: TournamentRound,
+    currentRound: string,
     /**
      * The available mappools of the tournament
      */
@@ -172,7 +167,7 @@ export interface Replay {
  * Represents a mappool for a tournament.
  */
 export interface Mappool {
-  round: TournamentRound;
+  round: string;
   slots: Array<string>;
   maps: Array<{
     slot: string;

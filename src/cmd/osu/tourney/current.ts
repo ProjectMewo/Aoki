@@ -1,14 +1,13 @@
-import { TournamentRound } from "@local-types/settings";
 import AokiError from "@struct/AokiError";
 import {
+  AutocompleteInteraction,
   CommandContext,
   createStringOption,
   Declare,
   Group,
   Locales,
   Options,
-  SubCommand,
-  AutocompleteInteraction
+  SubCommand
 } from "seyfert";
 
 const options = {
@@ -19,7 +18,7 @@ const options = {
       "vi": 'đặt vòng này làm vòng hiện tại'
     },
     required: false,
-    autocomplete: async (interaction) => await Current.prototype.autocomplete(interaction)
+    autocomplete: async (i) => await Current.prototype.autocomplete(i)
   })
 };
 
@@ -41,9 +40,16 @@ const options = {
 @Options(options)
 export default class Current extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    // fetch the rounds of this tournament
+    const guild = await interaction.client.guilds.fetch(interaction.guildId!);
+    let rounds = guild.settings.tournament.mappools.map((mappool) => ({
+      name: mappool.round,
+      value: mappool.round
+    }));
+    // serve to user
     await this.respondWithLocalizedChoices(
       interaction,
-      interaction.t.osu.genericRoundChoices
+      rounds
     );
   };
 
@@ -104,7 +110,7 @@ export default class Current extends SubCommand {
     }
 
     // Update the current round
-    settings.currentRound = round as TournamentRound;
+    settings.currentRound = round;
     await guild.update({
       tournament: settings
     });

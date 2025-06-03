@@ -7,10 +7,8 @@ import {
   Group,
   Locales,
   Options,
-  SubCommand,
-  AutocompleteInteraction
+  SubCommand
 } from "seyfert";
-import { TournamentRound } from "@local-types/settings";
 
 const options = {
   round: createStringOption({
@@ -19,8 +17,7 @@ const options = {
       "en-US": 'the tournament round to add',
       "vi": 'vòng đấu giải đấu cậu muốn thêm'
     },
-    required: true,
-    autocomplete: async (interaction) => await AddRound.prototype.autocomplete(interaction)
+    required: true
   }),
   slots: createStringOption({
     description: 'mappool slots separated by comma (e.g. NM1,NM2)',
@@ -57,13 +54,6 @@ const options = {
 @Group('tourney')
 @Options(options)
 export default class AddRound extends SubCommand {
-  async autocomplete(interaction: AutocompleteInteraction): Promise<void> {
-    await this.respondWithLocalizedChoices(
-      interaction,
-      interaction.t.osu.genericRoundChoices
-    );
-  };
-
   async run(ctx: CommandContext<typeof options>): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.addRound;
     const { round, slots: slotsInput, set_current: setCurrent = false } = ctx.options;
@@ -77,6 +67,14 @@ export default class AddRound extends SubCommand {
       return AokiError.NOT_FOUND({
         sender: ctx.interaction,
         content: t.noTournament
+      });
+    }
+
+    // Since round is free input we need to validate input against profanity
+    if (await ctx.client.utils.profane.isProfane(round)) {
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.profane
       });
     }
 
@@ -117,7 +115,7 @@ export default class AddRound extends SubCommand {
 
     // Create new mappool
     const newMappool = {
-      round: round as TournamentRound,
+      round,
       slots,
       maps: [],
       replays: [],
@@ -127,7 +125,7 @@ export default class AddRound extends SubCommand {
     // Update settings
     settings.mappools.push(newMappool);
     if (setCurrent) {
-      settings.currentRound = round as TournamentRound;
+      settings.currentRound = round;
     }
 
     await guild.update({

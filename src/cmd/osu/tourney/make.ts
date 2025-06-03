@@ -9,7 +9,6 @@ import {
   Options,
   SubCommand
 } from "seyfert";
-import { TournamentRound } from "@local-types/settings";
 
 const options = {
   name: createStringOption({
@@ -106,7 +105,7 @@ export default class Make extends SubCommand {
     const tournamentSettings = {
       name,
       abbreviation,
-      currentRound: "" as TournamentRound,
+      currentRound: "",
       mappools: [],
       roles: {
         host: [hostRole.id],
