@@ -204,6 +204,17 @@ export default {
       ],
       response: `Alright, I'll speak to you in **English**!`
     },
+    beta: {
+      legalNotice: [
+        "## Legal Notice",
+        "Use of beta features (which means **unreleased features** within Aoki's context) that leads to data loss, removal of partially your data or your member's data, is not within Aoki's responsibility.",
+        "Being whitelisted for beta means I (shimeji.rin) **will** collect your and your server's usage data to improve the feature for release. However, none of this data will be moved around like companies do. Solely the **beta usage** will be managed and regularly supervised by me, the rest of the data (the *released features' data*) is not within my collection.",
+        "More information will be disclosed to **you** when I contact you personally for this request.",
+        "*By clicking **\"Yes, I understood\"**, you acknowledge the content of this legal notice.*"
+      ].join("\n\n"),
+      confirmAcknowledgement: "Yes, I understood",
+      thankYouRequest: "I've sent this over to sensei! If they're interested in your application, they'll personally reach out to you within 1-3 days.\n\nFeel free to send another one if they don't answer, they might have missed it!"
+    },
     fault: {
       name: 'fault',
       description: 'report an issue with the bot.',
@@ -393,9 +404,13 @@ export default {
         noMaps: (currentRound: string) => `Oh. No maps have been confirmed for the ${currentRound} mappool yet.`,
         mapUnavailable: (slot: string, url: string) => `**${slot}**: [Map information unavailable] (Map URL: ${url})`,
         mapError: (slot: string, url: string) => `**${slot}**: [Error fetching map details] (Map URL: ${url})`,
-        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string, hp: string, star: string) =>
-          `**${slot}**: [${artist} - ${title} [${version}]](${url})\n\`OD: ${od}, HP: ${hp}, SR: ${star}\``,
-        embedTitle: (currentRound: string) => `Finalized picks for ${currentRound}`
+        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string,  star: string, bpm: string, time: string) =>
+          `**${slot}**: [**${artist} - ${title} [${version}]**](${url})\n<:star:1379398780683817001>\`${star}\` <:bpm:1379394494201331833>\`${bpm}\` <:time:1379394497859031071>\`${time}\` <:od:1379407313244393634>\`${od}\``,
+        embedTitle: (currentRound: string) => `Finalized picks for ${currentRound}`,
+        someInfo: "Some interesting information about this mappool:",
+        totalMaps: (maps: number) => `Total maps: **${maps}**`,
+        srRange: (highest: number, lowest: number) => `Difficulty range: **${lowest}★ - ${highest}★**`,
+        mappack: (url: string) => `📦 [**Mappack Download**](${url})`
       }
     },
     tourney: {
@@ -444,6 +459,13 @@ export default {
           `The round "${round}" doesn't exist in this tournament. Add it first with \`/tourney add-round\`.`,
         roundSetSuccess: (name: string, round: string, slots: string[]) =>
           `Got it. The current round of **${name}** is now **${round}**.\n\nAvailable slots: ${slots.join(', ')}`
+      },
+      removeRound: {
+        noTournament: 'Baka, no tournament exists in this server. Create one with `/tourney make` first.',
+        profane: 'Keep your tournament round name friendly, please. I wouldn\'t allow that.',
+        noPermission: 'Hey! You do not have permission to add tournament rounds, you baka. Only hosts, advisors, and mappoolers can do this.',
+        roundNotFound: (round: string) => `I couldn't find any round under the name **${round}**, check your input. Use the autocomplete I provide with this command.`,
+        success: `Got it. The round has been deleted.`
       },
       delete: {
         name: 'delete',

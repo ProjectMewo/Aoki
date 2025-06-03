@@ -225,6 +225,17 @@ export default {
       ],
       response: `Được rồi, tớ sẽ nói chuyện với cậu bằng **tiếng Việt**!`
     },
+    beta: {
+      legalNotice: [
+        "## Thông tin pháp lý",
+        "Việc sử dụng các tính năng beta (có nghĩa là **các tính năng chưa được ra mắt** trong ngữ cảnh của tớ) mà dẫn đến tình trạng mất dữ liệu của cậu, hoặc của các thành viên trong máy chủ của cậu, hoàn toàn không nằm trong trách nhiệm của tớ. Các tính năng này chưa được ra mắt là 100% có lý do của nó.",
+        "Được chấp nhận vào chương trình beta có nghĩa là sensei tớ (shimeji.rin) **sẽ thu thập dữ liệu sử dụng tính năng** của cậu và các thành viên trong máy chủ của cậu để hoàn thiện tính năng cho ra mắt. **Không có dữ liệu nào trong số này sẽ bị công khai, bán, hoặc tương tự như vậy,** như các công ty lớn thường làm. Chỉ có **dữ liệu chương trình beta** là được sử dụng, còn lại sẽ không bao giờ bị chỉnh sửa hoặc thu thập nếu đã được cài đặt. Sensei của tớ sẽ đảm bảo rằng dữ liệu ngoài chương trình beta và trong chương trình beta được kiểm soát.",
+        "Thông tin chi tiết hơn sẽ được gửi riêng cho cậu khi sensei tớ trực tiếp liên hệ.",
+        "*Bằng việc bấm vào nút **\"Ừ, tớ biết rồi\"**, cậu chấp nhận việc đã đọc và hiểu nội dung này.*"
+      ].join("\n\n"),
+      confirmAcknowledgement: "Ừ, tớ biết rồi",
+      thankYouRequest: "Tớ gửi rồi nhé. Sensei tớ sẽ trực tiếp liên hệ với cậu trong từ 1-3 ngày tới.\n\nNếu sensei tớ không trả lời, có thể họ đã quên. Gửi lại cũng được nhé."
+    },
     fault: {
       name: "lỗi-của-tớ",
       description: "báo cáo lỗi hoặc vấn đề với tớ",
@@ -392,9 +403,13 @@ export default {
         noMaps: (currentRound: string) => `Oh. Chưa có map nào được xác nhận cho mappool của ${currentRound}.`,
         mapUnavailable: (slot: string, url: string) => `**${slot}**: [Thông tin map không khả dụng] (URL map: ${url})`,
         mapError: (slot: string, url: string) => `**${slot}**: [Lỗi khi lấy thông tin map] (URL map: ${url})`,
-        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string, hp: string, star: string) =>
-          `**${slot}**: [${artist} - ${title} [${version}]](${url}) - \`OD: ${od}, HP: ${hp}, SR: ${star}\``,
-        embedTitle: (currentRound: string) => `Lựa chọn cuối cùng cho ${currentRound}`
+        mapDetails: (slot: string, artist: string, title: string, version: string, url: string, od: string,  star: string, bpm: string, time: string) =>
+          `**${slot}**: [**${artist} - ${title} [${version}]**](${url})\n<:star:1379398780683817001>\`${star}\` <:bpm:1379394494201331833>\`${bpm}\` <:time:1379394497859031071>\`${time}\` <:od:1379407313244393634>\`${od}\``,
+        embedTitle: (currentRound: string) => `Lựa chọn cuối cùng cho ${currentRound}`,
+        someInfo: "Một vài thông tin thú vị về mappool này:",
+        totalMaps: (maps: number) => `Tổng số map: **${maps}**`,
+        srRange: (highest: number, lowest: number) => `Khoảng độ khó: **${lowest}★ - ${highest}★**`,
+        mappack: (url: string) => `📦 [Link tải mappool](${url})`
       }
     },
     tourney: {
@@ -426,6 +441,13 @@ export default {
         success: (round: string, slots: string[], setCurrent: boolean) =>
           `Xong rồi. Đã thêm ${round} với ${slots.length} slot: ${slots.join(', ')}.\n` +
           (setCurrent ? `Đây hiện là vòng đấu hiện tại.` : `Sử dụng \`/tourney current ${round}\` để đặt đây là vòng hiện tại.`)
+      },
+      removeRound: {
+        noTournament: 'Đồ ngốc, không có giải đấu nào tồn tại trong máy chủ này. Tạo một cái bằng `/tourney make` trước.',
+        profane: 'Này, đặt tên vòng thì đặt cho thân thiện chứ. Làm vậy không được đâu.',
+        noPermission: 'Hey! Cậu không có quyền thêm vòng đấu cho giải đấu đâu, đồ ngốc. Chỉ host, cố vấn và người làm mappool mới được làm điều này.',
+        roundNotFound: (round: string) => `Tớ không tìm được vòng đấu nào mang tên **${round}** cả. Kiểm tra lại xem, nhớ chọn trong danh sách mà tớ cung cấp nha.`,
+        success: `Xong rồi, tớ xóa vòng đấu này rồi đó nha.`
       },
       current: {
         name: 'vòng-hiện-tại',

@@ -106,6 +106,23 @@ export default class View extends SubCommand {
       }
     };
 
+    // we don't make one if the server is not beta
+    // this feature is highly experimental (and very wasteful)
+    // TODO: offload this to API server
+    let mappackURL;
+    if (guild.settings.whitelistedForNewFeatures) {
+      mappackURL = await ctx.client.utils.osu.generateOrFetchMappack({
+        maps: mappool.maps,
+        client: {
+          s3: ctx.client.s3!,
+          requestV2Token: ctx.client.requestV2Token
+        },
+        extractDifficultyId,
+        fetchBeatmapInfo,
+        r2PublicBaseURL: "https://cdn.mewo.eu.org"
+      });
+    }
+
     // Fetch all beatmap details and create description
     const mapDetails = [];
     for (const map of mappool.maps) {
@@ -115,9 +132,9 @@ export default class View extends SubCommand {
           const slot = map.slot;
           const artist = beatmap.beatmapset.artist_unicode;
           const title = beatmap.beatmapset.title;
-          const version = beatmap.beatmapset.version;
+          const version = beatmap.version;
           const url = beatmap.url;
-          let od, hp, sr;
+          let od, sr;
           // taiko specific
           const diffAttr = async (diffId: string, mods: (number | string)[]) => {
             try {
@@ -144,18 +161,19 @@ export default class View extends SubCommand {
           const attr = mods.length > 0 ? await diffAttr(extractDifficultyId(map.url), mods) : null;
 
           od = mods.includes("HR")
-            ? Math.min(beatmap.accuracy * 1.4, 10)
+            ? parseFloat((Math.floor(Math.min(beatmap.accuracy * 1.4, 10) * 100) / 100).toFixed(2)).toString()
             : mods.includes("DT")
-              ? 50 - ((50 - 3 * beatmap.accuracy) / 1.5)
-              : beatmap.accuracy;
+              ? parseFloat((Math.floor((50 - ((50 - 3 * beatmap.accuracy) / 1.5)) * 100) / 100).toFixed(2)).toString()
+              : parseFloat((Math.floor(beatmap.accuracy * 100) / 100).toFixed(2)).toString();
 
-          hp = mods.includes("HR")
-            ? beatmap.drain * 1.4
-            : beatmap.drain;
+          sr = attr
+            ? parseFloat((Math.floor(attr.attributes.star_rating * 100) / 100).toFixed(2)).toString()
+            : parseFloat((Math.floor(beatmap.difficulty_rating * 100) / 100).toFixed(2)).toString();
 
-          sr = attr ? attr.star_rating : beatmap.difficulty_rating;
+          const bpm = parseFloat(beatmap.bpm.toFixed(2)).toString();
+          const totalTime = Math.floor(beatmap.total_length / 60) + ":" + (beatmap.total_length % 60).toString().padStart(2, '0');
           // end taiko specific
-          mapDetails.push(t.mapDetails(slot, artist, title, version, url, od, hp, sr));
+          mapDetails.push(t.mapDetails(slot, artist, title, version, url, od, sr, bpm, totalTime));
         } else {
           mapDetails.push(t.mapUnavailable(map.slot, map.url));
         }
@@ -164,10 +182,27 @@ export default class View extends SubCommand {
       }
     }
 
+    const srValues = mapDetails
+      .map(detail => {
+        const match = detail.match(/<:star:\d+>\`([\d.]+)\`/);
+        return match ? Number(match[1]) : null;
+      })
+      .filter(sr => sr !== null);
+
+    const highestSr = Math.max(...srValues);
+    const lowestSr = Math.min(...srValues);
+
+    const preDesc = [
+      t.someInfo,
+      `- ${t.totalMaps(mapDetails.length)}`,
+      `- ${t.srRange(highestSr, lowestSr)}`,
+      mappackURL ? `- ${t.mappack(mappackURL)}\n` : "\n"
+    ].join("\n");
+
     // Create a single embed with all maps
     const embed = new Embed()
       .setTitle(t.embedTitle(currentRound))
-      .setDescription(mapDetails.join('\n'))
+      .setDescription(preDesc + mapDetails.join('\n'))
       .setColor(10800862)
       .setTimestamp();
 

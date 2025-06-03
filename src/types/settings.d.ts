@@ -8,6 +8,10 @@ export interface GuildSettings {
    */
   timestampChannel: Array<string>,
   /**
+   * Whether this guild has been whitelisted to test new features.
+   */
+  whitelistedForNewFeatures: boolean,
+  /**
    * The verification settings for the guild.
    */
   verification: Partial<{

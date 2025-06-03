@@ -7,6 +7,7 @@ import Rights from "./rights";
 import Stats from "./stats";
 import Vote from "./vote";
 import Language from "./language";
+import Beta from "./beta";
 
 @Declare({
 	name: "my",
@@ -22,5 +23,5 @@ import Language from "./language";
 		['vi', 'các lệnh liên quan đến tớ hoặc phát triển của tớ.']
 	]
 })
-@Options([Fault, Info, Invite, Ping, Rights, Stats, Vote, Language])
+@Options([Fault, Info, Invite, Ping, Rights, Stats, Vote, Language, Beta])
 export default class My extends Command {};

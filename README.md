@@ -21,9 +21,18 @@
 
 However you don't get a lot of useful information on Seyfert, because it doesn't have a proper documentation. You have a [guide](https://docs.seyfert.dev) to work with, which is obviously quite insufficient (it took me a century to figure out how modals work here). This rewrite is just a **proof-of-concept**, it is not a fully cleaned up prototype to use in production.
 
-Also, you can't bundle your project. Seyfert loads your stuff dynamically, which basically means you can't use a bundler to somehow compile all that into a file.
+For very technical and obscure details I learned with Seyfert, head over to [INFO.md](/INFO.md).
 
 All technologies are still the same, except without Discord.js and with Seyfert.
+
+## Disclaimer for self-hosters
+Aoki is becoming highly difficult to self-host starting from this version where the main server split into different places to offload heavy works. Whatever you do from this version still stands under the impression that *you understand the code and its specifications*, and no support will be handed out to do this.
+
+Aoki's API server is basically the old code mashed together and exposed through a Bun server like it normally does. The full source code of this part is going to be on a new repository and maintained by me frequently.
+
+Aoki has also recently started using [Cloudflare R2](https://developers.cloudflare.com/r2/), which is basically an S3-compatible bucket for all your object storage, to implement a new functionality of [making mappacks for mappools](/src/struct/utils/OsuGame.ts). This function should be limited to only manually whitelisted servers to prevent abuse.
+
+It's also pretty difficult to make sure all of Aoki's dependencies are online at once, so in production use you should implement caching/similar behavior to fallback to something else.
 
 ## Local development setup
 Make sure you have Bun on your local machine. [Install it here](https://bun.sh). Seyfert also supports Node or whatever it does, check their docs, but I made it work with Bun.

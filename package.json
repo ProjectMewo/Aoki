@@ -24,9 +24,11 @@
   },
   "homepage": "https://github.com/ProjectMewo/Aoki#readme",
   "dependencies": {
+    "archiver": "^7.0.1",
     "seyfert": "^3.1.2"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/bun": "^1.2.12"
   }
 }

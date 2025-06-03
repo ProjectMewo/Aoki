@@ -10,6 +10,7 @@ import ProfaneUtil from "@utils/Profane";
 import StringUtil from "@utils/String";
 import TimeUtil from "@utils/Time";
 import DBL from "@utils/DBL";
+import { S3Client } from "bun";
 
 declare module '@struct/Client' {
   export default interface AokiClient extends Client {
@@ -91,5 +92,6 @@ declare module '@struct/Client' {
      * @type {boolean}
      */
     ready: boolean;
+    s3: S3Client | null;
   }
 }

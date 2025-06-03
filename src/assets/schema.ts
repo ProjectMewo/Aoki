@@ -24,6 +24,7 @@ export default {
 
   guilds: {
     timestampChannel: [],
+    whitelistedForNewFeatures: false,
     verification: {
       status: false,
       roleId: "",

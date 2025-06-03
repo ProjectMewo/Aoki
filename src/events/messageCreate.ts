@@ -29,7 +29,7 @@ export default createEvent({
       }
     }
 
-    const replayChannelId = guild.settings.tournament.mappools.find(m => m.replayChannelId === msg.channelId)?.replayChannelId;
+    const replayChannelId = guild.settings?.tournament?.mappools?.find(m => m.replayChannelId === msg.channelId)?.replayChannelId;
     if (!replayChannelId) return;
     await msg.client.utils.misc.replayRegistering(msg, msg.client);
   }

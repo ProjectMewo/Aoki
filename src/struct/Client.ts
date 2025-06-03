@@ -3,6 +3,7 @@ import { Client } from "seyfert";
 import { ActivityType, PresenceUpdateStatus } from "seyfert/lib/types";
 import Settings from "./Settings";
 import Schedule from "./Schedule";
+import { S3Client } from "bun";
 // Utility imports
 import AnilistUtil from "@utils/AniList";
 import ArrayUtil from "@utils/Array";
@@ -43,6 +44,7 @@ export default class AokiClient extends Client {
     this.lastGuildCount = null;
     this.startTime = Date.now();
     this.ready = false;
+    this.s3 = null;
     this.osuV2Token = {
       access_token: null,
       expires_at: 0
@@ -121,7 +123,18 @@ export default class AokiClient extends Client {
     return data.access_token;
   };
 
-  public async loadEssentials() {
+  public async loadS3Storage(): Promise<void> {
+    const s3 = new S3Client({
+      bucket: "mappools",
+      endpoint: process.env.R2_ENDPOINT,
+      accessKeyId: process.env.R2_ACCESS_KEY!,
+      secretAccessKey: process.env.R2_SECRET_KEY!
+    });
+    this.s3 = s3;
+    return;
+  };
+
+  public async loadEssentials(): Promise<void> {
     // Load commands, locales and events
     // @ts-ignore
     this.commands.set([Anime, Fun, My, OsuGame, Utility, Verify]);
@@ -130,26 +143,26 @@ export default class AokiClient extends Client {
       { name: 'vi', file: await import('../locales/vi') }
     ]);
     this.events.set([
-      { 
-        data: { 
-          name: 'interactionCreate', 
-          once: false 
-        }, 
-        run: (i: any) => interactionCreate.run(i, this, 1) 
+      {
+        data: {
+          name: 'interactionCreate',
+          once: false
+        },
+        run: (i: any) => interactionCreate.run(i, this, 1)
       },
-      { 
-        data: { 
-          name: 'messageCreate', 
-          once: false 
-        }, 
-        run: (i: any) => messageCreate.run(i, this, 1) 
+      {
+        data: {
+          name: 'messageCreate',
+          once: false
+        },
+        run: (i: any) => messageCreate.run(i, this, 1)
       },
-      { 
-        data: { 
-          name: 'botReady', 
-          once: true 
-        }, 
-        run: (i: any) => botReady.run(i, this, 1) 
+      {
+        data: {
+          name: 'botReady',
+          once: true
+        },
+        run: (i: any) => botReady.run(i, this, 1)
       }
     ]);
   }
@@ -162,6 +175,7 @@ export default class AokiClient extends Client {
     await Promise.all([
       this.requestV2Token(),
       this.loadEssentials(),
+      this.loadS3Storage(),
       Object.values(this.settings).map(async settings => await settings.init())
     ]);
     // Load default locale

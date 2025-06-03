@@ -93,8 +93,8 @@ export default class Make extends SubCommand {
 
     // Check if a tournament already exists
     const guild = await ctx.client.guilds.fetch(ctx.guildId!);
-    const currentSettings = guild.settings.tournament;
-    if (currentSettings.name) {
+    const currentSettings = guild.settings?.tournament;
+    if (currentSettings && currentSettings.name) {
       return AokiError.USER_INPUT({
         sender: ctx.interaction,
         content: t.alreadyExists(currentSettings.name, currentSettings.abbreviation)
@@ -128,8 +128,6 @@ export default class Make extends SubCommand {
       mappoolerRole, 
       testerRole
     ];
-
-    console.log(roles);
 
     await ctx.editOrReply({
       content: t.success(name, abbreviation, roles)
