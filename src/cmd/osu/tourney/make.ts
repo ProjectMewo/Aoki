@@ -129,6 +129,8 @@ export default class Make extends SubCommand {
       testerRole
     ];
 
+    console.log(roles);
+
     await ctx.editOrReply({
       content: t.success(name, abbreviation, roles)
     });
