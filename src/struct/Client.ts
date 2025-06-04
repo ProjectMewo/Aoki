@@ -43,7 +43,6 @@ export default class AokiClient extends Client {
     this.lastGuildCount = null;
     this.startTime = Date.now();
     this.ready = false;
-    this.s3 = null;
     this.osuV2Token = {
       access_token: null,
       expires_at: 0

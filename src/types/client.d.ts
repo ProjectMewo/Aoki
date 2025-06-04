@@ -92,6 +92,5 @@ declare module '@struct/Client' {
      * @type {boolean}
      */
     ready: boolean;
-    s3: S3Client | null;
   }
 }
