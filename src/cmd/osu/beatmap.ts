@@ -1,261 +1,258 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { 
-  ActionRowBuilder, 
-  ButtonBuilder, 
-  ButtonStyle, 
-  ChatInputCommandInteraction, 
-  EmbedBuilder, 
-  MessageFlags, 
-  StringSelectMenuBuilder, 
-  StringSelectMenuInteraction, 
-  TextChannel 
-} from "discord.js";
-import { Beatmapset } from "../../types/beatmapset";
-import AokiError from "@struct/handlers/AokiError";
+import { meta } from "@assets/cmdMeta";
+import { Beatmapset } from "@local-types/beatmapset";
+import AokiError from "@struct/AokiError";
 import AokiClient from "@struct/Client";
+import {
+  CommandContext,
+  createStringOption,
+  createBooleanOption,
+  Declare,
+  Embed,
+  SubCommand,
+  Options,
+  TextGuildChannel,
+  StringSelectMenu,
+  StringSelectOption,
+  ActionRow,
+  StringSelectMenuInteraction,
+  Button,
+  Locales,
+  AutocompleteInteraction
+} from "seyfert";
+import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 
-export default class Beatmap extends Subcommand {
-  private baseUrl: string;
-  private api_v2: string;
-  
-  constructor() {
-    super({
-      name: 'beatmap',
-      description: 'search for beatmaps by query',
-      permissions: [],
-      options: [
-        {
-          type: 'string',
-          name: 'query',
-          description: 'search query for the beatmap',
-          required: true
-        },
-        {
-          type: 'string',
-          name: 'mode',
-          description: 'filter by game mode',
-          required: false,
-          choices: [
-            { name: 'osu!standard', value: '0' },
-            { name: 'osu!taiko', value: '1' },
-            { name: 'osu!catch', value: '2' },
-            { name: 'osu!mania', value: '3' }
-          ]
-        },
-        {
-          type: 'string',
-          name: 'status',
-          description: 'filter by ranked status',
-          required: false,
-          choices: [
-            { name: 'Ranked', value: 'ranked' },
-            { name: 'Qualified', value: 'qualified' },
-            { name: 'Loved', value: 'loved' },
-            { name: 'Pending', value: 'pending' },
-            { name: 'Graveyard', value: 'graveyard' },
-            { name: 'Any', value: 'any' }
-          ]
-        },
-        {
-          type: 'string',
-          name: 'sort',
-          description: 'sort the results',
-          required: false,
-          choices: [
-            { name: 'Relevance', value: 'relevance' },
-            { name: 'Date (newest)', value: 'plays' },
-            { name: 'Difficulty', value: 'difficulty' }
-          ]
-        },
-        {
-          type: 'string',
-          name: 'genre',
-          description: 'filter by music genre',
-          required: false,
-          choices: [
-            { name: 'Any', value: 'any' },
-            { name: 'Unspecified', value: 'unspecified' },
-            { name: 'Video Game', value: 'video-game' },
-            { name: 'Anime', value: 'anime' },
-            { name: 'Rock', value: 'rock' },
-            { name: 'Pop', value: 'pop' },
-            { name: 'Other', value: 'other' },
-            { name: 'Novelty', value: 'novelty' },
-            { name: 'Hip Hop', value: 'hip-hop' },
-            { name: 'Electronic', value: 'electronic' },
-            { name: 'Metal', value: 'metal' },
-            { name: 'Classical', value: 'classical' },
-            { name: 'Folk', value: 'folk' },
-            { name: 'Jazz', value: 'jazz' }
-          ]
-        },
-        {
-          type: 'string',
-          name: 'language',
-          description: 'filter by language',
-          required: false,
-          choices: [
-            { name: 'Any', value: 'any' },
-            { name: 'Other', value: 'other' },
-            { name: 'English', value: 'english' },
-            { name: 'Japanese', value: 'japanese' },
-            { name: 'Chinese', value: 'chinese' },
-            { name: 'Instrumental', value: 'instrumental' },
-            { name: 'Korean', value: 'korean' },
-            { name: 'French', value: 'french' },
-            { name: 'German', value: 'german' },
-            { name: 'Swedish', value: 'swedish' },
-            { name: 'Spanish', value: 'spanish' },
-            { name: 'Italian', value: 'italian' }
-          ]
-        },
-        {
-          type: 'boolean',
-          name: 'storyboard',
-          description: 'filter maps with storyboards',
-          required: false
-        }
-      ]
-    });
-    
-    this.baseUrl = "https://osu.ppy.sh";
-    this.api_v2 = `${this.baseUrl}/api/v2`;
+const options = {
+  query: createStringOption({
+    description: "search query for the beatmap",
+    description_localizations: meta.osu.beatmap.query,
+    required: true
+  }),
+  mode: createStringOption({
+    description: "filter by game mode",
+    description_localizations: meta.osu.beatmap.mode,
+    required: false,
+    choices: [
+      { name: "osu!standard", value: "0" },
+      { name: "osu!taiko", value: "1" },
+      { name: "osu!catch", value: "2" },
+      { name: "osu!mania", value: "3" }
+    ]
+  }),
+  status: createStringOption({
+    description: "filter by ranked status",
+    description_localizations: meta.osu.beatmap.status,
+    required: false,
+    autocomplete: async (interaction) => await Beatmap.prototype.autocompleteStatus(interaction)
+  }),
+  sort: createStringOption({
+    description: "sort the results",
+    description_localizations: meta.osu.beatmap.sort,
+    required: false,
+    autocomplete: async (interaction) => await Beatmap.prototype.autocompleteSort(interaction)
+  }),
+  genre: createStringOption({
+    description: "filter by music genre",
+    description_localizations: meta.osu.beatmap.genre,
+    required: false,
+    autocomplete: async (interaction) => await Beatmap.prototype.autocompleteGenre(interaction)
+  }),
+  language: createStringOption({
+    description: "filter by language",
+    description_localizations: meta.osu.beatmap.language,
+    required: false,
+    autocomplete: async (interaction) => await Beatmap.prototype.autocompleteLanguage(interaction)
+  }),
+  storyboard: createBooleanOption({
+    description: "filter maps with storyboards",
+    description_localizations: meta.osu.beatmap.storyboard,
+    required: false
+  })
+};
+
+@Declare({
+  name: "beatmap",
+  description: "search for beatmaps by query"
+})
+@Locales(meta.osu.beatmap.loc)
+@Options(options)
+export default class Beatmap extends SubCommand {
+  private readonly api_v2 = "https://osu.ppy.sh/api/v2";
+
+  async autocompleteStatus(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction, 
+      interaction.t.osu.beatmap.choices.status
+    );
   }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    const query = i.options.getString("query") || "";
-    const mode = i.options.getString("mode") || "0";
-    const status = i.options.getString("status") || "any";
-    const sort = i.options.getString("sort") || "relevance";
-    const genre = i.options.getString("genre") || "any";
-    const language = i.options.getString("language") || "any";
-    const storyboard = i.options.getBoolean("storyboard") ? '1' : '0';
 
-    // Shorthand
-    const string = i.client.utils.string;
+  async autocompleteSort(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.beatmap.choices.sort
+    );
+  }
+
+  async autocompleteGenre(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.beatmap.choices.genre
+    );
+  }
+
+  async autocompleteLanguage(interaction: AutocompleteInteraction): Promise<void> {
+    await this.respondWithLocalizedChoices(
+      interaction,
+      interaction.t.osu.beatmap.choices.langs
+    );
+  }
+
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.beatmap;
+    const {
+      query,
+      mode = "0",
+      status = "any",
+      sort = "relevance",
+      genre = "any",
+      language = "any",
+      storyboard = false
+    } = ctx.options;
+    const utils = ctx.client.utils;
+
+    await ctx.deferReply();
 
     try {
       const searchParams = {
-        query: query,
-        m: Number(mode),
-        status: status,
-        genre: genre,
-        language: language,
-        sort: sort,
-        storyboard: storyboard
+        query,
+        m: mode,
+        status,
+        genre,
+        language,
+        sort,
+        storyboard: storyboard ? "1" : "0"
       };
 
       const beatmapsets = await this.searchBeatmap({
-        client: i.client,
+        client: ctx.client,
         type: "beatmaps",
         ...searchParams
       }) as Array<Beatmapset>;
 
-      if (beatmapsets.length === 0) {
+      if (beatmapsets.length == 0) {
         return AokiError.NOT_FOUND({
-          sender: i,
-          content: "No beatmaps found matching your criteria."
+          sender: ctx.interaction,
+          content: t.noResults
         });
       }
-      
+
       // NSFW filtering
       const beatmapsFiltered = beatmapsets.filter((beatmap: Beatmapset) => {
-        if ((i.channel as TextChannel).nsfw) return true;
+        if ((ctx.interaction.channel as TextGuildChannel).nsfw) return true;
         else return !beatmap.nsfw;
       });
-      
+
+      if (beatmapsFiltered.length == 0) {
+        return AokiError.NOT_FOUND({
+          sender: ctx.interaction,
+          content: t.nsfwResults
+        });
+      }
+
       // Take only 25 first results
       const beatmaps = beatmapsFiltered.slice(0, 25);
-      const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('beatmap_select')
-        .setPlaceholder(`Listing ${beatmaps.length} top result${beatmaps.length == 1 ? "" : "s"}. Select to view.`)
-        .addOptions(beatmaps.map((beatmap: Beatmapset, index: number) => ({
+      const options = beatmaps.map((beatmap: Beatmapset, index: number) => (
+        new StringSelectOption({
           label: `${beatmap.artist} - ${beatmap.title}`,
-          description: `Mapper: ${beatmap.creator} | Status: ${string.toProperCase(beatmap.status)}`,
+          description: t.stringSelectDesc(beatmap.creator, beatmap.status),
           value: index.toString()
-        })));
+        })
+      ));
 
-      const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
+      const selectMenu = new StringSelectMenu()
+        .setCustomId('beatmap_select')
+        .setPlaceholder(t.selectPlaceholder(beatmaps.length))
+        .addOption(options);
 
-      const message = await i.editReply({ components: [row] });
-      
+      const row = new ActionRow<StringSelectMenu>().addComponents(selectMenu);
+
+      const message = await ctx.editOrReply({ components: [row] }, true);
+
       // Filter for the select menu interaction
       const filter = (interaction: any): interaction is StringSelectMenuInteraction => {
-        return interaction.isStringSelectMenu && interaction.isStringSelectMenu() && interaction.customId === 'beatmap_select' && interaction.user.id === i.user.id;
+        return interaction.user.id === ctx.author.id;
       };
-      
-      const collector = message.createMessageComponentCollector({ filter, time: 90000 }); // 2 minutes
 
-      collector.on('collect', async (interaction: StringSelectMenuInteraction) => {
+      const collector = message.createComponentCollector({ filter, timeout: 90000 }); // 2 minutes
+
+      collector.run('beatmap_select', async (interaction: StringSelectMenuInteraction) => {
         const selectedIndex = parseInt(interaction.values[0]);
         const selectedBeatmap = beatmaps[selectedIndex];
 
-        const detailedEmbed = new EmbedBuilder()
+        const detailedEmbed = new Embed()
           .setColor(10800862)
           .setAuthor({
-            name: `Mapped by ${selectedBeatmap.creator}`,
-            iconURL: `https://a.ppy.sh/${selectedBeatmap.user_id}`
+            name: t.embed.author(selectedBeatmap.creator),
+            iconUrl: `https://a.ppy.sh/${selectedBeatmap.user_id}`
           })
-          .setDescription(`:notes: [Song preview](https://b.ppy.sh/preview/${selectedBeatmap.id}.mp3) | :frame_photo: [Cover/Background](https://assets.ppy.sh/beatmaps/${selectedBeatmap.id}/covers/raw.jpg)`)
-          .setTitle(`${string.escapeMarkdown(selectedBeatmap.artist)} - ${string.escapeMarkdown(selectedBeatmap.title)}`)
+          .setDescription(t.embed.description(selectedBeatmap.id))
+          .setTitle(`${utils.string.escapeMarkdown(selectedBeatmap.artist)} - ${utils.string.escapeMarkdown(selectedBeatmap.title)}`)
           .setURL(`https://osu.ppy.sh/beatmapsets/${selectedBeatmap.id}`)
           .setImage(`https://assets.ppy.sh/beatmaps/${selectedBeatmap.id}/covers/cover.jpg`)
           .addFields(
-            { name: "Raw Title", value: `${string.escapeMarkdown(selectedBeatmap.artist_unicode)} - ${string.escapeMarkdown(selectedBeatmap.title_unicode)}`, inline: false },
-            { name: "Source", value: selectedBeatmap.source || "None", inline: false },
-            { name: "BPM", value: selectedBeatmap.bpm.toString(), inline: true },
-            { name: "Favorites", value: selectedBeatmap.favourite_count.toString(), inline: true },
-            { name: "Spotlight Status", value: string.toProperCase(selectedBeatmap.spotlight.toString()), inline: true },
-            { name: "Set ID", value: selectedBeatmap.id.toString(), inline: true },
-            { name: "Is NSFW?", value: string.toProperCase(selectedBeatmap.nsfw.toString()), inline: true },
-            { name: "Last updated", value: i.client.utils.time.formatDistance(new Date(selectedBeatmap.last_updated), new Date()), inline: true },
-            { name: "Status", value: `${string.toProperCase(selectedBeatmap.status)}${selectedBeatmap.ranked_date ? ` on ${i.client.utils.time.formatDate(new Date(selectedBeatmap.ranked_date), "ddMMMMyyyy")}` : ""}`, inline: false },
+            { name: t.embed.fieldNames.rawT, value: `${utils.string.escapeMarkdown(selectedBeatmap.artist_unicode)} - ${utils.string.escapeMarkdown(selectedBeatmap.title_unicode)}`, inline: false },
+            { name: t.embed.fieldNames.source, value: selectedBeatmap.source || "None", inline: false },
+            { name: t.embed.fieldNames.bpm, value: selectedBeatmap.bpm.toString(), inline: true },
+            { name: t.embed.fieldNames.favs, value: selectedBeatmap.favourite_count.toString(), inline: true },
+            { name: t.embed.fieldNames.spotStats, value: utils.string.toProperCase(selectedBeatmap.spotlight.toString()), inline: true },
+            { name: t.embed.fieldNames.setId, value: selectedBeatmap.id.toString(), inline: true },
+            { name: t.embed.fieldNames.nsfw, value: utils.string.toProperCase(selectedBeatmap.nsfw.toString()), inline: true },
+            { name: t.embed.fieldNames.updated, value: utils.time.formatDistance(new Date(selectedBeatmap.last_updated), new Date()), inline: true },
+            { name: t.embed.fieldNames.status, value: `${utils.string.toProperCase(selectedBeatmap.status)}${selectedBeatmap.ranked_date ? ` ${t.embed.fieldNames.on} ${utils.time.formatDate(new Date(selectedBeatmap.ranked_date), "ddMMMMyyyy")}` : ""}`, inline: false },
           )
-          .setFooter({ text: `This set has ${selectedBeatmap.beatmaps.length} ${selectedBeatmap.status} beatmaps` })
+          .setFooter({ text: t.embed.footer(selectedBeatmap.beatmaps.length, selectedBeatmap.status) })
           .setTimestamp();
 
-        const downloadButton = new ButtonBuilder()
-          .setLabel('osu!web download')
+        const downloadButton = new Button()
+          .setLabel(t.buttons.osuWebDownload)
           .setURL(`https://osu.ppy.sh/beatmapsets/${selectedBeatmap.id}/download`)
           .setStyle(ButtonStyle.Link);
 
-        const directButton = new ButtonBuilder()
-          .setLabel('osu!direct download')
-          .setURL(`https://aoki.hackers.moe/osudirect?id=${selectedBeatmap.beatmaps[0].id}`)
+        const directButton = new Button()
+          .setLabel(t.buttons.osuDirectDownload)
+          .setURL(`https://aoki.mewo.workers.dev/osu/direct?id=${selectedBeatmap.beatmaps[0].id}`)
           .setStyle(ButtonStyle.Link);
 
-        const buttonRow = new ActionRowBuilder<ButtonBuilder>()
+        const buttonRow = new ActionRow<Button>()
           .addComponents(downloadButton, directButton);
 
-        await interaction.reply({ embeds: [detailedEmbed], components: [buttonRow], flags: MessageFlags.Ephemeral });
+        await interaction.editOrReply({ embeds: [detailedEmbed], components: [buttonRow], flags: MessageFlags.Ephemeral });
       });
-      
+
     } catch (error) {
       console.error('Error searching for beatmaps:', error);
       return AokiError.API_ERROR({
-        sender: i,
-        content: 'An error occurred while searching for beatmaps. Please try again later.'
+        sender: ctx.interaction,
+        content: t.apiError
       });
     }
   }
-  
+
   // API helper methods
   async searchBeatmap(params: any) {
     const token = await (params.client as AokiClient).requestV2Token();
-    
+
     // Build URL with query parameters
     const query = Object.entries(params)
       .filter(([key, value]) => key !== 'type' && value !== 'any')
       .map(([key, value]) => `${key}=${encodeURIComponent(value as string)}`)
       .join('&');
-    
+
     const url = `${this.api_v2}/beatmapsets/search?${query}`;
-    
+
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    
+
     const data = await res.json();
     return data.beatmapsets;
   }

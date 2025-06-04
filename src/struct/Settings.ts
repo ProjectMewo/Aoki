@@ -1,157 +1,111 @@
-import { Collection } from "discord.js";
-import AokiClient from "./Client";
-/**
- * Manages settings for a specific table.
- * To make sure the cache is in sync methods from here must be used.
- * 
- * @example
- * // Add a new settings instance for each table to manage in client
- * this.settings = new Settings(this, "guilds");
- * // Then use it anywhere
- * this.client.settings[prop].update({ ... });
- */
+import { Collection } from "seyfert";
+
 export default class Settings {
-  /**
-   * The client instance of this setting
-   * @type {AokiClient}
-   */
-  private client: AokiClient;
-  /**
-   * The cache of this setting
-   * @type {Collection<string, any>}
-   */
-  private cache: Collection<string, any>;
-  /**
-   * The collection name of this setting
-   * @type {string}
-   */
   private collection: string;
-  /**
-   * The default values of this setting
-   * @type {object}
-   */
-  private defaults: object;
-  constructor(
-    client: AokiClient, 
-    collection: string, 
-    defaults = {}
-  ) {
-    this.client = client;
-    this.cache = new Collection();
+  private cache: Collection<string, any>;
+
+  constructor(collection: string) {
     this.collection = collection;
-    this.defaults = defaults;
-  };
+    this.cache = new Collection();
+  }
+
   /**
-   * Get an entry by ID from cache.
-   * @param {String} id - The ID to lookup the cache.
-   * @returns {?Object} The document from the cache if available.
+   * Get a cached document.
    */
-  get(id: string): object | null {
+  get(id: string): object | undefined {
     return this.cache.get(id);
-  };
+  }
+
   /**
-   * Updates settings for the table this settings instance manages.
-   * 
-   * The input is safe for upserts. If the document does not exist it inserts it.
-   * @example
-   * update(id, { something: true, another_thing: [] });
-   * @param {String} id - The ID of the document to update.
-   * @param {Object} obj - An object with key-value changes to apply.
-   * @returns {Object} The updated object from the database.
-   */
-  async update(id: string, obj: object): Promise<object> {
-    if (typeof obj !== "object") throw new Error("Expected an object.");
-    const value = await this.client.db!.collection(this.collection).findOneAndUpdate({ id }, { $set: obj }, {
-      upsert: true,
-      // https://mongodb.github.io/node-mongodb-native/6.8/interfaces/FindOneAndUpdateOptions.html#returnDocument
-      returnDocument: 'after',
-      projection: { _id: 0 }
-    });
-    if (value) {
-      this.cache.set(id, this.mergeDefault(this.defaults, value));
-    }
-    return value || {};
-  };
-  /**
-   * Syncs the cache with the database.
-   * Use this in case the cache becomes outdated.
-   * @param {String} id - ID of the document to sync.
-   * @returns {Object} The newly fetched data from the database.
+   * Sync one document from API and store in cache.
    */
   async sync(id: string): Promise<object> {
-    const doc = await this.client.db!.collection(this.collection).findOne({ id }, { projection: { _id: 0 } });
-    if (!doc) return {};
-    this.cache.set(id, this.mergeDefault(this.defaults, doc));
-    return doc;
-  };
-  /**
-   * Deletes a document with the given ID.
-   * @param {String} id - ID of the document to delete.
-   */
-  async delete(id: string) {
-    await this.client.db!.collection(this.collection).deleteOne({ id });
-    this.cache.delete(id);
-  };
-  /**
-   * Alias to db.collection(col).find(...)
-   * @param {any[]} args - Arguments to pass to the find method.
-   */
-  find(...args: [any]) {
-    return this.client.db!.collection(this.collection).find(...args);
-  };
-  /**
-   * Alias to db.collection(col).findOne(...)
-   * @param {any[]} args - Arguments to pass to the findOne method
-   */
-  findOne(...args: [any]) {
-    return this.client.db!.collection(this.collection).findOne(...args);
-  };
-  /**
-  * Return cache if available, else return the default values.
-  * @param {String} id - The ID to lookup the cache.
-  * @returns {Object} The document from the cache if available.
-  */
-  getDefaults(id: string) {
-    return this.cache.get(id) || this.defaults;
+    const res = await fetch(`${process.env.DB}/${this.collection}/${id}`, {
+      headers: { Authorization: `Bearer ${process.env.INTERNAL_KEY}` }
+    });
+
+    if (!res.ok) return {};
+    const data = await res.json();
+    this.cache.set(id, data);
+    return data;
   }
-  /**
-   * Initializes this settings by loading the cache.
-   * Call this before the client is logged in.
-   */
-  async init() {
-    const docs = await this.client.db!
-      .collection(this.collection)
-      .find({}, { projection: { _id: 0 } })
-      .toArray();
 
-    // set verification collection ttl to 1h
-    if (this.collection == "verifications") await this.client.db!
-      .collection(this.collection)
-      .createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 });
-
-    for (const doc of docs) this.cache.set(doc.id, this.mergeDefault(this.defaults, doc));
-  };
-  
-  // discord.js<=14.0.0
   /**
-   * Sets default properties on an object that aren't already specified.
-   * @param {Object} def Default properties
-   * @param {Object} given Object to assign defaults to
-   * @returns {Object}
+   * Bulk-populate cache on init.
    */
-  mergeDefault(
-    def: Record<string, any>, 
-    given: Record<string, any>
-  ): Record<string, any> {
-    if (!given) return def;
-    for (const key in def) {
-      if (!Object.hasOwn(given, key) || given[key] === undefined) {
-        given[key] = def[key];
-      } else if (given[key] === Object(given[key])) {
-        given[key] = this.mergeDefault(def[key], given[key]);
-      }
+  async init(): Promise<void> {
+    const res = await fetch(`${process.env.DB}/${this.collection}/all`, {
+      headers: { Authorization: `Bearer ${process.env.INTERNAL_KEY}` }
+    });
+
+    if (!res.ok) throw new Error(`Failed to populate ${this.collection}`);
+
+    const docs = await res.json();
+    for (const doc of docs) {
+      if (doc?.id) this.cache.set(doc.id, doc);
     }
+  }
 
-    return given;
-  };
-};
+  /**
+   * Force flush entire cache or a single entry.
+   */
+  flush(id?: string): void {
+    if (id) this.cache.delete(id);
+    else this.cache.clear();
+  }
+
+  /**
+   * Upsert a document and update cache.
+   */
+  async update(id: string, obj: object): Promise<object> {
+    const res = await fetch(`${process.env.DB}/${this.collection}/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.INTERNAL_KEY}`
+      },
+      body: JSON.stringify(obj)
+    });
+
+    if (!res.ok) throw new Error(`Failed to update ${this.collection}/${id}`);
+
+    const updated = { id, ...obj };
+    this.cache.set(id, updated);
+    return updated;
+  }
+
+  /**
+   * Filter query on the cache.
+   */
+  async findOne(filter: object): Promise<object> {
+    for (const doc of this.cache.values()) {
+      let match = true;
+      for (const [key, value] of Object.entries(filter)) {
+        if (doc[key] !== value) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return doc;
+    }
+    return {};
+  }
+
+  /**
+   * Find everything of matching criteria in cache.
+   */
+  async findAll(filter: object): Promise<object[]> {
+    const results: object[] = [];
+    for (const doc of this.cache.values()) {
+      let match = true;
+      for (const [key, value] of Object.entries(filter)) {
+        if (doc[key] !== value) {
+          match = false;
+          break;
+        }
+      }
+      if (match) results.push(doc);
+    }
+    return results;
+  }
+}

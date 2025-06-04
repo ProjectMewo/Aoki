@@ -1,275 +1,300 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { 
-  ChatInputCommandInteraction, 
-  EmbedBuilder,
-  TextChannel,
-  AnySelectMenuInteraction,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  RoleSelectMenuBuilder,
-  ChannelSelectMenuBuilder,
-  ChannelType,
-  ColorResolvable,
+import { meta } from "@assets/cmdMeta";
+import AokiError from "@struct/AokiError";
+import {
+  ActionRow,
+  Button,
+  CommandContext,
+  Declare,
+  SubCommand,
+  Modal,
+  TextInput,
+  WebhookMessage,
+  RoleSelectMenu,
+  ChannelSelectMenu,
+  RoleSelectMenuInteraction,
+  ChannelSelectMenuInteraction,
   ModalSubmitInteraction,
-  PermissionFlagsBits,
-  MessageFlags
-} from "discord.js";
+  Guild,
+  TextGuildChannel,
+  SelectMenuInteraction,
+  Locales
+} from "seyfert";
+import { 
+  ButtonStyle, 
+  MessageFlags, 
+  PermissionFlagsBits, 
+  TextInputStyle 
+} from "seyfert/lib/types";
 
-interface Customization {
-  verification: {
-    title: string;
-    thumbnail: string;
-    description: string;
-    roleId: string;
-    channelId: string;
-    color: string;
-    status: boolean;
-  };
-}
+@Declare({
+  name: "customize",
+  description: "customize the verification message",
+})
+@Locales(meta.verify.customize.loc)
+export default class Customize extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).verify.customize;
+    await ctx.deferReply(true);
 
-export default class Customize extends Subcommand {
-  constructor() {
-    super({
-      name: 'customize',
-      description: 'Customize the verification message',
-      permissions: ['ManageGuild'],
-      options: []
-    });
-  };
+    const guild = await ctx.client.guilds.fetch(ctx.guildId!);
+    const me = await guild.members.fetch(ctx.client.botId);
+    const settings = guild.settings.verification;
 
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply({ flags: MessageFlags.Ephemeral });
-    const guildSettings = i.guild!.settings;
+    if (!settings?.status) {
+      return AokiError.NOT_FOUND({
+        sender: ctx.interaction,
+        content: t.errors.verificationDisabled
+      });
+    }
 
-    if (!guildSettings || !guildSettings.verification.status) {
-      await i.editReply({ content: 'The verification system is disabled. Please enable it first.' });
-      return;
+    const customization = {
+      title: settings.title || t.embed.defaultTitle,
+      thumbnail: settings.thumbnail || guild.iconURL() || "",
+      description:
+        settings.description ||
+        t.embed.defaultDescription,
+      roleId: settings.roleId || "",
+      channelId: settings.channelId || "",
+      color: ctx.client.utils.string.hexToColorResolvable(settings.color || "#FFFFFF"),
     };
 
-    let customization: Customization = {
-      verification: {
-        title: guildSettings?.verification.title || 'Verify your osu! account',
-        thumbnail: guildSettings?.verification.thumbnail || i.guild!.iconURL() || "",
-        description: guildSettings?.verification.description || 'Click the button below to verify your osu! account and gain access to the server.',
-        roleId: guildSettings?.verification.roleId || '',
-        channelId: guildSettings?.verification.channelId || '',
-        color: guildSettings?.verification.color || '#FFFFFF',
-        status: guildSettings?.verification.status || false
-      }
-    };
+    const updatePreview = async (): Promise<WebhookMessage> => {
+      const previewEmbed = this.createPreviewEmbed(customization, t);
+      const actionRow = this.createActionRow(t);
+      const roleRow = this.createRoleSelectRow(t);
+      const channelRow = this.createChannelSelectRow(t);
 
-    const updatePreview = async (): Promise<void> => {
-      const previewEmbed = this.createPreviewEmbed(customization);
-      const row = this.createActionRow(i.guild!.id);
-      const roleRow = this.createRoleSelectRow();
-      const channelRow = this.createChannelSelectRow();
-
-      await i.editReply({
-        content: 'Preview of the verification message:',
+      const message = await ctx.editOrReply({
+        content: t.preview.content,
         embeds: [previewEmbed],
-        components: [row, roleRow, channelRow],
-      });
+        components: [actionRow, roleRow, channelRow],
+        flags: MessageFlags.Ephemeral
+      }, true);
+      return message;
     };
 
-    await updatePreview();
+    const message = await updatePreview();
 
-    const message = await i.fetchReply();
-    const collector = message.createMessageComponentCollector({ time: 300000 }); // 5 minutes
+    const collector = message.createComponentCollector({
+      timeout: 300000, // 5 minutes
+    });
 
-    collector.on('collect', async (interaction: AnySelectMenuInteraction) => {
-      if (interaction.customId === 'edit_verification') {
-        await this.showEditModal(interaction, customization, updatePreview);
-      } else if (interaction.customId === 'save_verification') {
-        await this.saveVerification(interaction, customization);
-        collector.stop();
-      } else if (interaction.customId === 'select_role') {
-        const role = await i.guild?.roles.fetch(interaction.values[0]);
-        if (!role) {
-          return await interaction.reply({ content: 'Selected role not found. Please try again.', flags: MessageFlags.Ephemeral });
-        }
-        if (role.position >= i.guild!.members.me!.roles.highest.position) {
-          return await interaction.reply({ content: 'Baka, that role is higher than my highest role. I can\'t assign that to other users.', flags: MessageFlags.Ephemeral });
-        }
-        customization.verification.roleId = interaction.values[0];
-        await interaction.reply({ content: `Verification role updated.`, flags: MessageFlags.Ephemeral });
-        await updatePreview();
-      } else if(interaction.customId === 'select_channel') {
-        const channel = await i.guild?.channels.fetch(interaction.values[0]);
-        if (!channel) {
-          return await interaction.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral });
-        }
-        if (!channel.permissionsFor(i.client.user!)?.has(PermissionFlagsBits.SendMessages)) {
-          await interaction.reply({ content: 'Baka, I can\'t send messages in there. Check the permissions you gave me.', flags: MessageFlags.Ephemeral });
-          return;
-        }
-        customization.verification.channelId = interaction.values[0];
-        await interaction.reply({ content: `Verification channel updated.`, flags: MessageFlags.Ephemeral });
-        await updatePreview();
+    collector.run("edit_verification", async (interaction: SelectMenuInteraction) => {
+      await this.showEditModal(interaction, customization, updatePreview, t);
+    });
+
+    collector.run("save_verification", async () => {
+      await this.saveVerification(ctx, customization, guild, t);
+      collector.stop();
+    });
+
+    collector.run("select_role", async (interaction: RoleSelectMenuInteraction) => {
+      const role = (await guild.roles.list()).find(r => r.id === interaction.values[0]);
+      if (!role) {
+        return interaction.editOrReply({
+          content: t.roleSelection.roleNotFound,
+          flags: MessageFlags.Ephemeral
+        });
       }
-    });
-
-    collector.on('end', () => {
-      i.editReply({ components: [] }).catch(console.error);
-    });
-  }
-
-  createRoleSelectRow(): ActionRowBuilder<RoleSelectMenuBuilder> {
-    return new ActionRowBuilder<RoleSelectMenuBuilder>().addComponents(
-      new RoleSelectMenuBuilder()
-        .setCustomId('select_role')
-        .setPlaceholder('Select verification role')
-        .setMinValues(1)
-        .setMaxValues(1)
-    );
-  }
-
-  createChannelSelectRow(): ActionRowBuilder<ChannelSelectMenuBuilder> {
-    return new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
-      new ChannelSelectMenuBuilder()
-        .setCustomId('select_channel')
-        .setPlaceholder('Select verification channel')
-        .setChannelTypes(ChannelType.GuildText)
-    );
-  }
-
-  createPreviewEmbed(customization: Customization): EmbedBuilder {
-    return new EmbedBuilder()
-      .setTitle(customization.verification.title || "Verify your osu! account")
-      .setThumbnail(customization.verification.thumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
-      .setDescription(customization.verification.description || "Click the button below to verify your osu! account and gain access to the server.")
-      .setColor(customization.verification.color as ColorResolvable || '#FFFFFF')
-      .setFooter({ text: `Last updated: ${new Date().toLocaleString()}` });
-  }
-
-  createActionRow(guildId: string): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId('edit_verification')
-        .setLabel('Edit')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId('save_verification')
-        .setLabel('Save')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId(`verify_${guildId}`)
-        .setLabel('Verify (Preview)')
-        .setStyle(ButtonStyle.Secondary)
-    );
-  }
-
-  async showEditModal(i: AnySelectMenuInteraction, customization: Customization, updatePreview: () => Promise<void>): Promise<void> {
-    const modal = new ModalBuilder()
-      .setCustomId('edit_verification_modal')
-      .setTitle('Edit Verification Message');
-
-    const titleInput = new TextInputBuilder()
-      .setCustomId('title')
-      .setLabel('Title')
-      .setStyle(TextInputStyle.Short)
-      .setValue(customization.verification.title || "Verify your osu! account")
-      .setRequired(true);
-
-    const descriptionInput = new TextInputBuilder()
-      .setCustomId('description')
-      .setLabel('Description')
-      .setStyle(TextInputStyle.Paragraph)
-      .setValue(customization.verification.description || "Click the button below to verify your osu! account and gain access to the server.")
-      .setRequired(true);
-
-    const thumbnailInput = new TextInputBuilder()
-      .setCustomId('thumbnail')
-      .setLabel('Thumbnail URL')
-      .setStyle(TextInputStyle.Short)
-      .setValue(customization.verification.thumbnail || "https://cdn.discordapp.com/embed/avatars/0.png")
-      .setRequired(false);
-
-    const colorInput = new TextInputBuilder()
-      .setCustomId('color')
-      .setLabel('Embed Color (Hex Code)')
-      .setStyle(TextInputStyle.Short)
-      .setMaxLength(7)
-      .setValue(customization.verification.color || "#FFFFFF")
-      .setRequired(false);
-
-    modal.addComponents(
-      new ActionRowBuilder<TextInputBuilder>().addComponents(titleInput),
-      new ActionRowBuilder<TextInputBuilder>().addComponents(descriptionInput),
-      new ActionRowBuilder<TextInputBuilder>().addComponents(thumbnailInput),
-      new ActionRowBuilder<TextInputBuilder>().addComponents(colorInput)
-    );
-
-    await i.showModal(modal);
-
-    try {
-      const modalSubmission = await i.awaitModalSubmit({
-        filter: (interaction: ModalSubmitInteraction) => interaction.customId === 'edit_verification_modal',
-        time: 300000
+      const botHighestRole = await me.roles.highest();
+      if (role.position >= botHighestRole.position) {
+        return interaction.editOrReply({
+          content: t.roleSelection.roleTooHigh,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+      customization.roleId = interaction.values[0];
+      await interaction.editOrReply({
+        content: t.roleSelection.roleUpdated,
+        flags: MessageFlags.Ephemeral
       });
+      await updatePreview();
+    });
 
-      customization.verification.title = modalSubmission.fields.getTextInputValue('title');
-      customization.verification.description = modalSubmission.fields.getTextInputValue('description');
-      customization.verification.thumbnail = modalSubmission.fields.getTextInputValue('thumbnail');
-      customization.verification.color = modalSubmission.fields.getTextInputValue('color');
+    collector.run("select_channel", async (interaction: ChannelSelectMenuInteraction) => {
+      const channel = await guild.channels.fetch(interaction.values[0]);
+      if (!channel) {
+        return interaction.editOrReply({
+          content: t.channelSelection.channelNotFound,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+      if (!(await me.fetchPermissions()).has([PermissionFlagsBits.SendMessages])) {
+        return interaction.editOrReply({
+          content: t.channelSelection.botNoSendPermission,
+          flags: MessageFlags.Ephemeral
+        });
+      }
+      customization.channelId = interaction.values[0];
+      await interaction.editOrReply({
+        content: t.channelSelection.channelUpdated,
+        flags: MessageFlags.Ephemeral
+      });
+      await updatePreview();
+    });
+  }
+
+  createRoleSelectRow(t: any): ActionRow<RoleSelectMenu> {
+    return new ActionRow<RoleSelectMenu>().setComponents([
+      new RoleSelectMenu()
+        .setCustomId("select_role")
+        .setPlaceholder(t.roleSelection.placeholder)
+    ]);
+  }
+
+  createChannelSelectRow(t: any): ActionRow<ChannelSelectMenu> {
+    return new ActionRow<ChannelSelectMenu>().setComponents([
+      new ChannelSelectMenu()
+        .setCustomId("select_channel")
+        .setPlaceholder(t.channelSelection.placeholder)
+    ]);
+  }
+
+  createPreviewEmbed(customization: any, t: any) {
+    return {
+      title: customization.title,
+      thumbnail: { url: customization.thumbnail },
+      description: customization.description,
+      color: customization.color,
+      footer: { text: t.preview.lastUpdated(new Date().toLocaleString()) },
+    };
+  }
+
+  createActionRow(t: any): ActionRow {
+    return new ActionRow().setComponents([
+      new Button()
+        .setCustomId("edit_verification")
+        .setLabel(t.buttons.edit)
+        .setStyle(ButtonStyle.Primary),
+      new Button()
+        .setCustomId("save_verification")
+        .setLabel(t.buttons.save)
+        .setStyle(ButtonStyle.Success),
+    ]);
+  }
+
+  async showEditModal(
+    ctx: SelectMenuInteraction,
+    customization: any,
+    updatePreview: () => Promise<WebhookMessage>,
+    t: any
+  ): Promise<void> {
+    const titleInput = new TextInput()
+      .setCustomId("title")
+      .setLabel(t.editVerification.fields.title)
+      .setStyle(TextInputStyle.Short)
+      .setValue(customization.title)
+      .setRequired(true);
+
+    const descriptionInput = new TextInput()
+      .setCustomId("description")
+      .setLabel(t.editVerification.fields.description)
+      .setStyle(TextInputStyle.Paragraph)
+      .setValue(customization.description)
+      .setRequired(true);
+
+    const thumbnailInput = new TextInput()
+      .setCustomId("thumbnail")
+      .setLabel(t.editVerification.fields.thumbnail)
+      .setStyle(TextInputStyle.Short)
+      .setValue(customization.thumbnail)
+      .setRequired(false);
+
+    const colorInput = new TextInput()
+      .setCustomId("color")
+      .setLabel(t.editVerification.fields.color)
+      .setStyle(TextInputStyle.Short)
+      .setValue(customization.color)
+      .setRequired(false);
+
+    const modal = new Modal()
+      .setCustomId("edit_verification_modal")
+      .setTitle(t.editVerification.title)
+      .setComponents([
+        new ActionRow<TextInput>().setComponents([titleInput]),
+        new ActionRow<TextInput>().setComponents([descriptionInput]),
+        new ActionRow<TextInput>().setComponents([thumbnailInput]),
+        new ActionRow<TextInput>().setComponents([colorInput]),
+      ]);
+
+    modal.run(async (modalSubmission: ModalSubmitInteraction) => {
+      customization.title = modalSubmission.getInputValue("title", true);
+      customization.description = modalSubmission.getInputValue("description", true);
+      customization.thumbnail = modalSubmission.getInputValue("thumbnail", true);
+      customization.color = modalSubmission.getInputValue("color", true);
 
       await updatePreview();
-      await modalSubmission.reply({ content: 'Preview updated. You can make more changes or save the configuration.', flags: MessageFlags.Ephemeral });
-    } catch (error: any) {
-      console.error('Modal submission error:', error);
-      await i.followUp({ content: 'An error occurred while processing your input. Please try again.', flags: MessageFlags.Ephemeral }).catch(console.error);
-    }
+      await modalSubmission.editOrReply({
+        content: t.editVerification.previewUpdated,
+        flags: MessageFlags.Ephemeral
+      });
+    });
+
+    await ctx.modal(modal);
   }
 
-  async saveVerification(i: AnySelectMenuInteraction, customization: Customization): Promise<void> {
-    if (!customization.verification.channelId) {
-      await i.reply({ content: 'Please select a channel for the verification message.', flags: MessageFlags.Ephemeral });
-      return;
+  async saveVerification(ctx: CommandContext, customization: any, guild: Guild, t: any): Promise<void> {
+    if (!customization.channelId) {
+      return AokiError.NOT_FOUND({
+        sender: ctx.interaction,
+        content: t.saveVerification.noChannelSelected,
+      });
     }
 
-    const channel = await i.guild?.channels.fetch(customization.verification.channelId);
+    const channel = await ctx.client.channels.fetch(customization.channelId);
     if (!channel) {
-      await i.reply({ content: 'Selected channel not found. Please try again.', flags: MessageFlags.Ephemeral });
-      return;
+      return AokiError.NOT_FOUND({
+        sender: ctx.interaction,
+        content: t.saveVerification.channelNotFound,
+      });
     }
 
-    const verificationEmbed = this.createPreviewEmbed(customization);
-    const verificationRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`verify_${i.guild!.id}`)
-        .setLabel('Verify')
-        .setStyle(ButtonStyle.Primary)
-    );
+    const verificationEmbed = this.createPreviewEmbed(customization, t);
+    const verificationRow = new ActionRow().setComponents([
+      new Button()
+        .setCustomId(`verify_${ctx.guildId}`)
+        .setLabel(t.buttons.verify)
+        .setStyle(ButtonStyle.Primary),
+    ]);
 
-    // check if there is already a message before
-    // delete the old one to send the newer one
-    if (i.guild?.settings?.verification.messageId) {
+    if (guild.settings.verification.messageId) {
       try {
-        const fetchChannel = i.guild?.channels.cache.get(i.guild.settings.verification.channelId!);
-        const oldMessage = fetchChannel ? await (fetchChannel as TextChannel).messages.fetch(i.guild.settings?.verification.messageId) : null;
+        const fetchChannel = await guild.channels.fetch(
+          guild.settings.verification.channelId!
+        );
+        const oldMessage = fetchChannel
+          ? await (fetchChannel as TextGuildChannel).messages.fetch(
+              guild.settings.verification.messageId
+            )
+          : null;
         if (oldMessage) {
           await oldMessage.delete();
         }
       } catch (error: any) {
-        if (error.code !== 10008) { // 10008 is the error code for Unknown Message
-          console.error('Failed to delete old verification message:', error);
+        if (error.code !== 10008) {
+          console.error("Failed to delete old verification message:", error);
         }
       }
-    }
+    } 
 
-    const verificationMessage = await (channel as TextChannel).send({ embeds: [verificationEmbed], components: [verificationRow] });
-
-    await i.guild!.update({
-      ...customization,
-      verification: {
-        messageId: verificationMessage.id,
-        ...customization.verification
-      }
+    const verificationMessage = await ctx.client.messages.write(channel.id, {
+      embeds: [verificationEmbed],
+      components: [verificationRow],
     });
 
-    await i.reply({ content: 'Verification message saved and posted in the selected channel.\n\nPlease **DO NOT** delete the verification message. You\'ll have to set it up again.', flags: MessageFlags.Ephemeral });
-  };
+    await guild.update({
+      verification: {
+        status: true,
+        messageId: verificationMessage.id,
+        ...customization,
+      },
+    });
+
+    await ctx.editOrReply({
+      content: t.saveVerification.messageSaved,
+      components: [],
+      embeds: []
+    });
+    return;
+  }
 }

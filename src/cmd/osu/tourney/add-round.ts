@@ -1,0 +1,122 @@
+import { meta } from "@assets/cmdMeta";
+import AokiError from "@struct/AokiError";
+import {
+  CommandContext,
+  createBooleanOption,
+  createStringOption,
+  Declare,
+  Group,
+  Locales,
+  Options,
+  SubCommand
+} from "seyfert";
+
+const options = {
+  round: createStringOption({
+    description: 'the tournament round to add',
+    description_localizations: meta.osu.tourney.add_round.round,
+    required: true
+  }),
+  slots: createStringOption({
+    description: 'mappool slots separated by comma (e.g. NM1,NM2)',
+    description_localizations: meta.osu.tourney.add_round.slots,
+    required: true
+  }),
+  set_current: createBooleanOption({
+    description: 'set this as the current active round',
+    description_localizations: meta.osu.tourney.add_round.set_current,
+    required: false
+  })
+};
+
+@Declare({
+  name: 'add-round',
+  description: 'add a tournament round with mappool slots'
+})
+@Locales(meta.osu.tourney.add_round.loc)
+@Group('tourney')
+@Options(options)
+export default class AddRound extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).osu.tourney.addRound;
+    const { round, slots: slotsInput, set_current: setCurrent = false } = ctx.options;
+
+    await ctx.deferReply();
+
+    // Get tournament settings
+    const guild = await ctx.client.guilds.fetch(ctx.guildId!);
+    const settings = guild.settings.tournament;
+    if (!settings.name) {
+      return AokiError.NOT_FOUND({
+        sender: ctx.interaction,
+        content: t.noTournament
+      });
+    }
+
+    // Since round is free input we need to validate input against profanity
+    if (await ctx.client.utils.profane.isProfane(round)) {
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.profane
+      });
+    }
+
+    // Check permission - only hosts, advisors, and mappoolers can add rounds
+    const permittedRoles = [
+      ...settings.roles.host,
+      ...settings.roles.advisor,
+      ...settings.roles.mappooler
+    ];
+    const userRoles = (await ctx.interaction.member!.roles.list()).map(role => role.id);
+    const hasPermittedRole = permittedRoles.some(roleId => userRoles.includes(roleId));
+
+    if (!hasPermittedRole) {
+      return AokiError.PERMISSION({
+        sender: ctx.interaction,
+        content: t.noPermission
+      });
+    }
+
+    // Parse slots
+    const slots = slotsInput.split(',').map(slot => slot.trim()).filter(slot => slot);
+
+    if (slots.length === 0) {
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.noSlots
+      });
+    }
+
+    // Check if round already exists
+    const existingMappool = settings.mappools.find(mp => mp.round === round);
+    if (existingMappool) {
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.roundExists(round)
+      });
+    }
+
+    // Create new mappool
+    const newMappool = {
+      round,
+      slots,
+      maps: [],
+      replays: [],
+      suggestions: []
+    };
+
+    // Update settings
+    settings.mappools.push(newMappool);
+    if (setCurrent) {
+      settings.currentRound = round;
+    }
+
+    await guild.update({
+      tournament: settings
+    });
+
+    await ctx.editOrReply({
+      content: t.success(round, slots, setCurrent)
+    });
+  }
+}

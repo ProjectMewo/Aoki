@@ -1,78 +1,101 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { meta } from "@assets/cmdMeta";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  createChannelOption, 
+  Declare, 
+  Embed, 
+  SubCommand, 
+  Options, 
+  Locales
+} from "seyfert";
 
-export default class Channel extends Subcommand {
-  constructor() {
-    super({
-      name: 'channel',
-      description: 'get information about a channel',
-      permissions: [],
-      options: [
-        {
-          type: 'channel',
-          name: 'channel',
-          description: 'the channel to get information about',
-          required: false
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    const channel = i.options.getChannel("channel") ?? i.channel;
-    
-    if (!channel) {
-      throw new Error("Channel not found.");
+const options = {
+  channel: createChannelOption({
+    description: 'the channel to get information about',
+    description_localizations: meta.utility.channel.channel,
+    required: false
+  })
+};
+
+@Declare({
+  name: 'channel',
+  description: 'get information about a channel'
+})
+@Locales(meta.utility.channel.loc)
+@Options(options)
+export default class Channel extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.channel;
+    const { channel } = ctx.options;
+    const targetChannel = channel ?? ctx.client.channels.fetch(ctx.channelId);
+
+    if (!targetChannel) {
+      throw AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.notFound
+      });
     }
-    
-    // Ensure channel has a name property
-    if (!('name' in channel)) {
-      throw new Error("Invalid channel type.");
+
+    if (!('name' in targetChannel)) {
+      throw AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.notFound
+      });
     }
-    
-    const ch = channel as { name: string; createdAt: Date | string; position?: number; nsfw?: boolean; slowmode?: number; topic?: string; id: string };
-    
+
+    const ch = targetChannel as { 
+      name: string; 
+      createdAt: Date | string; 
+      position?: number; 
+      nsfw?: boolean; 
+      slowmode?: number; 
+      topic?: string; 
+      id: string 
+    };
+
     const imgur = "https://i.imgur.com/";
     const channelTypes: { [key: number]: { icon: string; type: string } } = {
-      0: { icon: `${imgur}IkQqhRj.png`, type: "Text Channel" },
-      2: { icon: `${imgur}VuuMCXq.png`, type: "Voice Channel" },
-      4: { icon: `${imgur}Ri5YA3G.png`, type: "Guild Category" },
-      5: { icon: `${imgur}4TKO7k6.png`, type: "News Channel" },
-      10: { icon: `${imgur}Dfu73ox.png`, type: "Threads Channel" },
-      11: { icon: `${imgur}Dfu73ox.png`, type: "Threads Channel" },
-      12: { icon: `${imgur}Dfu73ox.png`, type: "Threads Channel" },
-      13: { icon: `${imgur}F92hbg9.png`, type: "Stage Channel" },
-      14: { icon: `${imgur}Dfu73ox.png`, type: "Guild Directory" },
-      15: { icon: `${imgur}q13YoYu.png`, type: "Guild Forum" }
+      0: { icon: `${imgur}IkQqhRj.png`, type: t.types.text },
+      2: { icon: `${imgur}VuuMCXq.png`, type: t.types.voice },
+      4: { icon: `${imgur}Ri5YA3G.png`, type: t.types.category },
+      5: { icon: `${imgur}4TKO7k6.png`, type: t.types.news },
+      10: { icon: `${imgur}Dfu73ox.png`, type: t.types.threads },
+      11: { icon: `${imgur}Dfu73ox.png`, type: t.types.threads },
+      12: { icon: `${imgur}Dfu73ox.png`, type: t.types.threads },
+      13: { icon: `${imgur}F92hbg9.png`, type: t.types.stage },
+      14: { icon: `${imgur}Dfu73ox.png`, type: t.types.dir },
+      15: { icon: `${imgur}q13YoYu.png`, type: t.types.forum }
     };
-    
-    // channel.type might be unknown, cast to number if safe
-    const key = (channel as any).type as number;
+
+    const key = (targetChannel as any).type as number;
     const { icon, type } = channelTypes[key] || { icon: "", type: "Unknown" };
-    
+
     const createdAt = new Date((ch.createdAt as string) || Date.now());
-    const time = i.client.utils.time.formatDistance(createdAt, new Date());
-    
-    const authorFieldName = `${ch.name}${ch.name.endsWith("s") ? "'" : "'s"} Information`;
-    const field = i.client.utils.string.keyValueField({
-      "Position": ch.position || "Unknown",
-      "Type": type,
-      "Created": time,
-      "NSFW?": ch.nsfw ? "Yes" : "No",
-      "Slowmode": ch.slowmode || "None",
-      "ID": ch.id,
-      "Topic": ch.topic
+    const time = ctx.client.utils.time.formatDistance(createdAt, new Date());
+
+    const authorFieldName = t.infoField(ch.name);
+    const field = ctx.client.utils.string.keyValueField({
+      [t.info.position]: ch.position || "Unknown",
+      [t.info.type]: type,
+      [t.info.created]: time,
+      [t.info.nsfw]: ch.nsfw ? t.info.yes : t.info.no,
+      [t.info.slowmode]: ch.slowmode || t.info.no,
+      [t.info.id]: ch.id,
+      [t.info.topic]: ch.topic
     }, 30);
-    
-    const embed = new EmbedBuilder()
+
+    const embed = new Embed()
       .setColor(10800862)
       .setAuthor({ name: authorFieldName })
       .setThumbnail(icon)
       .addFields([{ name: "\u2000", value: field }])
-      .setFooter({ text: `Requested by ${i.user.username}`, iconURL: i.user.displayAvatarURL() })
+      .setFooter({
+        text: t.requestedBy(ctx.author.username),
+        iconUrl: ctx.author.avatarURL()
+      })
       .setTimestamp();
-      
-    await i.editReply({ embeds: [embed] });
+
+    await ctx.editOrReply({ embeds: [embed] });
   }
 }

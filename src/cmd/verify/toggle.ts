@@ -1,31 +1,29 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import { meta } from "@assets/cmdMeta";
+import {
+  CommandContext,
+  Declare,
+  Locales,
+  SubCommand
+} from "seyfert";
 
-export default class Toggle extends Subcommand {
-  constructor() {
-    super({
-      name: 'toggle',
-      description: 'toggle the verification system for this server',
-      permissions: ['ManageGuild'],
-      options: []
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    const { guild } = i;
-    const data = i.client.guilds.cache.get(guild!.id);
-    const currentStatus = data?.settings.verification.status || false;
+@Declare({
+  name: "toggle",
+  description: "toggle the verification system for this server"
+})
+@Locales(meta.verify.toggle.loc)
+export default class Toggle extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).verify.toggle;
+    const guild = await ctx.client.guilds.fetch(ctx.guildId!);
+    const currentStatus = guild.settings.verification.status || false;
 
-    // If the current status is disabled, enable it
-    if (currentStatus == false) {
-      await data!.update({ verification: { status: true } });
-      await i.reply({ content: "The verification system has been enabled." });
-      return;
-    }
-    // If the current status is enabled, disable it
-    // Then, clear existing settings
-    else {
-      await data!.update({
+    await ctx.deferReply();
+
+    if (!currentStatus) {
+      await guild.update({ verification: { status: true } });
+      await ctx.editOrReply({ content: t.enabled });
+    } else {
+      await guild.update({
         verification: {
           messageId: "",
           roleId: "",
@@ -33,7 +31,7 @@ export default class Toggle extends Subcommand {
           status: false
         }
       });
-      await i.reply({ content: "The verification system has been disabled." });
-    };
+      await ctx.editOrReply({ content: t.disabled });
+    }
   }
 }

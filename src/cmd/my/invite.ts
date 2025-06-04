@@ -1,31 +1,24 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
+import { meta } from "@assets/cmdMeta";
+import { CommandContext, Declare, Embed, Locales, SubCommand } from "seyfert";
 
-export default class Invite extends Subcommand {
-  constructor() {
-    super({
-      name: 'invite',
-      description: 'take me to your server.',
-      permissions: [],
-      options: []
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    const description: string = [
-      "Hey, you want to take me to your server? Great. Let's make your server a little more lively.\n",
-      `[Click here to take me there.](https://discord.com/oauth2/authorize?client_id=${i.client.user.id})`,
-      "I'm quite exited to see what you have."
-    ].join("\n");
+@Declare({
+  name: "invite",
+  description: "take me to your server."
+})
+@Locales(meta.my.invite.loc)
+export default class Invite extends SubCommand {
+  async run(ctx: CommandContext) {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).my.invite;
+    const description = t.desc;
     
-    const embed = new EmbedBuilder()
+    const embed = new Embed()
       .setColor(10800862)
       .setDescription(description)
-      .setTitle("Invite me?")
-      .setThumbnail(i.client.user.avatarURL())
-      .setFooter({ text: `Made with ❤` })
+      .setTitle(t.title)
+      .setThumbnail(ctx.client.me!.avatarURL())
+      .setFooter({ text: t.madeWLove })
       .setTimestamp();
       
-    await i.reply({ embeds: [embed] });
+    await ctx.editOrReply({ embeds: [embed] });
   }
 }

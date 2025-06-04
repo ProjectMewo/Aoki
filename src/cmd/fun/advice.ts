@@ -1,33 +1,31 @@
-import AokiError from "@struct/handlers/AokiError";
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction } from "discord.js";
+import AokiError from "@struct/AokiError";
+import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
-export default class Advice extends Subcommand {
-  constructor() {
-    super({
-      name: 'advice',
-      description: 'get a random piece of advice.',
-      permissions: [],
-      options: []
-    });
-  };
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
+@Declare({
+  name: 'advice',
+  description: 'get a random piece of advice.'
+})
+@Locales(meta.fun.advice.loc)
+export default class Advice extends SubCommand {
+  async run(ctx: CommandContext): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).fun.advice;
     try {
       // fetch advice from the API
-      const response = await fetch("https://api.adviceslip.com/advice");
-      const data = await response.json();
-      
-      // extract the advice from the response
-      const advice = data.slip.advice;
+      const fetch = await ctx.client.utils.profane.getStatic(
+        "common", 
+        ctx.interaction.user.settings.language
+      );
+
+      const response = ctx.client.utils.array.random(fetch.advice);
       
       // send the response
-      await i.reply({ content: advice });
+      await ctx.write({ content: response as string });
     } catch {
       return AokiError.API_ERROR({
-        sender: i,
-        content: "Failed to fetch advice. Try again later."
+        sender: ctx.interaction,
+        content: t.apiError
       });
     }
-  };
+  }
 }

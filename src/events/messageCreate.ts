@@ -1,16 +1,12 @@
-import Event from '@struct/handlers/Event';
-import { Message } from 'discord.js';
-import AokiClient from '@struct/Client';
+import { createEvent } from 'seyfert';
 
-class MessageCreateEvent extends Event {
-  constructor() {
-    super({ name: 'messageCreate', once: false });
-  }
+export default createEvent({
+  data: { once: false, name: 'messageCreate' },
+  async run(msg, client) {
+    if (msg.author.bot || !msg.guildId || !msg.author.settings.processMessagePermission) return;
+    const guild = await client.guilds.fetch(msg.guildId);
 
-  public async execute(client: AokiClient, msg: Message<true>) {
-    if (msg.author.bot || !msg.guild || !msg.author.settings.processMessagePermission) return;
-
-    const prefixRegex = new RegExp(`^(?:(?:hey|yo),? aoki,? )|^<@!?${client.user?.id}>`, 'i');
+    const prefixRegex = new RegExp(`^(?:(?:hey|yo),? aoki,? )|^<@!?${client.me?.id}>`, 'i');
     if (prefixRegex.test(msg.content)) {
       const prefixMatch = msg.content.match(prefixRegex);
       if (prefixMatch) {
@@ -19,8 +15,12 @@ class MessageCreateEvent extends Event {
       return;
     }
 
-    const timestampChannel = msg.guild.settings.timestampChannel;
-    if (msg.channel.id === timestampChannel) {
+    const timestampChannel = guild.settings.timestampChannel;
+    if (
+      Array.isArray(timestampChannel) ? 
+        timestampChannel.includes(msg.channelId) : 
+        msg.channelId === timestampChannel
+    ) {
       const timestampRegex = /(\d+):(\d{2}):(\d{3})\s*(\(((\d+(\|)?,?)+)\))?/gim;
       const timestamps = msg.content.match(timestampRegex);
       if (timestamps) {
@@ -29,10 +29,8 @@ class MessageCreateEvent extends Event {
       }
     }
 
-    const replayChannelId = msg.guild.settings.tournament.mappools.find(m => m.replayChannelId === msg.channel.id)?.replayChannelId;
+    const replayChannelId = guild.settings?.tournament?.mappools?.find(m => m.replayChannelId === msg.channelId)?.replayChannelId;
     if (!replayChannelId) return;
-    await msg.client.utils.misc.replayRegistering(msg, msg.client as AokiClient);
+    await msg.client.utils.misc.replayRegistering(msg, msg.client);
   }
-}
-
-export default new MessageCreateEvent();
+})

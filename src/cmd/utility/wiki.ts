@@ -1,54 +1,80 @@
-import { Subcommand } from "@struct/handlers/Subcommand";
-import { ChatInputCommandInteraction, EmbedBuilder, TextChannel } from "discord.js";
+import { meta } from "@assets/cmdMeta";
+import AokiError from "@struct/AokiError";
+import { 
+  CommandContext, 
+  createStringOption, 
+  Declare, 
+  Embed, 
+  SubCommand, 
+  Options, 
+  TextGuildChannel,
+  Locales
+} from "seyfert";
 
-export default class Wiki extends Subcommand {
-  constructor() {
-    super({
-      name: 'wiki',
-      description: 'search for information on Wikipedia',
-      permissions: [],
-      options: [
-        {
-          type: 'string',
-          name: 'query',
-          description: 'the term to search for',
-          required: true
-        }
-      ]
-    });
-  }
-  
-  async execute(i: ChatInputCommandInteraction): Promise<void> {
-    await i.deferReply();
-    const query = i.options.getString("query")!;
-    
-    if (await i.client.utils.profane.isProfane(query) && !(i.channel as TextChannel).nsfw) {
-      throw new Error("Your query has something to do with profanity, baka.\n\nEither move to a NSFW channel, or change the query.");
+const options = {
+  query: createStringOption({
+    description: 'the term to search for',
+    required: true,
+    description_localizations: meta.utility.wiki.query
+  })
+};
+
+@Declare({
+  name: 'wiki',
+  description: 'search for information on Wikipedia'
+})
+@Locales(meta.utility.wiki.loc)
+@Options(options)
+export default class Wiki extends SubCommand {
+  async run(ctx: CommandContext<typeof options>): Promise<void> {
+    const t = ctx.t.get(ctx.interaction.user.settings.language).utility.wiki;
+    const { query } = ctx.options;
+
+    await ctx.deferReply();
+
+    if (await ctx.client.utils.profane.isProfane(query) && !(ctx.interaction.channel as TextGuildChannel).nsfw) {
+      return AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.profaneQuery
+      });
     }
-    
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`).then(async res => await res.json());
-    
-    if (!res?.title) {
-      throw new Error("Can't find that. Check your query.");
+
+    try {
+      const res = await fetch(`https://${ctx.interaction.user.settings.language == "vi" ? "vi" : "en"}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`).then(res => res.json());
+
+      if (!res?.title) {
+        return AokiError.USER_INPUT({
+          sender: ctx.interaction,
+          content: t.notFound
+        });
+      }
+
+      const timestamp = new Date(res.timestamp);
+      const thumbnail = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1122px-Wikipedia-logo-v2.svg.png";
+
+      const description = [
+        `***${t.desc}:** ${res.description || t.none}*\n\n`,
+        `**${t.extract}:** ${ctx.client.utils.string.textTruncate(res.extract, 1000).split(". ").join(".\n- ")}`
+      ].join("");
+
+      const embed = new Embed()
+        .setColor(10800862)
+        .setTimestamp(timestamp)
+        .setTitle(res.title)
+        .setThumbnail(thumbnail)
+        .setURL(res.content_urls.desktop.page)
+        .setDescription(description)
+        .setFooter({
+          text: t.requestedBy(ctx.author.username),
+          iconUrl: ctx.author.avatarURL()
+        });
+
+      await ctx.editOrReply({ embeds: [embed] });
+    } catch (error) {
+      AokiError.USER_INPUT({
+        sender: ctx.interaction,
+        content: t.fetchError
+      });
     }
-    
-    const timestamp = new Date(res.timestamp);
-    const thumbnail = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/1122px-Wikipedia-logo-v2.svg.png";
-    
-    const description = [
-      `***Description:** ${res.description || "None"}*\n\n`,
-      `**Extract:** ${i.client.utils.string.textTruncate(res.extract, 1000).split(". ").join(".\n- ")}`
-    ].join("");
-    
-    const embed = new EmbedBuilder()
-      .setColor(10800862)
-      .setTimestamp(timestamp)
-      .setTitle(res.title)
-      .setThumbnail(thumbnail)
-      .setURL(res.content_urls.desktop.page)
-      .setDescription(description)
-      .setFooter({ text: `Requested by ${i.user.username}`, iconURL: i.user.displayAvatarURL() });
-      
-    await i.editReply({ embeds: [embed] });
   }
 }

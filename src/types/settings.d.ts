@@ -1,17 +1,16 @@
 /**
- * The possible values for the current round of the tournament.
- */
-export type TournamentRound = "" | "Qualifiers" | "Group Stage" | "Round of 32" | "Round of 16" | "Quarterfinals" | "Semifinals" | "Finals" | "Grand Finals";
-
-/**
  * @interface GuildSettings
  * Represents the configuration settings for a guild.
  */
 export interface GuildSettings {
   /**
-   * The ID of the channel where timestamps are sent.
+   * The ID of the channels where timestamps are sent.
    */
-  timestampChannel: string,
+  timestampChannel: Array<string>,
+  /**
+   * Whether this guild has been whitelisted to test new features.
+   */
+  whitelistedForNewFeatures: boolean,
   /**
    * The verification settings for the guild.
    */
@@ -64,7 +63,7 @@ export interface GuildSettings {
     /**
      * The current round of the tournament
      */
-    currentRound: TournamentRound,
+    currentRound: string,
     /**
      * The available mappools of the tournament
      */
@@ -104,6 +103,10 @@ export interface GuildSettings {
  * Represents the configuration settings for a user.
  */
 export interface UserSettings {
+  /**
+   * The locale this user prefers
+   */
+  language: "en-US" | "vi",
   /**
    * The user's osu! in-game username.
    */
@@ -168,7 +171,7 @@ export interface Replay {
  * Represents a mappool for a tournament.
  */
 export interface Mappool {
-  round: TournamentRound;
+  round: string;
   slots: Array<string>;
   maps: Array<{
     slot: string;
