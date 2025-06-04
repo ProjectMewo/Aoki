@@ -74,34 +74,11 @@ export default class ViewSuggestions extends SubCommand {
       });
     }
 
-    // Helper functions
-    const extractDifficultyId = (url: string): string => {
-      if (url.includes('/b/')) {
-        return url.split('/b/')[1].split('?')[0].split('#')[0];
-      } else {
-        return url.split('#')[1].split('/')[1];
-      }
-    };
-
-    const fetchBeatmapInfo = async (diffId: string) => {
-      try {
-        const response = await fetch(`https://osu.ppy.sh/api/v2/beatmaps/${diffId}`, {
-          headers: {
-            Authorization: `Bearer ${await ctx.client.requestV2Token()}`
-          }
-        });
-        return await response.json();
-      } catch (error) {
-        console.error(`Failed to fetch beatmap ${diffId}:`, error);
-        return null;
-      }
-    };
-
     // Create paginated embeds for the suggestions
     const pages = new Pagination();
     for (const suggestion of mappool.suggestions) {
       const beatmapPromises = suggestion.urls.map(url =>
-        fetchBeatmapInfo(extractDifficultyId(url))
+        ctx.client.utils.osu.fetchBeatmapInfo(ctx.client, ctx.client.utils.osu.extractDifficultyId(url))
       );
 
       const beatmaps = await Promise.all(beatmapPromises);

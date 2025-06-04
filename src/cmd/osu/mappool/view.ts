@@ -74,30 +74,6 @@ export default class View extends SubCommand {
       });
     }
 
-    // Function to extract difficulty ID from osu! beatmap URL
-    const extractDifficultyId = (url: string): string => {
-      if (url.includes('/b/')) {
-        return url.split('/b/')[1].split('?')[0].split('#')[0];
-      } else {
-        return url.split('#')[1].split('/')[1];
-      }
-    };
-
-    // Function to fetch beatmap data
-    const fetchBeatmapInfo = async (diffId: string) => {
-      try {
-        const response = await fetch(`https://osu.ppy.sh/api/v2/beatmaps/${diffId}`, {
-          headers: {
-            Authorization: `Bearer ${await ctx.client.requestV2Token()}`
-          }
-        });
-        return await response.json();
-      } catch (error) {
-        console.error(`Failed to fetch beatmap ${diffId}:`, error);
-        return null;
-      }
-    };
-
     // we don't make one if the server is not beta
     // this feature is highly experimental (and very wasteful)
     // TODO: offload this to API server
@@ -118,7 +94,7 @@ export default class View extends SubCommand {
     const mapDetails = [];
     for (const map of mappool.maps) {
       try {
-        const beatmap = await fetchBeatmapInfo(extractDifficultyId(map.url));
+        const beatmap = await ctx.client.utils.osu.fetchBeatmapInfo(ctx.client, ctx.client.utils.osu.extractDifficultyId(map.url));
         if (beatmap) {
           const slot = map.slot;
           const artist = beatmap.beatmapset.artist_unicode;
@@ -149,7 +125,7 @@ export default class View extends SubCommand {
           if (map.slot.includes("HR")) mods.push("HR");
           if (map.slot.includes("DT") || map.slot.includes("NC")) mods.push("DT");
 
-          const attr = mods.length > 0 ? await diffAttr(extractDifficultyId(map.url), mods) : null;
+          const attr = mods.length > 0 ? await diffAttr(ctx.client.utils.osu.extractDifficultyId(map.url), mods) : null;
 
           od = mods.includes("HR")
             ? parseFloat((Math.floor(Math.min(beatmap.accuracy * 1.4, 10) * 100) / 100).toFixed(2)).toString()

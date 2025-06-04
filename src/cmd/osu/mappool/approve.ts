@@ -100,32 +100,8 @@ export default class Approve extends SubCommand {
       });
     }
 
-    // Extract difficulty ID from osu! beatmap URL
-    const extractDifficultyId = (url: string): string => {
-      if (url.includes('/b/')) {
-        return url.split('/b/')[1].split('?')[0].split('#')[0];
-      } else {
-        return url.split('#')[1].split('/')[1];
-      }
-    };
-
-    // Fetch beatmap data
-    const fetchBeatmapInfo = async (diffId: string) => {
-      try {
-        const response = await fetch(`https://osu.ppy.sh/api/v2/beatmaps/${diffId}`, {
-          headers: {
-            Authorization: `Bearer ${await ctx.client.requestV2Token()}`
-          }
-        });
-        return await response.json();
-      } catch (error) {
-        console.error(`Failed to fetch beatmap ${diffId}:`, error);
-        return null;
-      }
-    };
-
-    const diffId = extractDifficultyId(url);
-    const mapInfo = await fetchBeatmapInfo(diffId);
+    const diffId = ctx.client.utils.osu.extractDifficultyId(url);
+    const mapInfo = await ctx.client.utils.osu.fetchBeatmapInfo(ctx.client, diffId);
 
     if (!mapInfo) {
       return AokiError.API_ERROR({
