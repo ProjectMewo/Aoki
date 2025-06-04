@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -13,26 +14,17 @@ import {
 const options = {
   slot: createStringOption({
     description: 'the slot to suggest this map to',
-    description_localizations: {
-      "en-US": 'the slot to suggest this map to',
-      "vi": 'slot mà cậu muốn đề xuất map này'
-    },
+    description_localizations: meta.osu.mappool.suggest.slot,
     required: true
   }),
   url: createStringOption({
     description: 'the beatmap URL (must include difficulty ID)',
-    description_localizations: {
-      "en-US": 'the beatmap URL (must include difficulty ID)',
-      "vi": 'URL của beatmap (phải bao gồm ID độ khó)'
-    },
+    description_localizations: meta.osu.mappool.suggest.url,
     required: true
   }),
   confirm: createBooleanOption({
     description: 'confirm you know the correct current round is set',
-    description_localizations: {
-      "en-US": 'confirm you know the correct current round is set',
-      "vi": 'xác nhận rằng cậu biết vòng hiện tại đã được đặt đúng'
-    },
+    description_localizations: meta.osu.mappool.suggest.confirm,
     required: true
   })
 };
@@ -41,16 +33,7 @@ const options = {
   name: 'suggest',
   description: 'suggest a new map for this mappool slot.'
 })
-@Locales({
-  name: [
-    ['en-US', 'suggest'],
-    ['vi', 'đề-xuất']
-  ],
-  description: [
-    ['en-US', 'suggest a new map for this mappool slot.'],
-    ['vi', 'đề xuất một map mới cho slot mappool này.']
-  ]
-})
+@Locales(meta.osu.mappool.suggest.loc)
 @Group('mappool')
 @Options(options)
 export default class Suggest extends SubCommand {

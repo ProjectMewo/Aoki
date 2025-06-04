@@ -1,19 +1,11 @@
+import { meta } from "@assets/cmdMeta";
 import { CommandContext, Declare, Embed, Locales, SubCommand } from "seyfert";
 
 @Declare({
   name: "info",
   description: "get information about me"
 })
-@Locales({
-  name: [
-    ['en-US', 'info'],
-    ['vi', 'thông-tin']
-  ],
-  description: [
-    ['en-US', 'get information about me'],
-    ['vi', 'lấy thông tin về tớ']
-  ]
-})
+@Locales(meta.my.info.loc)
 export default class Info extends SubCommand {
   async run(ctx: CommandContext) {
     const t = ctx.t.get(ctx.interaction.user.settings.language).my.info;

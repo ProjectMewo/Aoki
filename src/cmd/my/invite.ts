@@ -1,19 +1,11 @@
+import { meta } from "@assets/cmdMeta";
 import { CommandContext, Declare, Embed, Locales, SubCommand } from "seyfert";
 
 @Declare({
   name: "invite",
   description: "take me to your server."
 })
-@Locales({
-  name: [
-    ['en-US', 'invite'],
-    ['vi', 'lời-mời']
-  ],
-  description: [
-    ['en-US', 'take me to your server.'],
-    ['vi', 'mời tớ vào máy chủ của cậu.']
-  ]
-})
+@Locales(meta.my.invite.loc)
 export default class Invite extends SubCommand {
   async run(ctx: CommandContext) {
     const t = ctx.t.get(ctx.interaction.user.settings.language).my.invite;

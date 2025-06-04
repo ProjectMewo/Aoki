@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -13,50 +14,32 @@ import {
 const options = {
   name: createStringOption({
     description: 'full name of the tournament',
-    description_localizations: {
-      "en-US": 'full name of the tournament',
-      "vi": 'tên đầy đủ của giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.name,
     required: true
   }),
   abbreviation: createStringOption({
     description: 'short form (abbreviation) of the tournament',
-    description_localizations: {
-      "en-US": 'short form (abbreviation) of the tournament',
-      "vi": 'viết tắt của giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.abbreviation,
     required: true
   }),
   host_role: createRoleOption({
     description: 'the role for tournament hosts/organizers',
-    description_localizations: {
-      "en-US": 'the role for tournament hosts/organizers',
-      "vi": 'vai trò cho người tổ chức giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.host_role,
     required: true
   }),
   advisor_role: createRoleOption({
     description: 'the role for tournament advisors',
-    description_localizations: {
-      "en-US": 'the role for tournament advisors',
-      "vi": 'vai trò cho cố vấn giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.advisor_role,
     required: false
   }),
   mappooler_role: createRoleOption({
     description: 'the role for tournament mappoolers',
-    description_localizations: {
-      "en-US": 'the role for tournament mappoolers',
-      "vi": 'vai trò cho người làm mappool giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.mappooler_role,
     required: false
   }),
   tester_role: createRoleOption({
     description: 'the role for tournament testplayers/replayers',
-    description_localizations: {
-      "en-US": 'the role for tournament testplayers/replayers',
-      "vi": 'vai trò cho người test/replay giải đấu'
-    },
+    description_localizations: meta.osu.tourney.make.tester_role,
     required: false
   })
 };
@@ -65,16 +48,7 @@ const options = {
   name: 'make',
   description: 'create a new tournament in this server'
 })
-@Locales({
-  name: [
-    ['en-US', 'make'],
-    ['vi', 'tạo-giải']
-  ],
-  description: [
-    ['en-US', 'create a new tournament in this server'],
-    ['vi', 'tạo một giải đấu mới trong máy chủ này']
-  ]
-})
+@Locales(meta.osu.tourney.make.loc)
 @Group('tourney')
 @Options(options)
 export default class Make extends SubCommand {

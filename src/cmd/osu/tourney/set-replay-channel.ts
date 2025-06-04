@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   AutocompleteInteraction,
@@ -15,19 +16,13 @@ import { ChannelType } from "seyfert/lib/types";
 const options = {
   channel: createChannelOption({
     description: 'the channel to set for replays',
-    description_localizations: {
-      "en-US": 'the channel to set for replays',
-      "vi": 'kênh để đặt cho phát lại'
-    },
+    description_localizations: meta.osu.tourney.set_replay_channel.channel,
     required: true,
     channel_types: [ChannelType.GuildText]
   }),
   round: createStringOption({
     description: 'the round this channel is for',
-    description_localizations: {
-      "en-US": 'the round this channel is for',
-      "vi": 'vòng đấu mà kênh này dành cho'
-    },
+    description_localizations: meta.osu.tourney.set_replay_channel.round,
     required: true,
     autocomplete: async (i) => await SetReplayChannel.prototype.autocomplete(i)
   })
@@ -37,16 +32,7 @@ const options = {
   name: 'set-replay-channel',
   description: 'set a channel for replays for a specific round'
 })
-@Locales({
-  name: [
-    ['en-US', 'set-replay-channel'],
-    ['vi', 'đặt-kênh-replay']
-  ],
-  description: [
-    ['en-US', 'set a channel for replays for a specific round'],
-    ['vi', 'đặt kênh cho phát lại cho một vòng đấu cụ thể']
-  ]
-})
+@Locales(meta.osu.tourney.set_replay_channel.loc)
 @Group('tourney')
 @Options(options)
 export default class SetReplayChannel extends SubCommand {

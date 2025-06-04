@@ -10,14 +10,12 @@ import {
 } from "seyfert";
 import { Watching } from "@assets/graphql";
 import { Locales } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   anime: createStringOption({
     description: 'the anime to subscribe to',
-    description_localizations: {
-      "en-US": 'the anime to subscribe to',
-      "vi": 'bộ anime mà cậu muốn đăng ký'
-    },
+    description_localizations: meta.anime.schedule.add.desc,
     required: true,
     autocomplete: async (interaction) => await Add.prototype.autocomplete(interaction)
   })
@@ -27,16 +25,7 @@ const options = {
   name: 'add',
   description: 'subscribe to anime episode notifications'
 })
-@Locales({
-  name: [
-    ['en-US', 'add'],
-    ['vi', 'thêm']
-  ],
-  description: [
-    ['en-US', 'subscribe to anime episode notifications'],
-    ['vi', 'đăng ký nhận thông báo tập mới']
-  ]
-})
+@Locales(meta.anime.schedule.add.loc)
 @Group('schedule')
 @Options(options)
 export default class Add extends SubCommand {

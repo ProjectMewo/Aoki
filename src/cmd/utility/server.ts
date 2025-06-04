@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -12,16 +13,7 @@ import {
   name: 'server',
   description: 'get information about the server'
 })
-@Locales({
-  name: [
-    ['en-US', 'server'],
-    ['vi', 'máy-chủ']
-  ],
-  description: [
-    ['en-US', 'get information about the server'],
-    ['vi', 'lấy thông tin về máy chủ']
-  ]
-})
+@Locales(meta.utility.server.loc)
 export default class Server extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).utility.server;

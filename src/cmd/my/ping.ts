@@ -1,19 +1,11 @@
+import { meta } from "@assets/cmdMeta";
 import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
 @Declare({
 	name: "ping",
 	description: "see if I respond."
 })
-@Locales({
-	name: [
-		['en-US', 'ping'],
-		['vi', 'kiểm-tra']
-	],
-	description: [
-		['en-US', 'see if I respond.'],
-		['vi', 'kiểm tra xem tớ có phản hồi không.']
-	]
-})
+@Locales(meta.my.ping.loc)
 export default class Ping extends SubCommand {
 	async run(ctx: CommandContext) {
 		const latency = ctx.client.gateway.latency;

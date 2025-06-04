@@ -9,23 +9,21 @@ import {
 } from 'seyfert';
 const _defProp = Object.defineProperties;
 
-import * as AokiUser from './User';
-_defProp(User.prototype, {
-  settings: { get: AokiUser.settings },
-  dev: { get: AokiUser.dev },
-  voted: { get: AokiUser.voted },
-  getSchedule: { value: AokiUser.getSchedule },
-  setSchedule: { value: AokiUser.setSchedule },
-  update: { value: AokiUser.update }
-});
-
-import * as AokiGuild from "./Guild";
+import * as AokiEntities from './Entities';
 _defProp(Guild.prototype, {
-  settings: { get: AokiGuild.settings },
-  update: { value: AokiGuild.update }
+  settings: { get: AokiEntities.guildSettings },
+  update: { value: AokiEntities.guildUpdate }
+});
+_defProp(User.prototype, {
+  settings: { get: AokiEntities.userSettings },
+  dev: { get: AokiEntities.userDev },
+  voted: { value: AokiEntities.userVoted },
+  getSchedule: { value: AokiEntities.userGetSchedule },
+  setSchedule: { value: AokiEntities.userSetSchedule },
+  update: { value: AokiEntities.userUpdate }
 });
 
-import * as AokiSubCommand from './SubCommand';
+import * as AokiSubCommand from './Command';
 _defProp(SubCommand.prototype, {
   respondWithLocalizedChoices: { value: AokiSubCommand.respondWithLocalizedChoices }
 });
@@ -34,22 +32,16 @@ _defProp(Command.prototype, {
   respondWithLocalizedChoices: { value: AokiSubCommand.respondWithLocalizedChoices }
 })
 
-import * as AokiAutocomplete from './AutocompleteInteraction';
+import * as AokiInteractions from './Interactions';
 _defProp(AutocompleteInteraction.prototype, {
-  t: { get: AokiAutocomplete.t }
+  t: { get: AokiInteractions.tAutocomplete }
 });
-
-import * as AokiChatInput from './ChatInputCommandInteraction';
-_defProp(ChatInputCommandInteraction.prototype, {
-  t: { get: AokiChatInput.t }
-});
-
-import * as AokiMessage from './Message';
-_defProp(Message.prototype, {
-  t: { get: AokiMessage.t }
-});
-
-import * as AokiButton from './ButtonInteraction';
 _defProp(ButtonInteraction.prototype, {
-  t: { get: AokiButton.t }
+  t: { get: AokiInteractions.tButton }
+});
+_defProp(ChatInputCommandInteraction.prototype, {
+  t: { get: AokiInteractions.tChatInput }
+});
+_defProp(Message.prototype, {
+  t: { get: AokiInteractions.tMessage }
 });

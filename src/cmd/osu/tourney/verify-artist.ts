@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   AutocompleteInteraction,
@@ -14,10 +15,7 @@ import {
 const options = {
   name: createStringOption({
     description: "the name of the artist to verify",
-    description_localizations: {
-      "en-US": "the name of the artist to verify",
-      "vi": "tên của nghệ sĩ cậu muốn kiểm tra"
-    },
+    description_localizations: meta.osu.tourney.verify_artist.name,
     required: true,
     autocomplete: async (interaction) => await VerifyArtist.prototype.autocomplete(interaction)
   })
@@ -27,16 +25,7 @@ const options = {
   name: "verify-artist",
   description: "check this artist's policies before using their songs"
 })
-@Locales({
-  name: [
-    ['en-US', 'verify-artist'],
-    ['vi', 'kiểm-tra-nghệ-sĩ']
-  ],
-  description: [
-    ['en-US', "check this artist's policies before using their songs"],
-    ['vi', "kiểm tra chính sách của nghệ sĩ này trước khi sử dụng bài hát của họ"]
-  ]
-})
+@Locales(meta.osu.tourney.verify_artist.loc)
 @Group('tourney')
 @Options(options)
 export default class VerifyArtist extends SubCommand {

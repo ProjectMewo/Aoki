@@ -26,13 +26,13 @@ const respondWithLocalizedChoices = async (
 };
 
 declare module 'seyfert' {
-  interface SubCommand {
+  interface Command {
     respondWithLocalizedChoices(
       interaction: AutocompleteInteraction,
       localizedChoices: { name: string; value: string }[]
     ): Promise<void>
   }
-  interface Command {
+  interface SubCommand {
     respondWithLocalizedChoices(
       interaction: AutocompleteInteraction,
       localizedChoices: { name: string; value: string }[]

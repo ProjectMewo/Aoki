@@ -7,21 +7,13 @@ import {
   SubCommand 
 } from "seyfert";
 import { Watching } from "@assets/graphql";
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: 'current',
   description: 'get information about your currently subscribed anime'
 })
-@Locales({
-  name: [
-    ['en-US', 'current'],
-    ['vi', 'hiện-tại']
-  ],
-  description: [
-    ['en-US', 'get information about your currently subscribed anime'],
-    ['vi', 'xem thông tin về anime cậu đang theo dõi']
-  ]
-})
+@Locales(meta.anime.schedule.current.loc)
 @Group('schedule')
 export default class Current extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

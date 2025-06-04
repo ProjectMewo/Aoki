@@ -8,21 +8,13 @@ import {
   Locales
 } from "seyfert";
 import Pagination from "@struct/Paginator";
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: 'view-suggestions',
   description: 'view all map suggestions for the current round.'
 })
-@Locales({
-  name: [
-    ['en-US', 'view-suggestions'],
-    ['vi', 'xem-đề-xuất']
-  ],
-  description: [
-    ['en-US', 'view all map suggestions for the current round.'],
-    ['vi', 'xem tất cả đề xuất map cho vòng hiện tại.']
-  ]
-})
+@Locales(meta.osu.mappool.view_suggestions.loc)
 @Group('mappool')
 export default class ViewSuggestions extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

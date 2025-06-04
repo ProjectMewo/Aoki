@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -13,10 +14,7 @@ import {
 const options = {
   round: createStringOption({
     description: 'the round to view replays for',
-    description_localizations: {
-      "en-US": 'the round to view replays for',
-      "vi": 'vòng đấu mà cậu muốn xem replay'
-    },
+    description_localizations: meta.osu.mappool.replays.round,
     required: false,
     autocomplete: async (interaction) => await Replays.prototype.autocomplete(interaction)
   })
@@ -26,16 +24,7 @@ const options = {
   name: 'replays',
   description: 'view saved replays for a specific round or the current mappool'
 })
-@Locales({
-  name: [
-    ['en-US', 'replays'],
-    ['vi', 'xem-replay']
-  ],
-  description: [
-    ['en-US', 'view saved replays for a specific round or the current mappool'],
-    ['vi', 'xem lại các replay đã lưu']
-  ]
-})
+@Locales(meta.osu.mappool.replays.loc)
 @Group('mappool')
 @Options(options)
 export default class Replays extends SubCommand {

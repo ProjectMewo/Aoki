@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
@@ -5,16 +6,7 @@ import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
   name: 'today',
   description: 'get a historical event that happened on today\'s date.'
 })
-@Locales({
-  name: [
-    ['en-US', 'today'],
-    ['vi', 'hôm-nay']
-  ],
-  description: [
-    ['en-US', 'get a historical event that happened on today\'s date.'],
-    ['vi', 'lấy sự kiện lịch sử đã xảy ra vào ngày hôm nay.']
-  ]
-})
+@Locales(meta.fun.today.loc)
 export default class Today extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.today;

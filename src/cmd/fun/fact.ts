@@ -1,20 +1,12 @@
 import AokiError from "@struct/AokiError";
 import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: 'fact',
   description: 'get a random fact.'
 })
-@Locales({
-  name: [
-    ['en-US', 'fact'],
-    ['vi', 'sự-thật']
-  ],
-  description: [
-    ['en-US', 'get a random fact.'],
-    ['vi', 'lấy một sự thật ngẫu nhiên.']
-  ]
-})
+@Locales(meta.fun.fact.loc)
 export default class Fact extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.fact;

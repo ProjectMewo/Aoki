@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -11,18 +12,12 @@ import {
 const options = {
   username: createStringOption({
     description: "your osu! username",
-    description_localizations: {
-      "en-US": "your osu! username",
-      "vi": "tên người dùng osu! của cậu"
-    },
+    description_localizations: meta.osu.set.username,
     required: true
   }),
   mode: createStringOption({
     description: "your preferred mode",
-    description_localizations: {
-      "en-US": "your preferred mode",
-      "vi": "chế độ cậu muốn đặt làm mặc định"
-    },
+    description_localizations: meta.osu.set.mode,
     required: true,
     choices: [
       { name: "osu!standard", value: "osu" },
@@ -37,16 +32,7 @@ const options = {
   name: "set",
   description: "set your osu! username and default mode"
 })
-@Locales({
-  name: [
-    ['en-US', 'set'],
-    ['vi', 'cấu-hình']
-  ],
-  description: [
-    ['en-US', 'set your osu! username and default mode'],
-    ['vi', 'đặt tên người dùng osu! và chế độ mặc định của cậu']
-  ]
-})
+@Locales(meta.osu.set.loc)
 @Options(options)
 export default class Set extends SubCommand {
   private usernameRegex = /^[\[\]a-z0-9_-\s]+$/i;

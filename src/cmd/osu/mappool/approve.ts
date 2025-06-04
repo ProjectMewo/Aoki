@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -12,18 +13,12 @@ import {
 const options = {
   slot: createStringOption({
     description: 'the slot to add this map to',
-    description_localizations: {
-      "en-US": 'the slot to add this map to',
-      "vi": 'vị trí để thêm map này'
-    },
+    description_localizations: meta.osu.mappool.approve.slot,
     required: true
   }),
   url: createStringOption({
     description: 'the beatmap URL (must include difficulty ID)',
-    description_localizations: {
-      "en-US": 'the beatmap URL (must include difficulty ID)',
-      "vi": 'URL của map (phải bao gồm ID độ khó)'
-    },
+    description_localizations: meta.osu.mappool.approve.url,
     required: true
   })
 };
@@ -32,16 +27,7 @@ const options = {
   name: 'approve',
   description: 'approve a map and move it to the current round\'s finalized mappool.'
 })
-@Locales({
-  name: [
-    ['en-US', 'approve'],
-    ['vi', 'duyệt']
-  ],
-  description: [
-    ['en-US', 'approve a map and move it to the current round\'s finalized mappool.'],
-    ['vi', 'duyệt một map và chuyển nó vào mappool đã chốt của vòng hiện tại.']
-  ]
-})
+@Locales(meta.osu.mappool.approve.loc)
 @Group('mappool')
 @Options(options)
 export default class Approve extends SubCommand {

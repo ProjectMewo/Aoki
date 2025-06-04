@@ -10,14 +10,12 @@ import {
   AutocompleteInteraction,
   Locales
 } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   type: createStringOption({
     description: 'content type to search for',
-    description_localizations: {
-      "en-US": 'content type to search for',
-      "vi": 'loại nội dung cậu muốn tìm kiếm'
-    },
+    description_localizations: meta.anime.search.type,
     required: true,
     choices: [
       { name: 'Anime', value: 'anime' },
@@ -28,10 +26,7 @@ const options = {
   }),
   query: createStringOption({
     description: 'search query',
-    description_localizations: {
-      "en-US": 'search query',
-      "vi": 'từ khóa tìm kiếm'
-    },
+    description_localizations: meta.anime.search.query,
     required: true,
     autocomplete: async (interaction) => await Search.prototype.autocomplete(interaction)
   })
@@ -41,16 +36,7 @@ const options = {
   name: 'search',
   description: 'search for anime, manga, characters, or people on MyAnimeList'
 })
-@Locales({
-  name: [
-    ['en-US', 'search'],
-    ['vi', 'tìm-kiếm']
-  ],
-  description: [
-    ['en-US', 'search for anime, manga, characters, or people on MyAnimeList'],
-    ['vi', 'tìm kiếm anime, manga, nhân vật, hoặc người trên MyAnimeList']
-  ]
-})
+@Locales(meta.anime.search.loc)
 @Options(options)
 export default class Search extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

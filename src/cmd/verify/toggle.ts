@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import {
   CommandContext,
   Declare,
@@ -9,16 +10,7 @@ import {
   name: "toggle",
   description: "toggle the verification system for this server"
 })
-@Locales({
-  name: [
-    ['en-US', 'toggle'],
-    ['vi', 'bật-tắt']
-  ],
-  description: [
-    ['en-US', 'toggle the verification system for this server'],
-    ['vi', 'bật tắt hệ thống xác minh cho máy chủ này']
-  ]
-})
+@Locales(meta.verify.toggle.loc)
 export default class Toggle extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).verify.toggle;

@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -12,16 +13,7 @@ import {
   name: 'view',
   description: 'view the finalized mappool for the current round.'
 })
-@Locales({
-  name: [
-    ['en-US', 'view'],
-    ['vi', 'xem']
-  ],
-  description: [
-    ['en-US', 'view the finalized mappool for the current round.'],
-    ['vi', 'xem mappool đã chốt cho vòng hiện tại.']
-  ]
-})
+@Locales(meta.osu.mappool.view.loc)
 @Group('mappool')
 export default class View extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   ActionRow,
@@ -29,16 +30,7 @@ import {
   name: "customize",
   description: "customize the verification message",
 })
-@Locales({
-  name: [
-    ['en-US', 'customize'],
-    ['vi', 'tùy-chỉnh']
-  ],
-  description: [
-    ['en-US', 'customize the verification message'],
-    ['vi', 'tùy chỉnh tin nhắn xác minh']
-  ]
-})
+@Locales(meta.verify.customize.loc)
 export default class Customize extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).verify.customize;

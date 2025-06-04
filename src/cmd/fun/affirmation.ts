@@ -1,20 +1,12 @@
 import AokiError from "@struct/AokiError";
 import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: 'affirmation',
   description: 'get a positive affirmation to brighten your day.'
 })
-@Locales({
-  name: [
-    ['en-US', 'affirmation'],
-    ['vi', 'khẳng-định']
-  ],
-  description: [
-    ['en-US', 'get a positive affirmation to brighten your day.'],
-    ['vi', 'nhận một lời khẳng định tích cực để làm bừng sáng ngày của cậu.']
-  ]
-})
+@Locales(meta.fun.affirmation.loc)
 export default class Affirmation extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.affirmation;

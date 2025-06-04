@@ -5,7 +5,6 @@ import Invite from "./invite";
 import Ping from "./ping";
 import Rights from "./rights";
 import Stats from "./stats";
-import Vote from "./vote";
 import Language from "./language";
 import Beta from "./beta";
 
@@ -23,5 +22,5 @@ import Beta from "./beta";
 		['vi', 'các lệnh liên quan đến tớ hoặc phát triển của tớ.']
 	]
 })
-@Options([Fault, Info, Invite, Ping, Rights, Stats, Vote, Language, Beta])
+@Options([Fault, Info, Invite, Ping, Rights, Stats, Language, Beta])
 export default class My extends Command {};

@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -14,10 +15,7 @@ const options = {
   query: createStringOption({
     description: "the term to search for",
     required: true,
-    description_localizations: {
-      "en-US": "the term to search for",
-      "vi": "thuật ngữ cậu muốn tìm kiếm"
-    }
+    description_localizations: meta.utility.urban.query
   })
 };
 
@@ -25,16 +23,7 @@ const options = {
   name: "urban",
   description: "search for a definition on Urban Dictionary"
 })
-@Locales({
-  name: [
-    ['en-US', 'urban'],
-    ['vi', 'từ-điển-đường-phố']
-  ],
-  description: [
-    ['en-US', 'search for a definition on Urban Dictionary'],
-    ['vi', 'tìm kiếm định nghĩa trên Từ điển Đường phố']
-  ]
-})
+@Locales(meta.utility.urban.loc)
 @Options(options)
 export default class Urban extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

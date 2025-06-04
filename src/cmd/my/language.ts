@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import { 
   CommandContext, 
   Declare, 
@@ -10,10 +11,7 @@ import {
 const options = {
   language: createStringOption({
     description: 'the language you want me to speak',
-    description_localizations: {
-      "en-US": 'the language you want me to speak',
-      "vi": 'ngôn ngữ cậu muốn tớ dùng để phản hồi'
-    },
+    description_localizations: meta.my.language.desc,
     required: true,
     autocomplete: async i => await Language.prototype.autocomplete(i)
   })
@@ -23,16 +21,7 @@ const options = {
   name: 'language',
   description: 'configure the language you want me to speak to you'
 })
-@Locales({
-  name: [
-    ['en-US', 'language'],
-    ['vi', 'ngôn-ngữ']
-  ],
-  description: [
-    ['en-US', 'configure the language you want me to speak to you'],
-    ['vi', 'cấu hình ngôn ngữ tớ sẽ dùng để phản hồi']
-  ]
-})
+@Locales(meta.my.language.loc)
 @Options(options)
 export default class Language extends SubCommand {
   async autocomplete(i: AutocompleteInteraction): Promise<void> {

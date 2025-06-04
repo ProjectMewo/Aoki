@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
 
@@ -5,16 +6,7 @@ import { CommandContext, Declare, Locales, SubCommand } from "seyfert";
   name: 'truth',
   description: 'get a random truth question for truth or dare.'
 })
-@Locales({
-  name: [
-    ['en-US', 'truth'],
-    ['vi', 'câu-hỏi-sự-thật']
-  ],
-  description: [
-    ['en-US', 'get a random truth question for truth or dare.'],
-    ['vi', 'nhận một câu hỏi sự thật ngẫu nhiên cho trò chơi thật hay dám.']
-  ]
-})
+@Locales(meta.fun.truth.loc)
 export default class Truth extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {
     const t = ctx.t.get(ctx.interaction.user.settings.language).fun.truth;

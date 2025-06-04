@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,10 +13,7 @@ import {
 const options = {
   user: createUserOption({
     description: 'the user to get the avatar of',
-    description_localizations: {
-      "en-US": 'the user to get the avatar of',
-      "vi": 'người dùng mà cậu muốn lấy ảnh đại diện'
-    },
+    description_localizations: meta.utility.avatar.user,
     required: false
   })
 };
@@ -24,16 +22,7 @@ const options = {
   name: 'avatar',
   description: 'get the avatar of a user'
 })
-@Locales({
-  name: [
-    ['en-US', 'avatar'],
-    ['vi', 'ảnh-đại-diện']
-  ],
-  description: [
-    ['en-US', 'get the avatar of a user'],
-    ['vi', 'lấy ảnh đại diện của một người dùng']
-  ]
-})
+@Locales(meta.utility.avatar.loc)
 @Options(options)
 export default class Avatar extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

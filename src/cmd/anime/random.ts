@@ -8,14 +8,12 @@ import {
   Options, 
   Locales
 } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   type: createStringOption({
     description: 'The type of content to get',
-    description_localizations: {
-      "en-US": 'The type of content to get',
-      "vi": 'Loại nội dung cậu muốn lấy'
-    },
+    description_localizations: meta.anime.random.desc,
     required: true,
     choices: [
       { name: 'anime', value: 'anime' },
@@ -28,16 +26,7 @@ const options = {
   name: 'random',
   description: 'get a random anime or manga from MyAnimeList'
 })
-@Locales({
-  name: [
-    ['en-US', 'random'],
-    ['vi', 'ngẫu-nhiên']
-  ],
-  description: [
-    ['en-US', 'get a random anime or manga from MyAnimeList'],
-    ['vi', 'lấy một anime hoặc manga ngẫu nhiên từ MyAnimeList']
-  ]
-})
+@Locales(meta.anime.random.loc)
 @Options(options)
 export default class Random extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

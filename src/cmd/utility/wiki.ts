@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -14,10 +15,7 @@ const options = {
   query: createStringOption({
     description: 'the term to search for',
     required: true,
-    description_localizations: {
-      "en-US": 'the term to search for',
-      "vi": 'thuật ngữ cậu muốn tìm kiếm'
-    }
+    description_localizations: meta.utility.wiki.query
   })
 };
 
@@ -25,16 +23,7 @@ const options = {
   name: 'wiki',
   description: 'search for information on Wikipedia'
 })
-@Locales({
-  name: [
-    ['en-US', 'wiki'],
-    ['vi', 'bách-khoa']
-  ],
-  description: [
-    ['en-US', 'search for information on Wikipedia'],
-    ['vi', 'tìm kiếm thông tin trên Wikipedia']
-  ]
-})
+@Locales(meta.utility.wiki.loc)
 @Options(options)
 export default class Wiki extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   AutocompleteInteraction,
@@ -13,10 +14,7 @@ import {
 const options = {
   round: createStringOption({
     description: 'the tournament round to remove',
-    description_localizations: {
-      "en-US": 'the tournament round to remove',
-      "vi": 'vòng đấu giải đấu cậu muốn xóa'
-    },
+    description_localizations: meta.osu.tourney.remove_round.round,
     required: true,
     autocomplete: async i => await RemoveRound.prototype.autocomplete(i)
   })
@@ -26,16 +24,7 @@ const options = {
   name: 'remove-round',
   description: 'remove a tournament round'
 })
-@Locales({
-  name: [
-    ['en-US', 'remove-round'],
-    ['vi', 'xóa-vòng']
-  ],
-  description: [
-    ['en-US', 'remove a tournament round'],
-    ['vi', 'xóa một vòng đấu giải đấu']
-  ]
-})
+@Locales(meta.osu.tourney.remove_round.loc)
 @Group('tourney')
 @Options(options)
 export default class RemoveRound extends SubCommand {

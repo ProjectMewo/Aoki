@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,10 +13,7 @@ import {
 const options = {
   query: createStringOption({
     description: 'the library name to search for',
-    description_localizations: {
-      "en-US": 'the library name to search for',
-      "vi": 'tên thư viện cậu muốn tìm kiếm'
-    },
+    description_localizations: meta.utility.npm.query,
     required: true
   })
 };
@@ -24,16 +22,7 @@ const options = {
   name: 'npm',
   description: 'search for an npm library'
 })
-@Locales({
-  name: [
-    ['en-US', 'npm'],
-    ['vi', 'npm']
-  ],
-  description: [
-    ['en-US', 'search for an npm library'],
-    ['vi', 'tìm kiếm một thư viện npm']
-  ]
-})
+@Locales(meta.utility.npm.loc)
 @Options(options)
 export default class Npm extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

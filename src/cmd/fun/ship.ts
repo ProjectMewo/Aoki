@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -11,18 +12,12 @@ import {
 const options = {
   first: createUserOption({
     description: 'the first user to ship',
-    description_localizations: {
-      "en-US": 'the first user to ship',
-      "vi": 'người đầu tiên cậu muốn ghép đôi'
-    },
+    description_localizations: meta.fun.ship.first,
     required: true
   }),
   second: createUserOption({
     description: 'the second user to ship',
-    description_localizations: {
-      "en-US": 'the second user to ship',
-      "vi": 'người thứ hai cậu muốn ghép đôi'
-    },
+    description_localizations: meta.fun.ship.second,
     required: true
   })
 }
@@ -31,16 +26,7 @@ const options = {
   name: 'ship',
   description: 'ship two users together and see their compatibility.'
 })
-@Locales({
-  name: [
-    ['en-US', 'ship'],
-    ['vi', 'ghép-đôi']
-  ],
-  description: [
-    ['en-US', 'ship two users together and see their compatibility.'],
-    ['vi', 'ghép đôi hai người và xem độ hợp nhau của họ.']
-  ]
-})
+@Locales(meta.fun.ship.loc)
 @Options(options)
 export default class Ship extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,10 +13,7 @@ import {
 const options = {
   channel: createChannelOption({
     description: 'the channel to get information about',
-    description_localizations: {
-      "en-US": 'the channel to get information about',
-      "vi": 'kênh mà cậu muốn lấy thông tin'
-    },
+    description_localizations: meta.utility.channel.channel,
     required: false
   })
 };
@@ -24,16 +22,7 @@ const options = {
   name: 'channel',
   description: 'get information about a channel'
 })
-@Locales({
-  name: [
-    ['en-US', 'channel'],
-    ['vi', 'kênh']
-  ],
-  description: [
-    ['en-US', 'get information about a channel'],
-    ['vi', 'lấy thông tin về một kênh']
-  ]
-})
+@Locales(meta.utility.channel.loc)
 @Options(options)
 export default class Channel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

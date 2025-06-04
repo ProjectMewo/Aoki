@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -14,18 +15,12 @@ import {
 const options = {
   query: createStringOption({
     description: 'description of the issue',
-    description_localizations: {
-      "en-US": 'description of the issue',
-      "vi": 'mô tả vấn đề'
-    },
+    description_localizations: meta.my.fault.query,
     required: false
   }),
   attachment: createAttachmentOption({
     description: 'an image related to the issue',
-    description_localizations: {
-      "en-US": 'an image related to the issue',
-      "vi": 'một hình ảnh liên quan đến vấn đề'
-    },
+    description_localizations: meta.my.fault.attachment,
     required: false
   })
 };
@@ -34,16 +29,7 @@ const options = {
   name: 'fault',
   description: 'report an issue with the bot'
 })
-@Locales({
-  name: [
-    ['en-US', 'fault'],
-    ['vi', 'lỗi-của-tớ']
-  ],
-  description: [
-    ['en-US', 'report an issue with the bot'],
-    ['vi', 'báo cáo một vấn đề với tớ']
-  ]
-})
+@Locales(meta.my.fault.loc)
 @Options(options)
 export default class Fault extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

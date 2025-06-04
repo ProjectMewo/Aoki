@@ -7,22 +7,13 @@ import {
   Locales
 } from "seyfert";
 import { Watching } from "@assets/graphql";
-
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: 'remove',
   description: 'remove your current anime subscription'
 })
-@Locales({
-  name: [
-    ['en-US', 'remove'],
-    ['vi', 'gỡ-bỏ']
-  ],
-  description: [
-    ['en-US', 'remove your current anime subscription'],
-    ['vi', 'gỡ bỏ đăng ký anime hiện tại của cậu']
-  ]
-})
+@Locales(meta.anime.schedule.remove.loc)
 @Group('schedule')
 export default class Remove extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

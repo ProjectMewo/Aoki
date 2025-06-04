@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,10 +13,7 @@ import {
 const options = {
   query: createStringOption({
     description: 'the URL to take a screenshot of',
-    description_localizations: {
-      "en-US": 'the URL to take a screenshot of',
-      "vi": 'URL để chụp ảnh màn hình'
-    },
+    description_localizations: meta.utility.screenshot.query,
     required: true
   })
 };
@@ -24,16 +22,7 @@ const options = {
   name: 'screenshot',
   description: 'take a screenshot of a website'
 })
-@Locales({
-  name: [
-    ['en-US', 'screenshot'],
-    ['vi', 'chụp-ảnh-màn-hình']
-  ],
-  description: [
-    ['en-US', 'take a screenshot of a website'],
-    ['vi', 'chụp ảnh màn hình của một trang web']
-  ]
-})
+@Locales(meta.utility.screenshot.loc)
 @Options(options)
 export default class Screenshot extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

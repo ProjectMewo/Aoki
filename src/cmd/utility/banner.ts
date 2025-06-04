@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -12,10 +13,7 @@ import {
 const options = {
   user: createUserOption({
     description: "the user to get the banner of",
-    description_localizations: {
-      "en-US": "the user to get the banner of",
-      "vi": "người dùng mà cậu muốn lấy biểu ngữ"
-    },
+    description_localizations: meta.utility.banner.user,
     required: false
   })
 };
@@ -24,16 +22,7 @@ const options = {
   name: "banner",
   description: "get the banner of a user"
 })
-@Locales({
-  name: [
-    ['en-US', 'banner'],
-    ['vi', 'biểu-ngữ']
-  ],
-  description: [
-    ['en-US', 'get the banner of a user'],
-    ['vi', 'lấy biểu ngữ của một người dùng']
-  ]
-})
+@Locales(meta.utility.banner.loc)
 @Options(options)
 export default class Banner extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

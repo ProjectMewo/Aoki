@@ -12,30 +12,22 @@ import {
 import AokiError from "@struct/AokiError";
 import AokiClient from "@struct/Client";
 import Pagination from "@struct/Paginator";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   beatmap_id: createNumberOption({
     description: "the beatmap ID to check",
-    description_localizations: {
-      "en-US": "the beatmap ID to check",
-      "vi": "ID của beatmap cần kiểm tra"
-    },
+    description_localizations: meta.osu.country_leaderboard.beatmap_id,
     required: true
   }),
   country_code: createStringOption({
     description: "the country code (2 letters)",
-    description_localizations: {
-      "en-US": "the country code (2 letters)",
-      "vi": "mã quốc gia (2 chữ cái)"
-    },
+    description_localizations: meta.osu.country_leaderboard.country_code,
     required: true
   }),
   mode: createStringOption({
     description: "the game mode to check",
-    description_localizations: {
-      "en-US": "the game mode to check",
-      "vi": "chế độ chơi cần kiểm tra"
-    },
+    description_localizations: meta.osu.country_leaderboard.mode,
     required: true,
     choices: [
       { name: "osu!standard", value: "osu" },
@@ -46,10 +38,7 @@ const options = {
   }),
   sort: createStringOption({
     description: "how to sort the results",
-    description_localizations: {
-      "en-US": "how to sort the results",
-      "vi": "cách sắp xếp kết quả"
-    },
+    description_localizations: meta.osu.country_leaderboard.sort,
     required: false,
     autocomplete: async (interaction) => await CountryLeaderboard.prototype.autocompleteSort(interaction)
   })
@@ -59,16 +48,7 @@ const options = {
   name: "country-leaderboard",
   description: "get a country leaderboard for a specific beatmap"
 })
-@Locales({
-  name: [
-    ['en-US', 'country-leaderboard'],
-    ['vi', 'bxh-quốc-gia']
-  ],
-  description: [
-    ['en-US', 'get a country leaderboard for a specific beatmap'],
-    ['vi', 'xem bảng xếp hạng quốc gia cho một beatmap cụ thể']
-  ]
-})
+@Locales(meta.osu.country_leaderboard.loc)
 @Options(options)
 export default class CountryLeaderboard extends SubCommand {
   private readonly api_v1 = "https://osu.ppy.sh/api/";

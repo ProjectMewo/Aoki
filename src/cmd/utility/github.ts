@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,18 +13,12 @@ import {
 const options = {
   user: createStringOption({
     description: 'the GitHub username',
-    description_localizations: {
-      "en-US": 'the GitHub username',
-      "vi": 'tên người dùng GitHub'
-    },
+    description_localizations: meta.utility.github.user,
     required: true
   }),
   repo: createStringOption({
     description: 'the repository name',
-    description_localizations: {
-      "en-US": 'the repository name',
-      "vi": 'tên repository'
-    },
+    description_localizations: meta.utility.github.repo,
     required: true
   })
 };
@@ -32,16 +27,7 @@ const options = {
   name: 'github',
   description: 'get information about a GitHub repository'
 })
-@Locales({
-  name: [
-    ['en-US', 'github'],
-    ['vi', 'github']
-  ],
-  description: [
-    ['en-US', 'get information about a GitHub repository'],
-    ['vi', 'lấy thông tin về một repository trên GitHub']
-  ]
-})
+@Locales(meta.utility.github.loc)
 @Options(options)
 export default class Github extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

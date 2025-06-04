@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -13,19 +14,13 @@ import {
 const options = {
   to: createStringOption({
     description: 'what permission to configure',
-    description_localizations: {
-      "en-US": 'what permission to configure',
-      "vi": 'quyền mà cậu muốn cấu hình'
-    },
+    description_localizations: meta.my.rights.to,
     required: true,
     autocomplete: async (interaction) => await Rights.prototype.autocomplete(interaction)
   }),
   should_be: createBooleanOption({
     description: 'whether I should do it or not',
-    description_localizations: {
-      "en-US": 'whether I should do it or not',
-      "vi": 'liệu tớ có nên làm điều đó hay không'
-    },
+    description_localizations: meta.my.rights.should_be,
     required: true
   })
 };
@@ -34,16 +29,7 @@ const options = {
   name: 'rights',
   description: 'configure your personal privacy settings'
 })
-@Locales({
-  name: [
-    ['en-US', 'rights'],
-    ['vi', 'quyền-cá-nhân']
-  ],
-  description: [
-    ['en-US', 'configure your personal privacy settings'],
-    ['vi', 'cấu hình quyền riêng tư cá nhân của cậu']
-  ]
-})
+@Locales(meta.my.rights.loc)
 @Options(options)
 export default class Rights extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

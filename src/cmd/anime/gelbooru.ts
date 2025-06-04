@@ -11,22 +11,17 @@ import {
   TextGuildChannel, 
   Locales
 } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   tags: createStringOption({
     description: 'tags to search for (separate with spaces)',
-    description_localizations: {
-      "en-US": 'tags to search for (separate with spaces)',
-      "vi": 'các thẻ để tìm kiếm (ngăn cách bằng dấu cách)'
-    },
+    description_localizations: meta.anime.gelbooru.tags,
     required: true
   }),
   rating: createStringOption({
     description: 'rating of the images. Default safe.',
-    description_localizations: {
-      "en-US": 'rating of the images. Default safe.',
-      "vi": 'xếp hạng của hình ảnh. Mặc định là an toàn.'
-    },
+    description_localizations: meta.anime.gelbooru.rating,
     required: false,
     choices: [
       { name: 'Safe', value: 'general' },
@@ -41,16 +36,7 @@ const options = {
   name: 'gelbooru',
   description: 'search for anime images on Gelbooru'
 })
-@Locales({
-  name: [
-    ['en-US', 'gelbooru'],
-    ['vi', 'tìm-gelbooru']
-  ],
-  description: [
-    ['en-US', 'search for anime images on Gelbooru'],
-    ['vi', 'tìm kiếm hình ảnh anime trên Gelbooru']
-  ]
-})
+@Locales(meta.anime.gelbooru.loc)
 @Options(options)
 export default class Gelbooru extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

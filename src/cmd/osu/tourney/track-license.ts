@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   AutocompleteInteraction,
@@ -13,10 +14,7 @@ import {
 const options = {
   track: createStringOption({
     description: 'the Spotify track name to search for',
-    description_localizations: {
-      "en-US": 'the Spotify track name to search for',
-      "vi": 'tên bài hát Spotify mà cậu muốn tìm kiếm'
-    },
+    description_localizations: meta.osu.tourney.track_license.track,
     required: true,
     autocomplete: async (interaction) => await TrackLicense.prototype.autocomplete(interaction)
   })
@@ -44,16 +42,7 @@ async function getSpotifyToken(): Promise<string | null> {
   name: 'track-license',
   description: 'get licensing information for a Spotify track. Not reliable.'
 })
-@Locales({
-  name: [
-    ['en-US', 'track-license'],
-    ['vi', 'giấy-phép-bài-hát']
-  ],
-  description: [
-    ['en-US', 'get licensing information for a Spotify track. Not reliable.'],
-    ['vi', 'lấy thông tin giấy phép cho một bài hát Spotify. Không đảm bảo chính xác.']
-  ]
-})
+@Locales(meta.osu.tourney.track_license.loc)
 @Group('tourney')
 @Options(options)
 export default class TrackLicense extends SubCommand {

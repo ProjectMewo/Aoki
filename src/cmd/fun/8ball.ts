@@ -7,14 +7,12 @@ import {
   Options, 
   Locales
 } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   query: createStringOption({
     description: 'the question to ask the 8-ball',
-    description_localizations: {
-      "en-US": 'the question to ask the 8-ball',
-      "vi": 'câu hỏi cậu muốn hỏi bi số 8'
-    },
+    description_localizations: meta.fun["8ball"].desc,
     required: true
   })
 }
@@ -23,16 +21,7 @@ const options = {
   name: '8ball',
   description: 'ask the magic 8-ball a question.'
 })
-@Locales({
-  name: [
-    ['en-US', '8ball'],
-    ['vi', '8ball']
-  ],
-  description: [
-    ['en-US', 'ask the magic 8-ball a question.'],
-    ['vi', 'hỏi bi số 8 một câu hỏi.']
-  ]
-})
+@Locales(meta.fun["8ball"].loc)
 @Options(options)
 export default class Eightball extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

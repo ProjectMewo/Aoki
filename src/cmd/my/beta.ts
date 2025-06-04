@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import {
   CommandContext,
   createStringOption,
@@ -14,10 +15,7 @@ import { ButtonStyle } from "seyfert/lib/types";
 const options = {
   reason: createStringOption({
     description: 'reason for requesting beta access',
-    description_localizations: {
-      "en-US": 'reason for requesting beta access',
-      "vi": 'lý do cậu yêu cầu quyền truy cập beta'
-    },
+    description_localizations: meta.my.beta.reason,
     required: true
   })
 };
@@ -27,16 +25,7 @@ const options = {
   description: 'ask my sensei to be whitelisted for beta programs',
   defaultMemberPermissions: ['ManageGuild']
 })
-@Locales({
-  name: [
-    ['en-US', 'beta'],
-    ['vi', 'beta']
-  ],
-  description: [
-    ['en-US', 'ask my sensei to be whitelisted for beta programs'],
-    ['vi', 'yêu cầu sensei thêm máy chủ của cậu vào danh sách quyền truy cập beta']
-  ]
-})
+@Locales(meta.my.beta.loc)
 @Options(options)
 export default class Beta extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

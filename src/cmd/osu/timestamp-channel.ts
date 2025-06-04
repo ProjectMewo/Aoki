@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -12,10 +13,7 @@ import { ChannelType, PermissionFlagsBits } from "seyfert/lib/types";
 const options = {
   channel: createChannelOption({
     description: 'the channel to send beatmap timestamps to',
-    description_localizations: {
-      "en-US": 'the channel to send beatmap timestamps to',
-      "vi": 'kênh để gửi dấu thời gian của beatmap'
-    },
+    description_localizations: meta.osu.timestamp_channel.channel,
     required: true,
     channel_types: [ChannelType.GuildText]
   })
@@ -25,16 +23,7 @@ const options = {
   name: 'add_timestamp_channel',
   description: 'add a channel for detecting osu! editor timestamps'
 })
-@Locales({
-  name: [
-    ['en-US', 'add-timestamp-channel'],
-    ['vi', 'kênh-dấu-thời-gian']
-  ],
-  description: [
-    ['en-US', 'add a channel for detecting osu! editor timestamps'],
-    ['vi', 'thêm một kênh để phát hiện dấu thời gian của osu! editor']
-  ]
-})
+@Locales(meta.osu.timestamp_channel.loc)
 @Options(options)
 export default class TimestampChannel extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

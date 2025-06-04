@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import { Beatmapset } from "@local-types/beatmapset";
 import AokiError from "@struct/AokiError";
 import AokiClient from "@struct/Client";
@@ -23,18 +24,12 @@ import { ButtonStyle, MessageFlags } from "seyfert/lib/types";
 const options = {
   query: createStringOption({
     description: "search query for the beatmap",
-    description_localizations: {
-      "en-US": "search query for the beatmap",
-      "vi": "truy vấn tìm kiếm cho beatmap"
-    },
+    description_localizations: meta.osu.beatmap.query,
     required: true
   }),
   mode: createStringOption({
     description: "filter by game mode",
-    description_localizations: {
-      "en-US": "filter by game mode",
-      "vi": "lọc theo chế độ chơi"
-    },
+    description_localizations: meta.osu.beatmap.mode,
     required: false,
     choices: [
       { name: "osu!standard", value: "0" },
@@ -45,46 +40,31 @@ const options = {
   }),
   status: createStringOption({
     description: "filter by ranked status",
-    description_localizations: {
-      "en-US": "filter by ranked status",
-      "vi": "lọc theo trạng thái xếp hạng"
-    },
+    description_localizations: meta.osu.beatmap.status,
     required: false,
     autocomplete: async (interaction) => await Beatmap.prototype.autocompleteStatus(interaction)
   }),
   sort: createStringOption({
     description: "sort the results",
-    description_localizations: {
-      "en-US": "sort the results",
-      "vi": "sắp xếp kết quả"
-    },
+    description_localizations: meta.osu.beatmap.sort,
     required: false,
     autocomplete: async (interaction) => await Beatmap.prototype.autocompleteSort(interaction)
   }),
   genre: createStringOption({
     description: "filter by music genre",
-    description_localizations: {
-      "en-US": "filter by music genre",
-      "vi": "lọc theo thể loại nhạc"
-    },
+    description_localizations: meta.osu.beatmap.genre,
     required: false,
     autocomplete: async (interaction) => await Beatmap.prototype.autocompleteGenre(interaction)
   }),
   language: createStringOption({
     description: "filter by language",
-    description_localizations: {
-      "en-US": "filter by language",
-      "vi": "lọc theo ngôn ngữ"
-    },
+    description_localizations: meta.osu.beatmap.language,
     required: false,
     autocomplete: async (interaction) => await Beatmap.prototype.autocompleteLanguage(interaction)
   }),
   storyboard: createBooleanOption({
     description: "filter maps with storyboards",
-    description_localizations: {
-      "en-US": "filter maps with storyboards",
-      "vi": "lọc các map có storyboard"
-    },
+    description_localizations: meta.osu.beatmap.storyboard,
     required: false
   })
 };
@@ -93,16 +73,7 @@ const options = {
   name: "beatmap",
   description: "search for beatmaps by query"
 })
-@Locales({
-  name: [
-    ['en-US', 'beatmap'],
-    ['vi', 'tìm-map']
-  ],
-  description: [
-    ['en-US', 'search for beatmaps by query'],
-    ['vi', 'tìm kiếm beatmap bằng truy vấn']
-  ]
-})
+@Locales(meta.osu.beatmap.loc)
 @Options(options)
 export default class Beatmap extends SubCommand {
   private readonly api_v2 = "https://osu.ppy.sh/api/v2";

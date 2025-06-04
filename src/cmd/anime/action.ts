@@ -9,14 +9,12 @@ import {
   Locales,
   AutocompleteInteraction
 } from "seyfert";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   type: createStringOption({
     description: "the type of action to get",
-    description_localizations: {
-      "en-US": "the type of action to get",
-      "vi": "loại hành động cậu muốn lấy"
-    },
+    description_localizations: meta.anime.action.desc,
     required: true,
     autocomplete: async (interaction) => await Action.prototype.autocomplete(interaction)
   })
@@ -26,16 +24,7 @@ const options = {
   name: "action",
   description: "get a random anime action image"
 })
-@Locales({
-  name: [
-    ['en-US', 'action'],
-    ['vi', 'hành-động']
-  ],
-  description: [
-    ['en-US', 'get a random anime action image'],
-    ['vi', 'lấy một hình ảnh hành động anime ngẫu nhiên']
-  ]
-})
+@Locales(meta.anime.action.loc)
 @Options(options)
 export default class Action extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

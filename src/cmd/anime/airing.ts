@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import Pagination from "@struct/Paginator";
 import { 
@@ -15,10 +16,7 @@ import {
 const options = {
   day: createStringOption({
     description: 'day of the week',
-    description_localizations: {
-      "en-US": 'day of the week',
-      "vi": 'ngày trong tuần'
-    },
+    description_localizations: meta.anime.airing.desc,
     required: true,
     autocomplete: async (i) => await Airing.prototype.autocomplete(i)
   })
@@ -28,16 +26,7 @@ const options = {
   name: 'airing',
   description: 'get a list of anime airing on a specific day'
 })
-@Locales({
-  name: [
-    ['en-US', 'airing'],
-    ['vi', 'lịch-chiếu']
-  ],
-  description: [
-    ['en-US', 'get a list of anime airing on a specific day'],
-    ['vi', 'xem danh sách anime phát sóng theo ngày']
-  ]
-})
+@Locales(meta.anime.airing.loc)
 @Options(options)
 export default class Airing extends SubCommand {
   async autocomplete(interaction: AutocompleteInteraction): Promise<void> {

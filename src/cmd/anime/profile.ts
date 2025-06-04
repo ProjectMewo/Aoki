@@ -10,14 +10,12 @@ import {
 } from "seyfert";
 import { User } from "@assets/graphql";
 import { UserData } from "@local-types/anilist";
+import { meta } from "@assets/cmdMeta";
 
 const options = {
   platform: createStringOption({
     description: "the platform to search on",
-    description_localizations: {
-      "en-US": "the platform to search on",
-      "vi": "nền tảng để tìm kiếm"
-    },
+    description_localizations: meta.anime.profile.platform,
     required: true,
     choices: [
       { name: "MyAnimeList", value: "mal" },
@@ -26,10 +24,7 @@ const options = {
   }),
   username: createStringOption({
     description: "the username to search for",
-    description_localizations: {
-      "en-US": "the username to search for",
-      "vi": "tên người dùng để tìm kiếm"
-    },
+    description_localizations: meta.anime.profile.username,
     required: true
   })
 };
@@ -38,16 +33,7 @@ const options = {
   name: "profile",
   description: "get an anime profile from MyAnimeList or AniList"
 })
-@Locales({
-  name: [
-    ['en-US', 'profile'],
-    ['vi', 'hồ-sơ']
-  ],
-  description: [
-    ['en-US', 'get an anime profile from MyAnimeList or AniList'],
-    ['vi', 'lấy hồ sơ anime từ MyAnimeList hoặc AniList']
-  ]
-})
+@Locales(meta.anime.profile.loc)
 @Options(options)
 export default class Profile extends SubCommand {
   async run(ctx: CommandContext<typeof options>): Promise<void> {

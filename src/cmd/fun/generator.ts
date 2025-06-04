@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import { 
   CommandContext, 
@@ -12,10 +13,7 @@ import {
 const options = {
   template: createStringOption({
     description: 'the template ID to use',
-    description_localizations: {
-      "en-US": 'the template ID to use',
-      "vi": 'ID mẫu cậu muốn sử dụng (không hỗ trợ tiếng Việt)'
-    },
+    description_localizations: meta.fun.generator.template,
     required: true,
     autocomplete: async (interaction) => {
       const focused = interaction.options.getAutocompleteValue();
@@ -30,18 +28,12 @@ const options = {
   }),
   top: createStringOption({
     description: 'the top text of the meme',
-    description_localizations: {
-      "en-US": 'the top text of the meme',
-      "vi": 'văn bản trên của meme'
-    },
+    description_localizations: meta.fun.generator.top,
     required: true
   }),
   bottom: createStringOption({
     description: 'the bottom text of the meme',
-    description_localizations: {
-      "en-US": 'the bottom text of the meme',
-      "vi": 'văn bản dưới của meme'
-    },
+    description_localizations: meta.fun.generator.bottom,
     required: true
   })
 };
@@ -50,16 +42,7 @@ const options = {
   name: 'generator',
   description: 'generate a meme using a template.'
 })
-@Locales({
-  name: [
-    ['en-US', 'generator'],
-    ['vi', 'trình-tạo']
-  ],
-  description: [
-    ['en-US', 'generate a meme using a template.'],
-    ['vi', 'tạo meme bằng mẫu.']
-  ]
-})
+@Locales(meta.fun.generator.loc)
 @Options(options)
 export default class Generator extends SubCommand {
   public static templates: Array<{ id: string, name: string, lines: number }> = [];

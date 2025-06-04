@@ -1,21 +1,13 @@
 import { CommandContext, Declare, Embed, Locales, SubCommand } from "seyfert";
 import os from 'os';
 import * as pkg from "../../../package.json";
+import { meta } from "@assets/cmdMeta";
 
 @Declare({
   name: "stats",
   description: "the nerdy statistics of how I'm working."
 })
-@Locales({
-  name: [
-    ['en-US', 'stats'],
-    ['vi', 'thống-kê']
-  ],
-  description: [
-    ['en-US', "the nerdy statistics of how I'm working."],
-    ['vi', "thống kê thô về cách tớ đang hoạt động."]
-  ]
-})
+@Locales(meta.my.stats.loc)
 export default class Stats extends SubCommand {
   async run(ctx: CommandContext) {
     const t = ctx.t.get(ctx.interaction.user.settings.language).my.stats;

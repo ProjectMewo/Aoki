@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   ActionRow,
@@ -14,16 +15,7 @@ import { ButtonStyle } from "seyfert/lib/types";
   name: 'delete',
   description: 'delete the current tournament in this server'
 })
-@Locales({
-  name: [
-    ['en-US', 'delete'],
-    ['vi', 'xóa']
-  ],
-  description: [
-    ['en-US', 'delete the current tournament in this server'],
-    ['vi', 'xóa giải đấu hiện tại trong máy chủ này']
-  ]
-})
+@Locales(meta.osu.tourney.delete.loc)
 @Group('tourney')
 export default class Delete extends SubCommand {
   async run(ctx: CommandContext): Promise<void> {

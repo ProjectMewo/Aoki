@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   CommandContext,
@@ -13,26 +14,17 @@ import {
 const options = {
   round: createStringOption({
     description: 'the tournament round to add',
-    description_localizations: {
-      "en-US": 'the tournament round to add',
-      "vi": 'vòng đấu giải đấu cậu muốn thêm'
-    },
+    description_localizations: meta.osu.tourney.add_round.round,
     required: true
   }),
   slots: createStringOption({
     description: 'mappool slots separated by comma (e.g. NM1,NM2)',
-    description_localizations: {
-      "en-US": 'mappool slots separated by comma (e.g. NM1,NM2)',
-      "vi": 'các slot mappool được phân tách bằng dấu phẩy (ví dụ: NM1,NM2)'
-    },
+    description_localizations: meta.osu.tourney.add_round.slots,
     required: true
   }),
   set_current: createBooleanOption({
     description: 'set this as the current active round',
-    description_localizations: {
-      "en-US": 'set this as the current active round',
-      "vi": 'đặt đây là vòng đấu hiện tại'
-    },
+    description_localizations: meta.osu.tourney.add_round.set_current,
     required: false
   })
 };
@@ -41,16 +33,7 @@ const options = {
   name: 'add-round',
   description: 'add a tournament round with mappool slots'
 })
-@Locales({
-  name: [
-    ['en-US', 'add-round'],
-    ['vi', 'thêm-vòng']
-  ],
-  description: [
-    ['en-US', 'add a tournament round with mappool slots'],
-    ['vi', 'thêm một vòng đấu với các slot mappool']
-  ]
-})
+@Locales(meta.osu.tourney.add_round.loc)
 @Group('tourney')
 @Options(options)
 export default class AddRound extends SubCommand {

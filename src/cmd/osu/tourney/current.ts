@@ -1,3 +1,4 @@
+import { meta } from "@assets/cmdMeta";
 import AokiError from "@struct/AokiError";
 import {
   AutocompleteInteraction,
@@ -13,10 +14,7 @@ import {
 const options = {
   round: createStringOption({
     description: 'set this as the current active round',
-    description_localizations: {
-      "en-US": 'set this as the current active round',
-      "vi": 'đặt vòng này làm vòng hiện tại'
-    },
+    description_localizations: meta.osu.tourney.current.round,
     required: false,
     autocomplete: async (i) => await Current.prototype.autocomplete(i)
   })
@@ -26,16 +24,7 @@ const options = {
   name: 'current',
   description: 'view or set the current tournament round'
 })
-@Locales({
-  name: [
-    ['en-US', 'current'],
-    ['vi', 'vòng-hiện-tại']
-  ],
-  description: [
-    ['en-US', 'view or set the current tournament round'],
-    ['vi', 'xem hoặc đặt vòng hiện tại của giải đấu']
-  ]
-})
+@Locales(meta.osu.tourney.current.loc)
 @Group('tourney')
 @Options(options)
 export default class Current extends SubCommand {
