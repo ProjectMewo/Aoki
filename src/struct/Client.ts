@@ -3,7 +3,6 @@ import { Client } from "seyfert";
 import { ActivityType, PresenceUpdateStatus } from "seyfert/lib/types";
 import Settings from "./Settings";
 import Schedule from "./Schedule";
-import { S3Client } from "bun";
 // Utility imports
 import AnilistUtil from "@utils/AniList";
 import ArrayUtil from "@utils/Array";
@@ -123,17 +122,6 @@ export default class AokiClient extends Client {
     return data.access_token;
   };
 
-  public async loadS3Storage(): Promise<void> {
-    const s3 = new S3Client({
-      bucket: "mappools",
-      endpoint: process.env.R2_ENDPOINT,
-      accessKeyId: process.env.R2_ACCESS_KEY!,
-      secretAccessKey: process.env.R2_SECRET_KEY!
-    });
-    this.s3 = s3;
-    return;
-  };
-
   public async loadEssentials(): Promise<void> {
     // Load commands, locales and events
     // @ts-ignore
@@ -175,7 +163,6 @@ export default class AokiClient extends Client {
     await Promise.all([
       this.requestV2Token(),
       this.loadEssentials(),
-      this.loadS3Storage(),
       Object.values(this.settings).map(async settings => await settings.init())
     ]);
     // Load default locale

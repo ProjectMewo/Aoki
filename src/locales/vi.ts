@@ -409,7 +409,7 @@ export default {
         someInfo: "Một vài thông tin thú vị về mappool này:",
         totalMaps: (maps: number) => `Tổng số map: **${maps}**`,
         srRange: (highest: number, lowest: number) => `Khoảng độ khó: **${lowest}★ - ${highest}★**`,
-        mappack: (url: string) => `📦 [Link tải mappool](${url})`
+        mappack: (url: string) => `📦 [**Link tải mappool**](${url})`
       }
     },
     tourney: {

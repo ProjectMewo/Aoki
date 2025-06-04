@@ -111,16 +111,15 @@ export default class View extends SubCommand {
     // TODO: offload this to API server
     let mappackURL;
     if (guild.settings.whitelistedForNewFeatures) {
-      mappackURL = await ctx.client.utils.osu.generateOrFetchMappack({
-        maps: mappool.maps,
-        client: {
-          s3: ctx.client.s3!,
-          requestV2Token: ctx.client.requestV2Token
-        },
-        extractDifficultyId,
-        fetchBeatmapInfo,
-        r2PublicBaseURL: "https://cdn.mewo.eu.org"
-      });
+      mappackURL = await fetch(`${process.env.DB}/s3/generate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.INTERNAL_KEY}` },
+        body: JSON.stringify({
+          maps: mappool.maps,
+          r2PublicBaseURL: "https://cdn.mewo.eu.org",
+          osuAPIv2Key: await ctx.client.requestV2Token()
+        })
+      }).then(async res => await res.json());
     }
 
     // Fetch all beatmap details and create description
@@ -134,7 +133,7 @@ export default class View extends SubCommand {
           const title = beatmap.beatmapset.title;
           const version = beatmap.version;
           const url = beatmap.url;
-          let od, sr;
+          let od, sr, bpm;
           // taiko specific
           const diffAttr = async (diffId: string, mods: (number | string)[]) => {
             try {
@@ -170,7 +169,10 @@ export default class View extends SubCommand {
             ? parseFloat((Math.floor(attr.attributes.star_rating * 100) / 100).toFixed(2)).toString()
             : parseFloat((Math.floor(beatmap.difficulty_rating * 100) / 100).toFixed(2)).toString();
 
-          const bpm = parseFloat(beatmap.bpm.toFixed(2)).toString();
+          bpm = mods.includes("DT")
+            ? parseFloat((beatmap.bpm * 1.5).toFixed(2)).toString()
+            : parseFloat(beatmap.bpm.toFixed(2)).toString();
+
           const totalTime = Math.floor(beatmap.total_length / 60) + ":" + (beatmap.total_length % 60).toString().padStart(2, '0');
           // end taiko specific
           mapDetails.push(t.mapDetails(slot, artist, title, version, url, od, sr, bpm, totalTime));
@@ -196,7 +198,7 @@ export default class View extends SubCommand {
       t.someInfo,
       `- ${t.totalMaps(mapDetails.length)}`,
       `- ${t.srRange(highestSr, lowestSr)}`,
-      mappackURL ? `- ${t.mappack(mappackURL)}\n` : "\n"
+      mappackURL ? `- ${t.mappack(mappackURL.url)}\n\n` : "\n"
     ].join("\n");
 
     // Create a single embed with all maps
